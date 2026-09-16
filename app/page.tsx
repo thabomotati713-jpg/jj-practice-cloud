@@ -10,8 +10,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const logoUrl =
-    "https://gdsxouwknkeyhijdgiqg.supabase.co/storage/v1/object/public/practice-logos/64ca98ac-7248-4949-82ff-704d593fedef/04a54e21-92a0-4be0-a1fc-f731b69c8d10.jpg";
+  const logoUrl = "/logo.jpg";
 
   const handleSignIn = async (
     e: React.FormEvent<HTMLFormElement>
