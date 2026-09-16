@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import QRCode from "qrcode";
 
 type Patient = {
   id: string;
@@ -64,6 +65,7 @@ export default function SickNotesPage() {
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedNote, setSelectedNote] = useState<SickNote | null>(null);
+  const [verifyQr, setVerifyQr] = useState("");
 
   const [patientId, setPatientId] = useState("");
   const [issueDate, setIssueDate] = useState("");
@@ -87,6 +89,25 @@ export default function SickNotesPage() {
 
     loadData();
   }, []);
+
+  // Generate a QR code linking to the public verification page for the
+  // currently selected note, so printed notes can be authenticated.
+  useEffect(() => {
+    if (!selectedNote?.id) {
+      setVerifyQr("");
+      return;
+    }
+
+    const url = `${window.location.origin}/verify/${selectedNote.id}`;
+
+    QRCode.toDataURL(url, {
+      width: 220,
+      margin: 1,
+      color: { dark: "#0f1f2d", light: "#ffffff" },
+    })
+      .then(setVerifyQr)
+      .catch(() => setVerifyQr(""));
+  }, [selectedNote?.id]);
 
   async function loadData() {
     setLoading(true);
@@ -868,6 +889,22 @@ export default function SickNotesPage() {
                     <p className="font-semibold text-gray-900">
                       {formatDate(selectedNote.issue_date)}
                     </p>
+
+                    {verifyQr && (
+                      <div className="mt-4 flex flex-col items-center sm:items-end">
+                        <img
+                          src={verifyQr}
+                          alt="Scan to verify this sick note"
+                          className="h-24 w-24"
+                        />
+
+                        <p className="mt-1 text-[10px] leading-tight text-gray-500">
+                          Scan to verify
+                          <br />
+                          authenticity
+                        </p>
+                      </div>
+                    )}
 
                   </div>
 

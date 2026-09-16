@@ -1,26 +1,76 @@
 @import "tailwindcss";
 
+/*
+ * J&J Practice Cloud — design tokens
+ * Clinical, calm palette: deep teal brand, slate neutrals.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f7f9;
+  --foreground: #0f1f2d;
+
+  --brand-50: #effaf8;
+  --brand-100: #d7f2ee;
+  --brand-200: #b0e5de;
+  --brand-300: #7dd1c8;
+  --brand-400: #4ab5ae;
+  --brand-500: #2b9a95;
+  --brand-600: #1f7c7a;
+  --brand-700: #1c6464;
+  --brand-800: #1a5051;
+  --brand-900: #123335;
+
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --muted: #64748b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand-600);
+  --color-brand-light: var(--brand-100);
+  --color-surface: var(--surface);
+  --color-line: var(--border);
+  --color-muted: var(--muted);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--brand-200);
+}
+
+/* Consistent focus treatment across every form in the app */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 1px;
+}
+
+/* Thin, unobtrusive scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }

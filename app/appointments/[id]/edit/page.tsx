@@ -152,6 +152,18 @@ export default function EditAppointmentPage() {
       return;
     }
 
+    if (
+      form.start_time &&
+      form.end_time &&
+      form.end_time <= form.start_time
+    ) {
+      setError(
+        "End time must be after the start time. Appointments cannot end before they begin."
+      );
+      setSaving(false);
+      return;
+    }
+
     const { error: updateError } = await supabase
       .from("appointments")
       .update({

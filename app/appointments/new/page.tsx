@@ -157,6 +157,14 @@ export default function NewAppointmentPage() {
       return;
     }
 
+    if (startTime && endTime && endTime <= startTime) {
+      setMessage(
+        "End time must be after the start time. Appointments cannot end before they begin."
+      );
+      setSaving(false);
+      return;
+    }
+
     const { error } = await supabase.from("appointments").insert({
       practice_id: profile.practice_id,
       patient_id: patientId,
