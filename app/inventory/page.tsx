@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { fetchMySpecialty, getSpecialty, type SpecialtyConfig } from "../../lib/specialties";
 
 type Product = {
   id: string;
@@ -30,9 +31,15 @@ export default function InventoryPage() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [specialty, setSpecialty] = useState<SpecialtyConfig>(
+    getSpecialty("general")
+  );
+  const [seeding, setSeeding] = useState(false);
+  const [seedMessage, setSeedMessage] = useState("");
 
   useEffect(() => {
     loadProducts();
+    fetchMySpecialty(supabase, supabase).then(setSpecialty);
   }, []);
 
   const loadProducts = async () => {
@@ -74,26 +81,89 @@ export default function InventoryPage() {
     setLoading(false);
   };
 
+  const loadStarterCatalog = async () => {
+    setSeeding(true);
+    setSeedMessage("");
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setSeedMessage("Your session has expired. Please sign in again.");
+        setSeeding(false);
+        return;
+      }
+
+      const response = await fetch("/api/inventory/seed-starter", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setSeedMessage(result.error || "Could not load the starter catalog.");
+        setSeeding(false);
+        return;
+      }
+
+      setSeedMessage(result.message || "Starter catalog loaded.");
+
+      if (result.added > 0) {
+        await loadProducts();
+      }
+    } catch (seedError) {
+      console.error(seedError);
+      setSeedMessage("Something went wrong while loading the starter catalog.");
+    }
+
+    setSeeding(false);
+  };
+
   const filteredProducts = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    if (!term) {
-      return products;
-    }
+    const matches = term
+      ? products.filter((product) =>
+          [
+            product.name,
+            product.generic_name,
+            product.product_code,
+            product.barcode,
+            product.category,
+            product.manufacturer,
+          ]
+            .filter(Boolean)
+            .some((value) => String(value).toLowerCase().includes(term))
+        )
+      : products;
 
-    return products.filter((product) =>
-      [
-        product.name,
-        product.generic_name,
-        product.product_code,
-        product.barcode,
-        product.category,
-        product.manufacturer,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(term))
+    // Specialty-aware ordering: items in the logged-in provider's own
+    // categories (a dentist's dental stock, an optometrist's frames)
+    // always appear before everything else.
+    const specialtyCategories = new Set(
+      specialty.inventoryCategories.map((c) => c.toLowerCase())
     );
-  }, [products, search]);
+
+    return [...matches].sort((a, b) => {
+      const aOwn = specialtyCategories.has(
+        String(a.category || "").toLowerCase()
+      )
+        ? 0
+        : 1;
+      const bOwn = specialtyCategories.has(
+        String(b.category || "").toLowerCase()
+      )
+        ? 0
+        : 1;
+
+      return aOwn - bOwn;
+    });
+  }, [products, search, specialty]);
 
   const totalProducts = products.length;
 
@@ -178,6 +248,17 @@ export default function InventoryPage() {
           <div className="page-actions">
             <button
               type="button"
+              onClick={loadStarterCatalog}
+              disabled={seeding}
+              className="btn btn-secondary"
+            >
+              {seeding
+                ? "Loading catalog..."
+                : `Load ${specialty.label} starter items`}
+            </button>
+
+            <button
+              type="button"
               onClick={() => {
                 window.location.href = "/inventory/new";
               }}
@@ -187,6 +268,10 @@ export default function InventoryPage() {
             </button>
           </div>
         </div>
+
+        {seedMessage && (
+          <div className="alert-info">{seedMessage}</div>
+        )}
 
         {error && (
           <div className="alert-error">{error}</div>
