@@ -762,6 +762,19 @@ export default function AppointmentsPage() {
                                 className="consultButton"
                                 onClick={() =>
                                   router.push(
+                                    `/consult/${appointment.id}`
+                                  )
+                                }
+                              >
+                                🎥 Video
+                              </button>
+                            )}
+
+                            {canStartConsultation && (
+                              <button
+                                className="consultButton"
+                                onClick={() =>
+                                  router.push(
                                     `/patients/${appointment.patient_id}/consultations/new?appointment_id=${appointment.id}`
                                   )
                                 }

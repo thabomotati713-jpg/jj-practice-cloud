@@ -204,6 +204,8 @@ export async function POST(request: Request) {
     const reason =
       appointment.reason || "Not specified";
 
+    const videoLink = `${new URL(request.url).origin}/consult/${appointment.id}`;
+
     const emailResult = await resend.emails.send({
       from: resendFromEmail,
       to: patient.email,
@@ -235,6 +237,19 @@ export async function POST(request: Request) {
             your appointment.
           </p>
 
+          <p style="margin-top: 24px;">
+            <a
+              href="${videoLink}"
+              style="background: #1f7c7a; color: #ffffff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;"
+            >Join Video Consultation</a>
+          </p>
+
+          <p style="font-size: 13px; color: #6b7280;">
+            If your appointment is an online consultation, use the button
+            above a few minutes before your time slot. The room is only
+            active when your doctor joins.
+          </p>
+
           <p>
             Kind regards,<br />
             <strong>${practiceName}</strong>
@@ -262,6 +277,9 @@ Appointment Type: ${appointmentType}
 Reason: ${reason}
 
 Please contact us if you need to change or cancel your appointment.
+
+For online consultations, join here: ${videoLink}
+(The room is only active when your doctor joins.)
 
 Kind regards,
 ${practiceName}
