@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { fetchMySpecialty } from "../../lib/specialties";
 import PracticeAccessGuard from "../../components/PracticeAccessGuard";
 
 type Counts = {
@@ -18,6 +19,7 @@ type Counts = {
 export default function Dashboard() {
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
+  const [specialtyLabel, setSpecialtyLabel] = useState("General Practice");
   const [practiceName, setPracticeName] = useState("");
   const [practiceLogo, setPracticeLogo] = useState("");
   const [counts, setCounts] = useState<Counts>({
@@ -129,6 +131,10 @@ export default function Dashboard() {
       "there";
 
     setUserName(displayName);
+
+    fetchMySpecialty(supabase, supabase).then((config) =>
+      setSpecialtyLabel(config.label)
+    );
 
     const { data: practiceSettings } =
       await supabase
@@ -585,6 +591,9 @@ export default function Dashboard() {
 
                 <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
                   Dashboard
+                  <span className="ml-3 align-middle rounded-full border border-white/80 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#1f7c7a] backdrop-blur-xl">
+                    {specialtyLabel}
+                  </span>
                 </h2>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">

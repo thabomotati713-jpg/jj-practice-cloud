@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "../../../lib/supabase";
+import { SPECIALTIES } from "../../../lib/specialties";
 
 export default function NewStaffPage() {
   const [form, setForm] = useState({
@@ -11,6 +12,7 @@ export default function NewStaffPage() {
     email: "",
     phone: "",
     role: "",
+    specialty: "general",
     active: true,
   });
 
@@ -61,6 +63,7 @@ export default function NewStaffPage() {
           email: form.email.trim(),
           phone: form.phone.trim(),
           role: form.role,
+          specialty: form.specialty,
           active: form.active,
         }),
       });
@@ -175,6 +178,23 @@ export default function NewStaffPage() {
                   <option value="FINANCE">Finance / Billing</option>
                   <option value="NURSE">Nurse</option>
                   <option value="INVENTORY">Inventory Manager</option>
+                </select>
+              </label>
+
+              <label className="field">
+                <span className="label">Specialty</span>
+                <select
+                  className="input"
+                  value={form.specialty}
+                  onChange={(e) =>
+                    updateField("specialty", e.target.value)
+                  }
+                >
+                  {SPECIALTIES.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
                 </select>
               </label>
 

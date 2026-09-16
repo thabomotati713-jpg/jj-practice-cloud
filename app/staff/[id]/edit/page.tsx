@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { SPECIALTIES } from "../../../../lib/specialties";
 import { supabase } from "../../../../lib/supabase";
 
 export default function EditStaff({
@@ -13,6 +14,7 @@ export default function EditStaff({
   const [lastName, setLastName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [role, setRole] = useState("");
+  const [specialty, setSpecialty] = useState("general");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [active, setActive] = useState(true);
@@ -70,6 +72,17 @@ export default function EditStaff({
     setPhone(staff.phone || "");
     setActive(staff.active ?? true);
 
+    // Best-effort: the specialty column may not exist pre-migration.
+    const { data: specRow } = await supabase
+      .from("staff")
+      .select("specialty")
+      .eq("id", staffId)
+      .maybeSingle();
+
+    if (specRow && "specialty" in specRow) {
+      setSpecialty((specRow as { specialty: string | null }).specialty || "general");
+    }
+
     setLoading(false);
   };
 
@@ -97,6 +110,12 @@ export default function EditStaff({
         phone: phone.trim() || null,
         active,
       })
+      .eq("id", id);
+
+    // Best-effort specialty update — ignore failures on pre-migration DBs.
+    await supabase
+      .from("staff")
+      .update({ specialty })
       .eq("id", id);
 
     if (updateError) {
@@ -200,6 +219,21 @@ export default function EditStaff({
                   className="input"
                   placeholder="Doctor, Reception, Nurse..."
                 />
+              </label>
+
+              <label className="field">
+                <span className="label">Specialty</span>
+                <select
+                  className="input"
+                  value={specialty}
+                  onChange={(e) => setSpecialty(e.target.value)}
+                >
+                  {SPECIALTIES.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <label className="field">

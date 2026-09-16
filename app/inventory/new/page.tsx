@@ -1,9 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
+import {
+  fetchMySpecialty,
+  getSpecialty,
+  type SpecialtyConfig,
+} from "../../../lib/specialties";
 
 export default function NewInventoryProductPage() {
+  const [specialtyConfig, setSpecialtyConfig] = useState<SpecialtyConfig>(
+    getSpecialty("general")
+  );
+
+  useEffect(() => {
+    fetchMySpecialty(supabase, supabase).then(setSpecialtyConfig);
+  }, []);
   const [form, setForm] = useState({
     product_code: "",
     barcode: "",
@@ -177,12 +189,25 @@ export default function NewInventoryProductPage() {
                   placeholder="Barcode number"
                 />
 
-                <Field
-                  label="Category"
-                  value={form.category}
-                  onChange={(value) => updateField("category", value)}
-                  placeholder="e.g. Analgesic"
-                />
+                <label className="field" htmlFor="field-category">
+                  <span className="label">Category</span>
+                  <input
+                    id="field-category"
+                    type="text"
+                    list="category-presets"
+                    value={form.category}
+                    onChange={(event) =>
+                      updateField("category", event.target.value)
+                    }
+                    placeholder={`e.g. ${specialtyConfig.inventoryCategories[0]}`}
+                    className="input"
+                  />
+                  <datalist id="category-presets">
+                    {specialtyConfig.inventoryCategories.map((cat) => (
+                      <option key={cat} value={cat} />
+                    ))}
+                  </datalist>
+                </label>
 
                 <Field
                   label="Strength"

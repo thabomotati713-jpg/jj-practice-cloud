@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import { specialtyLabel } from "../../lib/specialties";
 
 type Staff = {
   id: string;
@@ -18,6 +19,7 @@ type Staff = {
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
+  const [specialtyById, setSpecialtyById] = useState<Record<string, string | null>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -57,6 +59,26 @@ export default function StaffPage() {
         )
         .eq("practice_id", profile.practice_id)
         .order("created_at", { ascending: false });
+
+      // Best-effort specialty lookup — tolerates pre-migration DBs.
+      let specMap: Record<string, string | null> = {};
+
+      if (!staffError && data) {
+        const { data: specRows } = await supabase
+          .from("staff")
+          .select("id, specialty")
+          .eq("practice_id", profile.practice_id);
+
+        if (specRows) {
+          specMap = Object.fromEntries(
+            (specRows as { id: string; specialty: string | null }[]).map(
+              (row) => [row.id, row.specialty]
+            )
+          );
+        }
+
+        setSpecialtyById(specMap);
+      }
 
       if (staffError) {
         console.error("Staff error:", staffError);
@@ -161,6 +183,7 @@ export default function StaffPage() {
                   <tr>
                     <th>Name</th>
                     <th>Role</th>
+                    <th>Specialty</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Status</th>
@@ -176,6 +199,8 @@ export default function StaffPage() {
                       </td>
 
                       <td>{member.role || "—"}</td>
+
+                      <td>{specialtyLabel(specialtyById[member.id] ?? null)}</td>
 
                       <td>{member.email || "—"}</td>
 

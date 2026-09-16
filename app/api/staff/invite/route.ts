@@ -110,6 +110,7 @@ export async function POST(request: Request) {
     const email = String(body.email || "").trim().toLowerCase();
     const phone = String(body.phone || "").trim();
     const role = String(body.role || "").trim().toUpperCase();
+    const specialty = String(body.specialty || "").trim() || null;
     const active = body.active !== false;
 
     const profileRoleMap: Record<string, string> = {
@@ -157,8 +158,33 @@ export async function POST(request: Request) {
       );
     }
 
-    const { data: createdStaff, error: staffError } =
+    let { data: createdStaff, error: staffError } =
       await adminClient
+        .from("staff")
+        .insert({
+          practice_id: requestingProfile.practice_id,
+          first_name: firstName,
+          last_name: lastName,
+          display_name:
+            displayName || `${firstName} ${lastName}`,
+          email,
+          phone: phone || null,
+          role,
+          specialty,
+          active,
+        })
+        .select("id")
+        .single();
+
+    // The `specialty` column may not exist yet on databases that
+    // haven't run the multi-specialty migration — if the first insert
+    // fails on that column, retry without it.
+    let staffInsertError: { message: string } | null | undefined =
+      staffError;
+    let insertedWithSpecialty = false;
+
+    if (staffError && specialty) {
+      const retry = await adminClient
         .from("staff")
         .insert({
           practice_id: requestingProfile.practice_id,
@@ -174,7 +200,26 @@ export async function POST(request: Request) {
         .select("id")
         .single();
 
-    if (staffError || !createdStaff) {
+      if (!retry.error && retry.data) {
+        createdStaff = retry.data;
+        staffError = null;
+        insertedWithSpecialty = false;
+        staffInsertError = null;
+
+        // Best-effort: set the specialty separately.
+        await adminClient
+          .from("staff")
+          .update({ specialty })
+          .eq("id", (retry.data as { id: string }).id);
+      }
+    } else if (!staffError && createdStaff && specialty) {
+      // Column exists and specialty came through the insert already
+      // when supported; nothing further needed.
+      insertedWithSpecialty = true;
+      staffInsertError = null;
+    }
+
+    if (staffInsertError || staffError || !createdStaff) {
       return NextResponse.json(
         {
           error:

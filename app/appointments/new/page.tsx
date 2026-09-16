@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import {
+  fetchMySpecialty,
+  getSpecialty,
+  type SpecialtyConfig,
+} from "@/lib/specialties";
 
 type Patient = {
   id: string;
@@ -43,6 +48,13 @@ export default function NewAppointmentPage() {
   const [appointmentType, setAppointmentType] = useState("Consultation");
   const [status, setStatus] = useState("scheduled");
   const [reason, setReason] = useState("");
+  const [specialtyConfig, setSpecialtyConfig] = useState<SpecialtyConfig>(
+    getSpecialty("general")
+  );
+
+  useEffect(() => {
+    fetchMySpecialty(supabase, supabase).then(setSpecialtyConfig);
+  }, []);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -420,9 +432,15 @@ export default function NewAppointmentPage() {
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder="Reason for appointment"
+                  placeholder={`e.g. ${specialtyConfig.appointmentReasons[0]}`}
                   className="input"
+                  list="reason-presets"
                 />
+                <datalist id="reason-presets">
+                  {specialtyConfig.appointmentReasons.map((r) => (
+                    <option key={r} value={r} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="field" style={{ marginBottom: 0 }}>
