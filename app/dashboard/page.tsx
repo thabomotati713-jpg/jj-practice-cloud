@@ -32,6 +32,12 @@ export default function Dashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    invoicedThisMonth: 0,
+    collectedThisMonth: 0,
+    outstandingTotal: 0,
+    upcomingWeek: 0,
+  });
 
   useEffect(() => {
     loadDashboard();
@@ -331,6 +337,99 @@ export default function Dashboard() {
         inventoryResult.count || 0,
     });
 
+    // Practice analytics: billing performance and
+    // short-term appointment load.
+    const today = new Date();
+
+    const todayStr = today
+      .toLocaleDateString("en-CA");
+
+    const weekEnd = new Date(today);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    const monthStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      1
+    );
+
+    const monthStartStr = monthStart
+      .toLocaleDateString("en-CA");
+
+    const [invoicesStats, upcomingAppointments] =
+      await Promise.all([
+        supabase
+          .from("invoices")
+          .select(
+            "total, amount_paid, balance, invoice_date"
+          )
+          .eq("practice_id", practiceId),
+
+        supabase
+          .from("appointments")
+          .select(
+            "id",
+            { count: "exact", head: true }
+          )
+          .eq("practice_id", practiceId)
+          .gte("appointment_date", todayStr)
+          .lte(
+            "appointment_date",
+            weekEnd.toLocaleDateString("en-CA")
+          )
+          .in("status", [
+            "scheduled",
+            "confirmed",
+          ]),
+      ]);
+
+    if (!invoicesStats.error) {
+      const invoiceRows =
+        invoicesStats.data || [];
+
+      const invoicedThisMonth =
+        invoiceRows
+          .filter(
+            (invoice) =>
+              invoice.invoice_date >=
+              monthStartStr
+          )
+          .reduce(
+            (sum, invoice) =>
+              sum + (invoice.total || 0),
+            0
+          );
+
+      const collectedThisMonth =
+        invoiceRows
+          .filter(
+            (invoice) =>
+              invoice.invoice_date >=
+              monthStartStr
+          )
+          .reduce(
+            (sum, invoice) =>
+              sum +
+              (invoice.amount_paid || 0),
+            0
+          );
+
+      const outstandingTotal =
+        invoiceRows.reduce(
+          (sum, invoice) =>
+            sum + (invoice.balance || 0),
+          0
+        );
+
+      setStats({
+        invoicedThisMonth,
+        collectedThisMonth,
+        outstandingTotal,
+        upcomingWeek:
+          upcomingAppointments.count || 0,
+      });
+    }
+
     setLoading(false);
   };
 
@@ -521,6 +620,51 @@ export default function Dashboard() {
             {error}
           </div>
         )}
+
+        <section className="mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                label: "Invoiced this month",
+                value: `R ${stats.invoicedThisMonth.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
+                tone: "text-slate-900",
+              },
+              {
+                label: "Collected this month",
+                value: `R ${stats.collectedThisMonth.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
+                tone: "text-emerald-600",
+              },
+              {
+                label: "Outstanding balance",
+                value: `R ${stats.outstandingTotal.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
+                tone:
+                  stats.outstandingTotal > 0
+                    ? "text-amber-600"
+                    : "text-slate-900",
+              },
+              {
+                label: "Appointments next 7 days",
+                value: String(stats.upcomingWeek),
+                tone: "text-slate-900",
+              },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/80 bg-white/60 p-5 shadow-sm backdrop-blur-md"
+              >
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                  {stat.label}
+                </p>
+
+                <p
+                  className={`mt-2 text-xl font-bold tracking-tight sm:text-2xl ${stat.tone}`}
+                >
+                  {loading ? "—" : stat.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {loading ? (
           <div className="rounded-3xl border border-white/80 bg-white/60 p-12 text-center shadow-sm backdrop-blur-md">
