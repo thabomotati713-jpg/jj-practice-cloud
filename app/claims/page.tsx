@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { logAudit } from "@/lib/audit";
 import { supabase } from "../../lib/supabase";
 
 type Claim = {
@@ -69,6 +70,9 @@ export default function ClaimsPage() {
     }
 
     setClaims(claimData || []);
+
+    // POPIA: claims contain patient + billing data — log the access.
+    logAudit("view", "claim", null, "Claims list viewed");
     setPatients(patientData || []);
     setLoading(false);
   }

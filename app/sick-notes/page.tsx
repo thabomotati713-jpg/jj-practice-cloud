@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { logAudit } from "@/lib/audit";
 import { supabase } from "@/lib/supabase";
 import QRCode from "qrcode";
 
@@ -184,6 +185,9 @@ export default function SickNotesPage() {
     }));
 
     setSickNotes(formattedNotes);
+
+    // POPIA: sick note access is always logged.
+    logAudit("view", "sick_note", null, "Sick notes list viewed");
 
     const loadedSettings = { ...emptySettings };
 

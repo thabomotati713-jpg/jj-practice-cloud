@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import CommunicationBar from "@/components/CommunicationBar";
+import { logAudit } from "@/lib/audit";
 
 type Patient = {
   id: string;
@@ -159,6 +160,14 @@ export default function PatientFilePage() {
       }
 
       setPatient(patientData);
+
+      // POPIA: patient record access is always logged.
+      logAudit(
+        "view",
+        "patient",
+        patientId,
+        "Patient record opened"
+      );
 
       const [
         appointmentsResult,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { logAudit } from "@/lib/audit";
 import { supabase } from "../../lib/supabase";
 
 type Prescription = {
@@ -135,6 +136,9 @@ export default function PrescriptionsPage() {
     }
 
     setPrescriptions((prescriptionData || []) as Prescription[]);
+
+    // POPIA: prescription access is always logged.
+    logAudit("view", "prescription", null, "Prescriptions list viewed");
 
     if (prescriptionData && prescriptionData.length > 0) {
       const prescriptionIds = prescriptionData.map(

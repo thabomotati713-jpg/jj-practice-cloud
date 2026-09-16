@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "../../../lib/supabase";
+import { supabase } from "@/lib/supabase";
+import { logAudit } from "@/lib/audit";
 
 type Invoice = {
   id: string;
@@ -304,6 +305,9 @@ export default function InvoiceDetailPage() {
 
     const loadedInvoice = invoiceData as Invoice;
     setInvoice(loadedInvoice);
+
+    // POPIA: billing record access is always logged.
+    logAudit("view", "invoice", invoiceId, "Invoice opened");
 
     const [
       patientResult,

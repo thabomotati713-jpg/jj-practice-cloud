@@ -203,6 +203,12 @@ export default function SettingsPage() {
               Manage your practice information
             </p>
           </div>
+
+          <div className="page-actions">
+            <a href="/audit" className="btn btn-secondary btn-sm">
+              Audit Trail
+            </a>
+          </div>
         </div>
 
         <form onSubmit={handleSave} className="mx-auto max-w-4xl">
