@@ -190,7 +190,7 @@ export default function Home() {
       {/* Sign-in panel */}
       <section className="flex flex-1 items-center justify-center px-4 py-12 sm:px-8">
         <div className="w-full max-w-md">
-          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-7 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-9">
+          <div className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-7 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-9">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               Sign in
             </h2>

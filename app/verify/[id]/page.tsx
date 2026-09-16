@@ -59,9 +59,9 @@ export default function VerifySickNotePage() {
   }, [params?.id]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#f4f7f9] px-4 py-12">
+    <main className="flex min-h-screen items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg">
-        <div className="rounded-2xl border border-[#e2e8f0] bg-white p-8 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-10">
+        <div className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-10">
           {loading ? (
             <div className="text-center">
               <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-[#d7f2ee] border-t-[#1f7c7a]" />

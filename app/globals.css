@@ -5,7 +5,7 @@
  * Clinical, calm palette: deep teal brand, slate neutrals.
  */
 :root {
-  --background: #f4f7f9;
+  --background: #f2f7f6;
   --foreground: #0f1f2d;
 
   --brand-50: #effaf8;
@@ -19,9 +19,22 @@
   --brand-800: #1a5051;
   --brand-900: #123335;
 
-  --surface: #ffffff;
-  --border: #e2e8f0;
-  --muted: #64748b;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-solid: #ffffff;
+  --border: rgba(255, 255, 255, 0.75);
+  --border-soft: rgba(15, 31, 45, 0.07);
+  --muted: #5c7284;
+
+  /* The ambient wash behind every page — soft teal light */
+  --ambient:
+    radial-gradient(1100px 620px at 85% -10%, rgba(123, 209, 200, 0.35), transparent 60%),
+    radial-gradient(900px 560px at -15% 20%, rgba(43, 154, 149, 0.16), transparent 55%),
+    radial-gradient(1000px 700px at 50% 115%, rgba(123, 209, 200, 0.22), transparent 60%),
+    linear-gradient(180deg, #f7fbfa 0%, #eef6f4 100%);
+
+  --glass-blur: blur(18px) saturate(1.5);
+  --glass-shadow: 0 8px 32px rgba(18, 51, 53, 0.08);
+  --glass-shadow-hover: 0 14px 40px rgba(18, 51, 53, 0.12);
 }
 
 @theme inline {
@@ -42,7 +55,8 @@ html {
 }
 
 body {
-  background: var(--background);
+  background: var(--ambient);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", sans-serif;
@@ -81,14 +95,17 @@ button:focus-visible {
 
 .page-shell {
   min-height: 100vh;
-  background: var(--background);
+  background: var(--ambient);
+  background-attachment: fixed;
 }
 
 .app-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--border);
 }
 
@@ -212,14 +229,17 @@ button:focus-visible {
 }
 
 .btn-secondary {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   color: #334155;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 10px rgba(18, 51, 53, 0.05);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--brand-300);
 }
 
 .btn-danger {
@@ -241,11 +261,21 @@ button:focus-visible {
 /* Cards */
 .card {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgb(15 31 45 / 0.04);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
   margin-bottom: 20px;
   overflow: hidden;
+}
+
+.card > .card-header {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.card > .card-body {
+  background: transparent;
 }
 
 .card-header {
@@ -254,7 +284,7 @@ button:focus-visible {
   justify-content: space-between;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .card-title {
@@ -283,9 +313,12 @@ button:focus-visible {
 
 .stat-card {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 16px 18px;
+  box-shadow: var(--glass-shadow);
 }
 
 .stat-label {
@@ -343,9 +376,11 @@ button:focus-visible {
 .table-wrap {
   overflow-x: auto;
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgb(15 31 45 / 0.04);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
 }
 
 .table {
@@ -362,14 +397,14 @@ button:focus-visible {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
-  background: #f8fafc;
-  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid var(--border-soft);
   white-space: nowrap;
 }
 
 .table td {
   padding: 13px 16px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-soft);
   color: var(--foreground);
   vertical-align: middle;
 }

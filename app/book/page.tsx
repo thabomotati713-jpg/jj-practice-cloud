@@ -97,7 +97,7 @@ export default function BookPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-[#f4f7f9]">
-      <header className="border-b border-[#e2e8f0] bg-white">
+      <header className="border-b border-white/70 bg-white/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4 sm:px-6">
           <img
             src="/logo.jpg"
@@ -173,7 +173,7 @@ export default function BookPage() {
         )}
 
         {step === "identify" && (
-          <section className="rounded-2xl border border-[#e2e8f0] bg-white p-7 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-9">
+          <section className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-7 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-9">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Book an appointment
             </h1>
@@ -266,7 +266,7 @@ export default function BookPage() {
         )}
 
         {step === "choose" && (
-          <section className="rounded-2xl border border-[#e2e8f0] bg-white p-7 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-9">
+          <section className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-7 shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-9">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Pick a time
             </h1>
@@ -333,7 +333,7 @@ export default function BookPage() {
         )}
 
         {step === "done" && (
-          <section className="rounded-2xl border border-[#e2e8f0] bg-white p-7 text-center shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-10">
+          <section className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-7 text-center shadow-[0_8px_30px_rgb(15,31,45,0.06)] sm:p-10">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-2xl text-emerald-600">
               ✓
             </div>
@@ -370,7 +370,7 @@ export default function BookPage() {
         )}
       </div>
 
-      <footer className="border-t border-[#e2e8f0] bg-white py-4">
+      <footer className="border-t border-white/70 bg-white/70 backdrop-blur-xl py-4">
         <p className="text-center text-xs text-slate-400">
           © 2026 J&J Practice Cloud
         </p>

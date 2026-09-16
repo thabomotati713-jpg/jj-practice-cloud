@@ -440,7 +440,7 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-[#f4f7f9]">
-      <header className="sticky top-0 z-20 border-b border-[#e2e8f0] bg-white">
+      <header className="sticky top-0 z-20 border-b border-white/70 bg-white/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-white/80">
@@ -477,7 +477,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <nav className="sticky top-[73px] z-10 border-b border-[#e2e8f0] bg-white">
+      <nav className="sticky top-[73px] z-10 border-b border-white/70 bg-white/70 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6 lg:px-8">
           <div className="flex min-w-max items-center gap-1 py-2">
             <a
@@ -593,7 +593,7 @@ export default function Dashboard() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-[#e2e8f0] bg-white px-5 py-4 shadow-sm">
+              <div className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl px-5 py-4 shadow-sm">
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
                   Total records
                 </p>
@@ -650,7 +650,7 @@ export default function Dashboard() {
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-[#e2e8f0] bg-white p-5"
+                className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-5"
               >
                 <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
                   {stat.label}
@@ -667,7 +667,7 @@ export default function Dashboard() {
         </section>
 
         {loading ? (
-          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-12 text-center">
+          <div className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-12 text-center">
             <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1f7c7a]" />
 
             <p className="text-sm font-medium text-slate-500">
@@ -839,7 +839,7 @@ function DashboardCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl bg-white p-5 text-left border border-[#e2e8f0] shadow-[0_1px_2px_rgb(15,31,45,0.04)] hover:shadow-md hover:border-[#7dd1c8] transition-all duration-200"
+      className="group relative overflow-hidden rounded-2xl bg-white p-5 text-left border border-white/70 backdrop-blur-xl shadow-[0_1px_2px_rgb(15,31,45,0.04)] hover:shadow-md hover:border-[#7dd1c8] transition-all duration-200"
     >
       <div className="flex items-start justify-between">
         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#effaf8] text-[13px] font-bold text-[#1f7c7a]">
@@ -883,7 +883,7 @@ function QuickAction({
     <button
       type="button"
       onClick={onClick}
-      className="group flex items-center justify-between rounded-2xl border border-[#e2e8f0] bg-white px-4 py-4 text-left shadow-sm transition-all hover:border-[#7dd1c8] hover:shadow-md"
+      className="group flex items-center justify-between rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl px-4 py-4 text-left shadow-sm transition-all hover:border-[#7dd1c8] hover:shadow-md"
     >
       <span className="text-sm font-semibold text-slate-700">
         {label}
