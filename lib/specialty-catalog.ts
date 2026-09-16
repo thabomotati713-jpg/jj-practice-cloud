@@ -87,12 +87,66 @@ const GENERAL: CatalogItem[] = [
   { name: "Blood Pressure Monitor", category: "Equipment", unit: "each", minimum_stock: 1 },
 ];
 
+
+const DERMA: CatalogItem[] = [
+  { name: "Sunscreen SPF 50 (Face)", category: "Cosmeceuticals", unit: "tube", minimum_stock: 15 },
+  { name: "Gentle Skin Cleanser", category: "Cosmeceuticals", unit: "bottle", minimum_stock: 12 },
+  { name: "Barrier Repair Moisturiser", category: "Cosmeceuticals", unit: "tube", minimum_stock: 12 },
+  { name: "Tretinoin Cream 0.025%", category: "Medication", unit: "tube", minimum_stock: 8, prescription_required: true },
+  { name: "Hydroquinone Cream 2%", category: "Medication", unit: "tube", minimum_stock: 8, prescription_required: true },
+  { name: "Topical Corticosteroid Cream", category: "Medication", unit: "tube", minimum_stock: 10, prescription_required: true },
+  { name: "Clotrimazole Cream", category: "Medication", unit: "tube", minimum_stock: 10, prescription_required: false },
+  { name: "Salicylic Acid Peel Solution", category: "Cosmeceuticals", unit: "bottle", minimum_stock: 4 },
+  { name: "Punch Biopsy Set (Disposable)", category: "Consumables", unit: "each", minimum_stock: 8 },
+  { name: "Curettes (Disposable)", category: "Consumables", unit: "box", minimum_stock: 3 },
+  { name: "Cryotherapy Canister + Tips", category: "Equipment", unit: "kit", minimum_stock: 2 },
+  { name: "Comedone Extractors", category: "Equipment", unit: "each", minimum_stock: 5 },
+  { name: "Electrosurgery Handpiece Tips", category: "Equipment", unit: "each", minimum_stock: 4 },
+  { name: "Sterile Dressing Packs", category: "Consumables", unit: "pack", minimum_stock: 10 },
+  { name: "Nitrile Examination Gloves", category: "Consumables", unit: "box of 100", minimum_stock: 6 },
+];
+
+const PAEDS: CatalogItem[] = [
+  { name: "Paracetamol Syrup (Paediatric)", category: "Medication", unit: "bottle", minimum_stock: 15, prescription_required: false },
+  { name: "Ibuprofen Suspension (Paediatric)", category: "Medication", unit: "bottle", minimum_stock: 12, prescription_required: false },
+  { name: "Oral Rehydration Solution (Paediatric)", category: "Medication", unit: "sachet box", minimum_stock: 15, prescription_required: false },
+  { name: "Measles / MMR Vaccine", category: "Vaccines", unit: "vial", minimum_stock: 10, prescription_required: true },
+  { name: "Pneumococcal Vaccine (PCV)", category: "Vaccines", unit: "vial", minimum_stock: 8, prescription_required: true },
+  { name: "Rotavirus Vaccine", category: "Vaccines", unit: "vial", minimum_stock: 8, prescription_required: true },
+  { name: "DTaP / Hib Vaccine", category: "Vaccines", unit: "vial", minimum_stock: 8, prescription_required: true },
+  { name: "Polio Vaccine (IPV)", category: "Vaccines", unit: "vial", minimum_stock: 8, prescription_required: true },
+  { name: "Vitamin A Drops", category: "Medication", unit: "bottle", minimum_stock: 10, prescription_required: false },
+  { name: "Paediatric Inhaler Spacers", category: "Equipment", unit: "each", minimum_stock: 6 },
+  { name: "Digital Thermometer (Soft Tip)", category: "Equipment", unit: "each", minimum_stock: 6 },
+  { name: "Baby Scale", category: "Equipment", unit: "each", minimum_stock: 1 },
+  { name: "Growth Charts (Road to Health)", category: "Stationery", unit: "pack", minimum_stock: 20 },
+  { name: "Paediatric Blood Collection Tubes", category: "Consumables", unit: "box", minimum_stock: 5 },
+  { name: "Colourful Plasters (Children's)", category: "Consumables", unit: "box", minimum_stock: 10 },
+];
+
+const OTHER_SPECIALIST: CatalogItem[] = [
+  { name: "Examination Gloves (Assorted)", category: "Consumables", unit: "box of 100", minimum_stock: 6 },
+  { name: "Surgical Face Masks", category: "Consumables", unit: "box of 50", minimum_stock: 6 },
+  { name: "Sterile Gauze Swabs", category: "Consumables", unit: "pack", minimum_stock: 10 },
+  { name: "Adhesive Plasters (Assorted)", category: "Consumables", unit: "box", minimum_stock: 8 },
+  { name: "Alcohol Swabs", category: "Consumables", unit: "box", minimum_stock: 10 },
+  { name: "Hand Sanitiser", category: "Consumables", unit: "bottle", minimum_stock: 8 },
+  { name: "Sharps Container", category: "Consumables", unit: "each", minimum_stock: 3 },
+  { name: "Examination Couch Roll Paper", category: "Consumables", unit: "roll", minimum_stock: 8 },
+  { name: "Patient File Folders", category: "Stationery", unit: "pack", minimum_stock: 10 },
+  { name: "Prescription Pads", category: "Stationery", unit: "pack", minimum_stock: 5 },
+  { name: "Sphygmomanometer (BP Cuff)", category: "Equipment", unit: "each", minimum_stock: 1 },
+  { name: "Stethoscope (Spare)", category: "Equipment", unit: "each", minimum_stock: 1 },
+  { name: "Thermometer (Digital)", category: "Equipment", unit: "each", minimum_stock: 3 },
+  { name: "Pulse Oximeter", category: "Equipment", unit: "each", minimum_stock: 2 },
+];
+
 export const SPECIALTY_CATALOGS: Record<SpecialtyId, CatalogItem[]> = {
   general: GENERAL,
   dental: DENTAL,
   optical: OPTICAL,
   physio: PHYSIO,
-  derma: GENERAL, // dermatology practices typically stock the medical list plus cosmeceuticals
-  paeds: GENERAL,
-  other: GENERAL,
+  derma: DERMA,
+  paeds: PAEDS,
+  other: OTHER_SPECIALIST,
 };
