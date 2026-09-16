@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 794px; height: 1123px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #ffffff;
+    color: #0f1f2d;
+    display: flex; flex-direction: column;
+  }
+  .band {
+    background: #123339;
+    color: #ffffff;
+    padding: 70px 60px 55px;
+  }
+  .band h1 { font-size: 44px; letter-spacing: -1px; line-height: 1.15; }
+  .band p { margin-top: 14px; font-size: 19px; color: rgba(255,255,255,0.75); }
+  .accent { height: 10px; background: linear-gradient(90deg, #1f7c7a, #7dd1c8); }
+  .middle {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px 60px; text-align: center;
+  }
+  .qr-frame {
+    border: 5px solid #1f7c7a; border-radius: 24px;
+    padding: 28px; background: #ffffff;
+    box-shadow: 0 12px 40px rgba(15,31,45,0.10);
+  }
+  .qr-frame img { width: 380px; height: 380px; display: block; }
+  .middle h2 { margin-top: 36px; font-size: 26px; color: #1f7c7a; }
+  .middle .url {
+    margin-top: 12px; font-size: 21px; font-weight: 700; color: #0f1f2d;
+    background: #effaf8; border-radius: 12px; padding: 12px 24px;
+  }
+  .steps {
+    background: #f4f7f9;
+    padding: 45px 70px 55px;
+  }
+  .steps ol { list-style: none; }
+  .steps li {
+    display: flex; align-items: center; gap: 18px;
+    font-size: 20px; padding: 14px 0; color: #334155;
+  }
+  .steps .n {
+    flex: none; width: 40px; height: 40px; border-radius: 50%;
+    background: #1f7c7a; color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+  .footer {
+    background: #123339; color: rgba(255,255,255,0.5);
+    text-align: center; font-size: 13px; padding: 18px;
+    letter-spacing: 2px; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="band">
+    <h1>Skip the queue.<br />Book your visit online.</h1>
+    <p>J&J Practice Medical Centre — appointments in under a minute.</p>
+  </div>
+  <div class="accent"></div>
+  <div class="middle">
+    <div class="qr-frame"><img src="/book-qr.png" alt="Scan to book" /></div>
+    <h2>Scan the code with your phone camera</h2>
+    <div class="url">jj-practice-cloud-m2ts.vercel.app/book</div>
+  </div>
+  <div class="steps">
+    <ol>
+      <li><span class="n">1</span> Scan or type the address above</li>
+      <li><span class="n">2</span> Verify with your patient number and phone number</li>
+      <li><span class="n">3</span> Pick a day and a time that suits you</li>
+      <li><span class="n">4</span> You get an email reminder the day before</li>
+    </ol>
+  </div>
+  <div class="footer">J&J Practice Cloud &middot; Secure practice management</div>
+</body>
+</html>
