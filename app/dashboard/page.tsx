@@ -590,7 +590,7 @@ export default function Dashboard() {
                   </div>
 
                   <h2 className="display-font text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-                    Good day{userName ? `, ${userName.split(" ")[0]}` : ""}
+                    Good day{userName ? `, ${userName}` : ""}
                   </h2>
 
                   <p className="mt-1.5 text-sm leading-6 text-slate-500 sm:text-base">
