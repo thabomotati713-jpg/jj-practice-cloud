@@ -2,7 +2,7 @@
 
 Every page MUST use this system. The goal: a calm, professional, clinical product.
 Brand color: deep teal `#1f7c7a` (primary). Background: `#f4f7f9`. Text: `#0f1f2d`.
-NO gradients on content, no random accent colors (no indigo/blue/purple), no rounded-3xl glassmorphism.
+Soft glass aesthetic: frosted translucent panels (rgba white + backdrop blur) over an ambient teal wash. No random accent colors (no indigo/blue/purple). One ambient background, glass panels on top — nothing busier.
 
 ## Standard page skeleton
 
