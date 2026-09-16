@@ -445,7 +445,7 @@ export default function Dashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f4f7f9]">
+    <main className="min-h-screen">
       <header className="sticky top-0 z-20 border-b border-white/70 bg-white/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
@@ -561,64 +561,67 @@ export default function Dashboard() {
 
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <section className="mb-8">
-          <div className="card p-6 sm:p-8">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#d7f2ee] bg-[#effaf8] px-3 py-1.5 text-xs font-semibold text-[#1f7c7a] shadow-sm">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Practice overview
+          <div className="card p-6 sm:p-7">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 flex-none items-center justify-center overflow-hidden rounded-2xl border border-white/80 bg-white shadow-[var(--glass-shadow)]">
+                  {practiceLogo ? (
+                    <img
+                      src={practiceLogo}
+                      alt="Practice logo"
+                      className="h-full w-full object-contain p-1.5"
+                    />
+                  ) : (
+                    <span className="text-sm font-bold text-[#1f7c7a]">
+                      J&J
+                    </span>
+                  )}
                 </div>
 
-                <div className="mb-3 flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl border border-white/80 bg-white shadow-sm">
-                    {practiceLogo ? (
-                      <img
-                        src={practiceLogo}
-                        alt="Practice logo"
-                        className="h-full w-full object-contain p-1"
-                      />
-                    ) : (
-                      <span className="text-sm font-bold text-[#1f7c7a]">
-                        J&J
-                      </span>
-                    )}
+                <div>
+                  <div className="mb-1.5 flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1f7c7a]">
+                      {practiceName || "J&J Practice Medical Centre"}
+                    </p>
+
+                    <span className="rounded-full border border-white/80 bg-white/70 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#1f7c7a] backdrop-blur-xl">
+                      {specialtyLabel}
+                    </span>
                   </div>
 
-                  <p className="text-sm font-semibold uppercase tracking-wider text-[#1f7c7a]">
-                    {practiceName || "J&J PRACTICE MEDICAL CENTRE"}
+                  <h2 className="display-font text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+                    Good day{userName ? `, ${userName.split(" ")[0]}` : ""}
+                  </h2>
+
+                  <p className="mt-1.5 text-sm leading-6 text-slate-500 sm:text-base">
+                    Here is an overview of your practice today.
                   </p>
                 </div>
-
-                <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                  Dashboard
-                  <span className="ml-3 align-middle rounded-full border border-white/80 bg-white/70 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#1f7c7a] backdrop-blur-xl">
-                    {specialtyLabel}
-                  </span>
-                </h2>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                  Welcome back{userName ? `, ${userName}` : ""}. Here is an
-                  overview of your practice.
-                </p>
               </div>
 
-              <div className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl px-5 py-4 shadow-sm">
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                  Total records
-                </p>
+              <div className="flex flex-none items-center gap-3 rounded-2xl border border-white/70 bg-white/60 px-5 py-3.5 shadow-[var(--glass-shadow)] backdrop-blur-xl">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#effaf8] text-[11px] font-extrabold tracking-wide text-[#1f7c7a]">
+                  REC
+                </div>
 
-                <p className="mt-1 text-2xl font-bold text-slate-900">
-                  {loading
-                    ? "—"
-                    : counts.patients +
-                      counts.appointments +
-                      counts.prescriptions +
-                      counts.sick_notes +
-                      counts.invoices +
-                      counts.claims +
-                      counts.inventory +
-                      counts.staff}
-                </p>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    Total records
+                  </p>
+
+                  <p className="display-font text-2xl font-extrabold leading-6 text-slate-900">
+                    {loading
+                      ? "—"
+                      : counts.patients +
+                        counts.appointments +
+                        counts.prescriptions +
+                        counts.sick_notes +
+                        counts.invoices +
+                        counts.claims +
+                        counts.inventory +
+                        counts.staff}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -635,16 +638,22 @@ export default function Dashboard() {
             {[
               {
                 label: "Invoiced this month",
+                chip: "IN",
+                chipClass: "bg-[#effaf8] text-[#1f7c7a]",
                 value: `R ${stats.invoicedThisMonth.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
                 tone: "text-slate-900",
               },
               {
                 label: "Collected this month",
+                chip: "COL",
+                chipClass: "bg-emerald-50 text-emerald-600",
                 value: `R ${stats.collectedThisMonth.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
                 tone: "text-emerald-600",
               },
               {
                 label: "Outstanding balance",
+                chip: "OUT",
+                chipClass: "bg-amber-50 text-amber-600",
                 value: `R ${stats.outstandingTotal.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
                 tone:
                   stats.outstandingTotal > 0
@@ -653,20 +662,30 @@ export default function Dashboard() {
               },
               {
                 label: "Appointments next 7 days",
+                chip: "APT",
+                chipClass: "bg-sky-50 text-sky-600",
                 value: String(stats.upcomingWeek),
                 tone: "text-slate-900",
               },
             ].map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-5"
+                className="group rounded-2xl border border-white/70 bg-white/70 p-5 shadow-[var(--glass-shadow)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--glass-shadow-hover)]"
               >
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                  {stat.label}
-                </p>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    {stat.label}
+                  </p>
+
+                  <span
+                    className={`flex h-7 w-9 flex-none items-center justify-center rounded-lg text-[10px] font-extrabold tracking-wide ${stat.chipClass}`}
+                  >
+                    {stat.chip}
+                  </span>
+                </div>
 
                 <p
-                  className={`mt-2 text-xl font-bold tracking-tight sm:text-2xl ${stat.tone}`}
+                  className={`display-font mt-3 text-xl font-extrabold tracking-tight sm:text-2xl ${stat.tone}`}
                 >
                   {loading ? "—" : stat.value}
                 </p>

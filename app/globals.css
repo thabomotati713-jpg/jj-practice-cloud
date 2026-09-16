@@ -170,6 +170,11 @@ button:focus-visible {
   margin-bottom: 24px;
 }
 
+.page-title,
+.display-font {
+  font-family: var(--font-display), "Geist", sans-serif;
+}
+
 .page-title {
   font-size: 26px;
   font-weight: 700;
