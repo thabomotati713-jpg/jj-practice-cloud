@@ -298,9 +298,11 @@ export async function POST(request: Request) {
       );
     }
 
+    // Prefer the configured site URL, but fall back to the live
+    // origin of this request so invite links never point at localhost.
     const siteUrl =
       process.env.NEXT_PUBLIC_SITE_URL ||
-      "http://localhost:3000";
+      new URL(request.url).origin;
 
     const redirectTo = `${siteUrl}/set-password`;
 
