@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import CommunicationBar from "@/components/CommunicationBar";
 
 type Patient = {
   id: string;
@@ -401,6 +402,12 @@ export default function PatientFilePage() {
               )}
             </p>
           </div>
+
+          <CommunicationBar
+            phone={patient.phone}
+            email={patient.email}
+            firstName={patient.first_name}
+          />
 
           <div className="page-actions">
             <button

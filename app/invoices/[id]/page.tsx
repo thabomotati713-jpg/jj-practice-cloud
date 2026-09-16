@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../../lib/supabase";
 
@@ -82,6 +82,7 @@ type Profile = {
 
 export default function InvoiceDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const invoiceId = String(params.id);
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -103,6 +104,119 @@ export default function InvoiceDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [paymentReference, setPaymentReference] = useState("");
   const [paymentNotes, setPaymentNotes] = useState("");
+  const [generatingClaim, setGeneratingClaim] = useState(false);
+  const [claimMessage, setClaimMessage] = useState("");
+
+  const generateClaim = async () => {
+    if (!invoice || !patient) return;
+
+    if (
+      !patient.medical_aid_provider ||
+      !patient.medical_aid_number
+    ) {
+      setClaimMessage(
+        "This patient's medical aid details are incomplete. Add the provider and member number on the patient record first."
+      );
+      return;
+    }
+
+    setGeneratingClaim(true);
+    setClaimMessage("");
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      // Next sequential claim number, same scheme as claims/new.
+      const { data: lastClaims } = await supabase
+        .from("medical_aid_claims")
+        .select("claim_number")
+        .not("claim_number", "is", null)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      let nextNumber = 1;
+
+      const latestNumber =
+        lastClaims && lastClaims.length > 0
+          ? lastClaims[0].claim_number
+          : null;
+
+      if (latestNumber) {
+        const match = latestNumber.match(/(\d+)$/);
+
+        if (match) {
+          nextNumber = Number(match[1]) + 1;
+        }
+      }
+
+      const claimNumber = `CLM-${String(nextNumber).padStart(6, "0")}`;
+
+      const today = new Date().toISOString().slice(0, 10);
+
+      const itemSummary = items
+        .map(
+          (item) =>
+            `${item.service_code || ""}${
+              item.service_code ? " " : ""
+            }${item.description || ""} x${
+              item.quantity || 0
+            }`.trim()
+        )
+        .filter(Boolean)
+        .join("; ")
+        .slice(0, 400);
+
+      const { data: claim, error: claimError } =
+        await supabase
+          .from("medical_aid_claims")
+          .insert({
+            practice_id: invoice.practice_id,
+            patient_id: invoice.patient_id,
+            invoice_id: invoice.id,
+            claim_number: claimNumber,
+            claim_date: today,
+            medical_aid_provider:
+              patient.medical_aid_provider,
+            membership_number: patient.medical_aid_number,
+            dependent_code:
+              patient.medical_aid_dependent_code || null,
+            main_member_name:
+              patient.medical_aid_main_member || null,
+            claimed_amount: invoice.total || 0,
+            approved_amount: 0,
+            rejected_amount: 0,
+            submission_date: today,
+            status: "Submitted",
+            notes: `Auto-generated from invoice ${
+              invoice.invoice_number || ""
+            }. Items: ${itemSummary}`,
+            created_by: user?.id || null,
+          })
+          .select("id")
+          .single();
+
+      if (claimError) {
+        setClaimMessage(claimError.message);
+        setGeneratingClaim(false);
+        return;
+      }
+
+      if (claim) {
+        router.push(`/claims/${claim.id}`);
+        return;
+      }
+
+      setGeneratingClaim(false);
+    } catch (claimGenerationError) {
+      console.error(claimGenerationError);
+      setClaimMessage(
+        "Something went wrong while generating the claim."
+      );
+      setGeneratingClaim(false);
+    }
+  };
 
   useEffect(() => {
     loadInvoice();
@@ -533,6 +647,17 @@ export default function InvoiceDetailPage() {
 
               <button
                 type="button"
+                onClick={generateClaim}
+                disabled={generatingClaim}
+                className="btn btn-primary btn-sm"
+              >
+                {generatingClaim
+                  ? "Generating claim..."
+                  : "⚡ Generate Claim"}
+              </button>
+
+              <button
+                type="button"
                 onClick={printInvoice}
                 className="btn btn-primary btn-sm"
               >
@@ -541,6 +666,12 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
         </header>
+
+        {claimMessage && (
+          <div className="page-inner" style={{ paddingTop: 0 }}>
+            <div className="alert-info">{claimMessage}</div>
+          </div>
+        )}
 
         <div className="page-inner">
           <div className="page-header">
