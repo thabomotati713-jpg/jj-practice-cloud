@@ -815,6 +815,8 @@ export default function Dashboard() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                   <QuickAction
                     label="New patient"
+                    chip="NP"
+                    chipClass="bg-[#effaf8] text-[#1f7c7a]"
                     onClick={() => {
                       window.location.href = "/patients/new";
                     }}
@@ -822,6 +824,8 @@ export default function Dashboard() {
 
                   <QuickAction
                     label="New appointment"
+                    chip="NA"
+                    chipClass="bg-sky-50 text-sky-600"
                     onClick={() => {
                       window.location.href = "/appointments/new";
                     }}
@@ -829,6 +833,8 @@ export default function Dashboard() {
 
                   <QuickAction
                     label="Prescriptions"
+                    chip="RX"
+                    chipClass="bg-emerald-50 text-emerald-600"
                     onClick={() => {
                       window.location.href = "/prescriptions";
                     }}
@@ -836,6 +842,8 @@ export default function Dashboard() {
 
                   <QuickAction
                     label="Open inventory"
+                    chip="ST"
+                    chipClass="bg-amber-50 text-amber-600"
                     onClick={() => {
                       window.location.href = "/inventory";
                     }}
@@ -845,6 +853,17 @@ export default function Dashboard() {
             </section>
           </>
         )}
+
+        <footer className="mt-10 border-t border-slate-200/70 pt-5 pb-8">
+          <p className="mx-auto max-w-3xl text-center text-[11px] leading-5 text-slate-400">
+            J&amp;J Practice Cloud protects personal and health information in
+            accordance with South Africa&apos;s Protection of Personal
+            Information Act (POPIA, Act 4 of 2013), with administrative and
+            technical safeguards aligned to international healthcare privacy
+            standards, including HIPAA. Patient records are encrypted in
+            transit and at rest, and all record access is logged for audit.
+          </p>
+        </footer>
       </div>
     </main>
   );
@@ -902,22 +921,32 @@ function DashboardCard({
 
 function QuickAction({
   label,
+  chip,
+  chipClass,
   onClick,
 }: {
   label: string;
+  chip: string;
+  chipClass: string;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group flex items-center justify-between rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl px-4 py-4 text-left shadow-sm transition-all hover:border-[#7dd1c8] hover:shadow-md"
+      className="group flex items-center gap-3 rounded-2xl border border-white/70 bg-white/70 px-4 py-3.5 text-left shadow-[var(--glass-shadow)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#7dd1c8] hover:bg-white/90 hover:shadow-[var(--glass-shadow-hover)]"
     >
-      <span className="text-sm font-semibold text-slate-700">
+      <span
+        className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl text-[11px] font-extrabold tracking-wide transition-transform duration-200 group-hover:scale-105 ${chipClass}`}
+      >
+        {chip}
+      </span>
+
+      <span className="flex-1 text-sm font-semibold text-slate-700">
         {label}
       </span>
 
-      <span className="text-[#1f7c7a] transition-transform duration-200 group-hover:translate-x-1">
+      <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-[#1f7c7a] transition-all duration-200 group-hover:bg-[#effaf8] group-hover:translate-x-0.5">
         →
       </span>
     </button>
