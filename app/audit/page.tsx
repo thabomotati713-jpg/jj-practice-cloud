@@ -69,6 +69,31 @@ export default function AuditTrailPage() {
     setLoading(false);
   };
 
+  const viewHref = (event: AuditEvent): string | null => {
+    if (!event.entity_id) {
+      // List-level events have no single record to open.
+      if (event.entity === "sick_note") return "/sick-notes";
+      if (event.entity === "prescription") return "/prescriptions";
+      if (event.entity === "claim") return "/claims";
+      return null;
+    }
+
+    switch (event.entity) {
+      case "patient":
+        return `/patients/${event.entity_id}`;
+      case "invoice":
+        return `/invoices/${event.entity_id}`;
+      case "claim":
+        return `/claims/${event.entity_id}`;
+      case "sick_note":
+        return "/sick-notes";
+      case "prescription":
+        return "/prescriptions";
+      default:
+        return null;
+    }
+  };
+
   const formatWhen = (iso: string) => {
     const date = new Date(iso);
 
@@ -132,6 +157,7 @@ export default function AuditTrailPage() {
                   <th>Action</th>
                   <th>Record</th>
                   <th>Detail</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -151,7 +177,26 @@ export default function AuditTrailPage() {
                       </span>
                     </td>
                     <td className="capitalize">{event.entity}</td>
-                    <td>{event.details || "—"}</td>
+                    <td>
+                      {event.details || "—"}
+                      {event.entity_id && (
+                        <span className="text-xs text-slate-400 block">
+                          ref {event.entity_id.slice(0, 8)}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      {viewHref(event) ? (
+                        <a
+                          href={viewHref(event) as string}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          View
+                        </a>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
