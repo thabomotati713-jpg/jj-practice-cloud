@@ -22,6 +22,32 @@ type Patient = {
   last_name: string;
 };
 
+function statusBadgeClass(status: string | null): string {
+  const value = (status || "scheduled").toLowerCase();
+
+  if (["completed", "active", "paid", "in stock"].includes(value)) {
+    return "badge badge-green";
+  }
+
+  if (
+    ["scheduled", "confirmed", "pending", "submitted", "partially paid"].includes(
+      value
+    )
+  ) {
+    return "badge badge-blue";
+  }
+
+  if (["no_show", "no show", "low stock"].includes(value)) {
+    return "badge badge-amber";
+  }
+
+  if (["cancelled", "rejected", "overdue", "out of stock"].includes(value)) {
+    return "badge badge-red";
+  }
+
+  return "badge badge-gray";
+}
+
 export default function AppointmentsPage({
   params,
 }: {
@@ -181,19 +207,32 @@ export default function AppointmentsPage({
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-slate-500">Loading appointments...</p>
+      <main className="page-shell">
+        <div className="page-inner">
+          <p className="empty-state">Loading appointments...</p>
+        </div>
       </main>
     );
   }
 
   if (!patient) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
-          <p className="text-red-600">
-            {error || "Patient could not be found."}
-          </p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="alert-error">{error || "Patient could not be found."}</div>
         </div>
       </main>
     );
@@ -208,309 +247,275 @@ export default function AppointmentsPage({
     .join(" ");
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              Appointments
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
           <button
             onClick={async () => {
               await supabase.auth.signOut();
               window.location.href = "/";
             }}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+            className="btn btn-secondary btn-sm"
           >
             Sign out
           </button>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-6 flex flex-wrap items-center gap-4">
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = `/patients/${patient.id}`;
-            }}
-            className="text-sm font-semibold text-blue-700 hover:text-blue-800"
-          >
-            ← Patient Profile
-          </button>
-
+      <div className="page-inner">
+        <div className="page-header">
           <div>
-            <p className="text-sm font-semibold text-blue-700">
-              {patient.patient_id}
-            </p>
+            <div className="page-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = `/patients/${patient.id}`;
+                }}
+                className="btn btn-secondary btn-sm"
+              >
+                ← Patient Profile
+              </button>
+            </div>
 
-            <h2 className="text-2xl font-bold text-slate-900">
-              {fullName}
-            </h2>
+            <h1 className="page-title">
+              {fullName} — Appointments
+            </h1>
+
+            <p className="page-subtitle">{patient.patient_id}</p>
           </div>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Add Appointment */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-1">
-            <h3 className="mb-5 text-xl font-semibold text-slate-900">
-              New Appointment
-            </h3>
+          <section className="card lg:col-span-1">
+            <div className="card-header">
+              <h2 className="card-title">New Appointment</h2>
+            </div>
 
-            <form onSubmit={handleAddAppointment} className="space-y-4">
-              <div>
-                <label
-                  htmlFor="appointment_date"
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
-                  Date
-                </label>
-
-                <input
-                  id="appointment_date"
-                  type="date"
-                  required
-                  value={form.appointment_date}
-                  onChange={(e) =>
-                    updateField("appointment_date", e.target.value)
-                  }
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label
-                    htmlFor="start_time"
-                    className="mb-2 block text-sm font-medium text-slate-700"
-                  >
-                    Start time
+            <div className="card-body">
+              <form onSubmit={handleAddAppointment}>
+                <div className="field">
+                  <label htmlFor="appointment_date" className="label">
+                    Date
                   </label>
 
                   <input
-                    id="start_time"
-                    type="time"
+                    id="appointment_date"
+                    type="date"
                     required
-                    value={form.start_time}
+                    value={form.appointment_date}
                     onChange={(e) =>
-                      updateField("start_time", e.target.value)
+                      updateField("appointment_date", e.target.value)
                     }
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                    className="input"
                   />
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="end_time"
-                    className="mb-2 block text-sm font-medium text-slate-700"
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="field">
+                    <label htmlFor="start_time" className="label">
+                      Start time
+                    </label>
+
+                    <input
+                      id="start_time"
+                      type="time"
+                      required
+                      value={form.start_time}
+                      onChange={(e) =>
+                        updateField("start_time", e.target.value)
+                      }
+                      className="input"
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="end_time" className="label">
+                      End time
+                    </label>
+
+                    <input
+                      id="end_time"
+                      type="time"
+                      value={form.end_time}
+                      onChange={(e) =>
+                        updateField("end_time", e.target.value)
+                      }
+                      className="input"
+                    />
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="appointment_type" className="label">
+                    Appointment type
+                  </label>
+
+                  <select
+                    id="appointment_type"
+                    value={form.appointment_type}
+                    onChange={(e) =>
+                      updateField("appointment_type", e.target.value)
+                    }
+                    className="input"
                   >
-                    End time
+                    <option>Consultation</option>
+                    <option>Follow-up</option>
+                    <option>Procedure</option>
+                    <option>Review</option>
+                    <option>Emergency</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="reason" className="label">
+                    Reason
                   </label>
 
                   <input
-                    id="end_time"
-                    type="time"
-                    value={form.end_time}
+                    id="reason"
+                    type="text"
+                    value={form.reason}
                     onChange={(e) =>
-                      updateField("end_time", e.target.value)
+                      updateField("reason", e.target.value)
                     }
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                    placeholder="Reason for appointment"
+                    className="input"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label
-                  htmlFor="appointment_type"
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
-                  Appointment type
-                </label>
+                <div className="field">
+                  <label htmlFor="status" className="label">
+                    Status
+                  </label>
 
-                <select
-                  id="appointment_type"
-                  value={form.appointment_type}
-                  onChange={(e) =>
-                    updateField("appointment_type", e.target.value)
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option>Consultation</option>
-                  <option>Follow-up</option>
-                  <option>Procedure</option>
-                  <option>Review</option>
-                  <option>Emergency</option>
-                  <option>Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="reason"
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
-                  Reason
-                </label>
-
-                <input
-                  id="reason"
-                  type="text"
-                  value={form.reason}
-                  onChange={(e) =>
-                    updateField("reason", e.target.value)
-                  }
-                  placeholder="Reason for appointment"
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="status"
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
-                  Status
-                </label>
-
-                <select
-                  id="status"
-                  value={form.status}
-                  onChange={(e) =>
-                    updateField("status", e.target.value)
-                  }
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="no_show">No Show</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="notes"
-                  className="mb-2 block text-sm font-medium text-slate-700"
-                >
-                  Notes
-                </label>
-
-                <textarea
-                  id="notes"
-                  value={form.notes}
-                  onChange={(e) =>
-                    updateField("notes", e.target.value)
-                  }
-                  rows={4}
-                  placeholder="Appointment notes..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {error && (
-                <div className="rounded-xl bg-red-50 p-3 text-sm text-red-700">
-                  {error}
+                  <select
+                    id="status"
+                    value={form.status}
+                    onChange={(e) =>
+                      updateField("status", e.target.value)
+                    }
+                    className="input"
+                  >
+                    <option value="scheduled">Scheduled</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="no_show">No Show</option>
+                  </select>
                 </div>
-              )}
 
-              {success && (
-                <div className="rounded-xl bg-green-50 p-3 text-sm text-green-700">
-                  {success}
+                <div className="field">
+                  <label htmlFor="notes" className="label">
+                    Notes
+                  </label>
+
+                  <textarea
+                    id="notes"
+                    value={form.notes}
+                    onChange={(e) =>
+                      updateField("notes", e.target.value)
+                    }
+                    rows={4}
+                    placeholder="Appointment notes..."
+                    className="input"
+                  />
                 </div>
-              )}
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
-              >
-                {saving ? "Saving..." : "Add Appointment"}
-              </button>
-            </form>
+                {error && <div className="alert-error">{error}</div>}
+
+                {success && <div className="alert-success">{success}</div>}
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary w-full"
+                >
+                  {saving ? "Saving..." : "Add Appointment"}
+                </button>
+              </form>
+            </div>
           </section>
 
           {/* Appointment List */}
-          <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-2">
-            <div className="mb-5">
-              <h3 className="text-xl font-semibold text-slate-900">
-                Appointment History
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-500">
-                All appointments for this patient
-              </p>
+          <section className="card lg:col-span-2">
+            <div className="card-header">
+              <h2 className="card-title">Appointment History</h2>
             </div>
 
-            {appointments.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-300 p-10 text-center">
-                <p className="font-medium text-slate-700">
-                  No appointments yet
-                </p>
+            <div className="card-body">
+              <p className="text-sm text-[var(--muted)]">
+                All appointments for this patient
+              </p>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Use the form to create the first appointment.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {appointments.map((appointment) => (
-                  <div
-                    key={appointment.id}
-                    className="rounded-xl border border-slate-200 p-5"
-                  >
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="font-semibold text-slate-900">
-                          {appointment.appointment_type ||
-                            "Appointment"}
-                        </p>
+              {appointments.length === 0 ? (
+                <div className="empty-state">
+                  <p className="font-medium">No appointments yet</p>
+                  <p className="mt-1">
+                    Use the form to create the first appointment.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {appointments.map((appointment) => (
+                    <div
+                      key={appointment.id}
+                      className="rounded-xl border border-[var(--border)] p-4"
+                    >
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="font-semibold text-[var(--foreground)]">
+                            {appointment.appointment_type ||
+                              "Appointment"}
+                          </p>
 
-                        <p className="mt-1 text-sm text-slate-600">
-                          {appointment.appointment_date}
-                          {" · "}
-                          {appointment.start_time}
-                          {appointment.end_time
-                            ? ` – ${appointment.end_time}`
-                            : ""}
-                        </p>
+                          <p className="mt-1 text-sm text-[var(--muted)]">
+                            {appointment.appointment_date}
+                            {" · "}
+                            {appointment.start_time}
+                            {appointment.end_time
+                              ? ` – ${appointment.end_time}`
+                              : ""}
+                          </p>
+                        </div>
+
+                        <span className={statusBadgeClass(appointment.status)}>
+                          {appointment.status || "scheduled"}
+                        </span>
                       </div>
 
-                      <span className="w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                        {appointment.status || "scheduled"}
-                      </span>
+                      {appointment.reason && (
+                        <div className="mt-4">
+                          <p className="stat-label">Reason</p>
+                          <p className="mt-1 text-sm">
+                            {appointment.reason}
+                          </p>
+                        </div>
+                      )}
+
+                      {appointment.notes && (
+                        <div className="mt-4">
+                          <p className="stat-label">Notes</p>
+                          <p className="mt-1 whitespace-pre-wrap text-sm">
+                            {appointment.notes}
+                          </p>
+                        </div>
+                      )}
                     </div>
-
-                    {appointment.reason && (
-                      <div className="mt-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          Reason
-                        </p>
-                        <p className="mt-1 text-sm text-slate-700">
-                          {appointment.reason}
-                        </p>
-                      </div>
-                    )}
-
-                    {appointment.notes && (
-                      <div className="mt-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          Notes
-                        </p>
-                        <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
-                          {appointment.notes}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </section>
         </div>
       </div>

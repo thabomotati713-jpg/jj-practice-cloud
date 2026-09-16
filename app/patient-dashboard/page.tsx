@@ -227,11 +227,11 @@ export default function PatientDashboardPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <div className="rounded-2xl bg-white px-8 py-6 shadow-lg">
-          <p className="font-medium text-slate-600">
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="empty-state">
             Loading your healthcare information...
-          </p>
+          </div>
         </div>
       </main>
     );
@@ -239,25 +239,47 @@ export default function PatientDashboardPage() {
 
   if (error || !patient) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
-        <div className="max-w-lg rounded-2xl bg-white p-8 text-center shadow-lg">
-          <h1 className="text-xl font-bold text-slate-900">
-            Patient Portal
-          </h1>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">
+                J&J Practice Cloud
+              </span>
+            </a>
+          </div>
+        </header>
 
-          <p className="mt-4 text-slate-600">
-            {error || "Your patient record could not be found."}
-          </p>
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Patient Portal</h1>
+            </div>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/";
-            }}
-            className="mt-6 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white"
-          >
-            Back to Login
-          </button>
+          <div className="card">
+            <div className="card-body">
+              <div className="alert-error">
+                {error ||
+                  "Your patient record could not be found."}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/";
+                }}
+                className="btn btn-primary"
+              >
+                Back to Login
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -303,29 +325,28 @@ export default function PatientDashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen overflow-hidden bg-slate-100 text-slate-900">
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">
+              J&J Practice Cloud
+            </span>
+          </a>
 
-      <div className="fixed inset-0 -z-10 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-300/30 blur-3xl" />
-        <div className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-cyan-200/30 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-indigo-200/20 blur-3xl" />
-      </div>
-
-      <div className="mx-auto max-w-7xl px-4 py-5 md:px-8 md:py-8">
-
-        <header className="mb-6 flex items-center justify-between rounded-[2rem] border border-white/80 bg-white/50 px-5 py-4 shadow-xl backdrop-blur-2xl">
-
-          <div>
-            <p className="text-xs font-bold tracking-[0.2em] text-blue-600">
-              J&J PRACTICE CLOUD
-            </p>
-
-            <p className="mt-1 text-sm text-slate-500">
+          <div className="page-actions">
+            <span className="badge badge-blue">
               Welcome, {patient.first_name}
-            </p>
-          </div>
+            </span>
 
-          <div className="flex items-center gap-3">
+            <div className="badge badge-gray">
+              {getInitials(patient)}
+            </div>
 
             <button
               type="button"
@@ -333,151 +354,109 @@ export default function PatientDashboardPage() {
                 await supabase.auth.signOut();
                 window.location.href = "/";
               }}
-              className="rounded-full bg-white/70 px-4 py-2 text-sm font-medium shadow-sm"
+              className="btn btn-secondary btn-sm"
             >
               Sign out
             </button>
+          </div>
+        </div>
+      </header>
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-blue-500 to-indigo-600 font-bold text-white shadow-lg">
-              {getInitials(patient)}
-            </div>
-
+      <div className="page-inner pb-32">
+        <div className="page-header">
+          <div>
+            <p className="page-subtitle">
+              Your healthcare, simplified
+            </p>
+            <h1 className="page-title">
+              Hello, {patient.first_name}. Your health. One
+              place.
+            </h1>
+            <p className="page-subtitle">
+              Manage your appointments, prescriptions,
+              documents and healthcare journey from one secure
+              patient portal.
+            </p>
           </div>
 
-        </header>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href =
+                  "/patient-dashboard/appointments";
+              }}
+              className="btn btn-primary"
+            >
+              Book an Appointment
+            </button>
 
-        <section className="relative mb-6 overflow-hidden rounded-[2.5rem] border border-white/80 bg-white/45 shadow-2xl backdrop-blur-2xl">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href =
+                  "/patient-dashboard/profile";
+              }}
+              className="btn btn-secondary"
+            >
+              View My Profile
+            </button>
+          </div>
+        </div>
 
-          <div className="grid md:grid-cols-2">
-
-            <div className="relative z-10 flex flex-col justify-center p-7 md:p-12">
-
-              <span className="mb-4 w-fit rounded-full border border-blue-200/70 bg-blue-50/70 px-4 py-2 text-xs font-bold uppercase tracking-wider text-blue-700">
-                Your healthcare, simplified
-              </span>
-
-              <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-                Hello, {patient.first_name}.
-                <br />
-
-                <span className="text-blue-600">
-                  Your health.
-                </span>
-
-                <br />
-
-                One place.
-              </h1>
-
-              <p className="mt-5 max-w-lg text-base leading-7 text-slate-600 md:text-lg">
-                Manage your appointments, prescriptions, documents and
-                healthcare journey from one secure patient portal.
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href =
-                      "/patient-dashboard/appointments";
-                  }}
-                  className="rounded-2xl bg-blue-600 px-6 py-4 font-semibold text-white shadow-xl"
-                >
-                  Book an Appointment
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    window.location.href =
-                      "/patient-dashboard/profile";
-                  }}
-                  className="rounded-2xl border border-white bg-white/70 px-6 py-4 font-semibold text-slate-700 shadow-lg"
-                >
-                  View My Profile
-                </button>
-
-              </div>
-
-            </div>
-
-            <div className="relative min-h-[300px] overflow-hidden bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-700 md:min-h-[430px]">
-
-              <div className="absolute inset-0 flex items-center justify-center p-8">
-
-                <div className="w-full max-w-sm rounded-[2rem] border border-white/30 bg-white/15 p-6 shadow-2xl backdrop-blur-xl">
-
-                  <p className="text-sm font-medium text-white/70">
-                    NEXT APPOINTMENT
-                  </p>
-
-                  <div className="mt-5 flex items-center gap-4">
-
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl shadow-lg">
-                      📅
-                    </div>
-
-                    <div>
-
-                      {data.nextAppointment ? (
-                        <>
-                          <p className="font-bold text-white">
-                            {formatDate(
-                              data.nextAppointment.appointment_date
-                            )}
-                          </p>
-
-                          <p className="mt-1 text-sm text-white/70">
-                            {formatTime(
-                              data.nextAppointment.start_time
-                            )}
-                            {data.nextAppointment.appointment_type
-                              ? ` • ${data.nextAppointment.appointment_type}`
-                              : ""}
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="font-bold text-white">
-                            No appointment yet
-                          </p>
-
-                          <p className="mt-1 text-sm text-white/70">
-                            Book your next visit
-                          </p>
-                        </>
-                      )}
-
-                    </div>
-
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      window.location.href =
-                        "/patient-dashboard/appointments";
-                    }}
-                    className="mt-6 w-full rounded-xl bg-white py-3 font-semibold text-blue-700 shadow-lg"
-                  >
-                    {data.nextAppointment
-                      ? "View Appointments"
-                      : "Book Appointment"}
-                  </button>
-
-                </div>
-
-              </div>
-
-            </div>
-
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Next Appointment</h2>
           </div>
 
+          <div className="card-body">
+            {data.nextAppointment ? (
+              <>
+                <p className="stat-value">
+                  {formatDate(
+                    data.nextAppointment.appointment_date
+                  )}
+                </p>
+
+                <p className="page-subtitle">
+                  {formatTime(
+                    data.nextAppointment.start_time
+                  )}
+                  {data.nextAppointment.appointment_type
+                    ? ` • ${data.nextAppointment.appointment_type}`
+                    : ""}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="stat-value">
+                  No appointment yet
+                </p>
+
+                <p className="page-subtitle">
+                  Book your next visit
+                </p>
+              </>
+            )}
+
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href =
+                    "/patient-dashboard/appointments";
+                }}
+                className="btn btn-primary btn-sm"
+              >
+                {data.nextAppointment
+                  ? "View Appointments"
+                  : "Book Appointment"}
+              </button>
+            </div>
+          </div>
         </section>
 
-        <section className="mb-6 grid gap-4 sm:grid-cols-3">
-
+        <section className="stat-grid">
           {[
             [
               "Patient ID",
@@ -495,40 +474,25 @@ export default function PatientDashboardPage() {
               "Active prescriptions",
             ],
           ].map(([label, value, description]) => (
-            <div
-              key={label}
-              className="rounded-3xl border border-white/80 bg-white/55 p-5 shadow-lg backdrop-blur-2xl"
-            >
-              <p className="text-xs font-bold tracking-wider text-slate-400">
-                {label.toUpperCase()}
-              </p>
+            <div key={label} className="stat-card">
+              <p className="stat-label">{label}</p>
 
-              <p className="mt-2 text-2xl font-bold">
-                {value}
-              </p>
+              <p className="stat-value">{value}</p>
 
-              <p className="mt-1 text-sm text-slate-500">
-                {description}
-              </p>
+              <p className="page-subtitle">{description}</p>
             </div>
           ))}
-
         </section>
 
         <section className="mb-6">
-
           <div className="mb-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
-              Patient services
-            </p>
-
-            <h2 className="mt-1 text-2xl font-bold">
+            <p className="page-subtitle">Patient services</p>
+            <h2 className="page-title text-2xl">
               Your Healthcare
             </h2>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
             {modules.map((module) => (
               <button
                 key={module.title}
@@ -536,156 +500,136 @@ export default function PatientDashboardPage() {
                 onClick={() => {
                   window.location.href = module.href;
                 }}
-                className="group rounded-[2rem] border border-white/80 bg-white/50 p-6 text-left shadow-lg backdrop-blur-2xl transition duration-200 hover:-translate-y-1 hover:bg-white/70 hover:shadow-2xl"
+                className="card text-left"
               >
-                <div className="flex items-start justify-between">
+                <div className="card-body">
+                  <div className="flex items-start justify-between">
+                    <h3 className="card-title">
+                      {module.icon} {module.title}
+                    </h3>
 
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/80 text-2xl shadow-md">
-                    {module.icon}
+                    <span className="page-subtitle">
+                      →
+                    </span>
                   </div>
 
-                  <span className="text-xl text-slate-300">
-                    →
-                  </span>
-
+                  <p className="page-subtitle">
+                    {module.text}
+                  </p>
                 </div>
-
-                <h3 className="mt-5 text-lg font-bold">
-                  {module.title}
-                </h3>
-
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  {module.text}
-                </p>
-
               </button>
             ))}
-
           </div>
-
         </section>
 
-        <section className="mb-24 rounded-[2rem] border border-white/80 bg-white/50 p-6 shadow-xl backdrop-blur-2xl">
-
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
-              Activity
-            </p>
-
-            <h2 className="mt-1 text-xl font-bold">
-              Recent Consultations
-            </h2>
+        <section className="card mb-6">
+          <div className="card-header">
+            <div>
+              <p className="page-subtitle">Activity</p>
+              <h2 className="card-title">
+                Recent Consultations
+              </h2>
+            </div>
           </div>
 
           {data.recentConsultations.length === 0 ? (
-            <div className="mt-5 rounded-2xl bg-white/60 p-6 text-center">
-
-              <div className="text-3xl">
-                🩺
-              </div>
+            <div className="empty-state">
+              <div className="text-3xl">🩺</div>
 
               <p className="mt-2 font-semibold">
                 No consultations yet
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1">
                 Your consultation history will appear here.
               </p>
-
             </div>
           ) : (
-            <div className="mt-5 space-y-3">
+            <div className="card-body">
+              <div className="space-y-3">
+                {data.recentConsultations.map(
+                  (consultation) => (
+                    <div
+                      key={consultation.id}
+                      className="stat-card"
+                    >
+                      <p className="font-semibold">
+                        {new Date(
+                          consultation.consultation_date
+                        ).toLocaleDateString("en-ZA", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </p>
 
-              {data.recentConsultations.map((consultation) => (
-                <div
-                  key={consultation.id}
-                  className="rounded-2xl bg-white/70 p-5"
-                >
-
-                  <p className="font-semibold text-slate-900">
-                    {new Date(
-                      consultation.consultation_date
-                    ).toLocaleDateString("en-ZA", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    {consultation.diagnosis ||
-                      "Consultation completed"}
-                  </p>
-
-                </div>
-              ))}
-
+                      <p className="page-subtitle">
+                        {consultation.diagnosis ||
+                          "Consultation completed"}
+                      </p>
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           )}
-
         </section>
 
-        <nav className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 rounded-[2rem] border border-white/80 bg-white/75 p-2 shadow-2xl backdrop-blur-2xl">
+        <nav className="fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-xl -translate-x-1/2">
+          <div className="card">
+            <div className="card-body">
+              <div className="grid grid-cols-5 gap-1">
+                {[
+                  ["Home", "⌂", "/patient-dashboard"],
+                  [
+                    "Appointments",
+                    "📅",
+                    "/patient-dashboard/appointments",
+                  ],
+                  [
+                    "Prescriptions",
+                    "💊",
+                    "/patient-dashboard/prescriptions",
+                  ],
+                  [
+                    "Documents",
+                    "📄",
+                    "/patient-dashboard/documents",
+                  ],
+                  [
+                    "Profile",
+                    "👤",
+                    "/patient-dashboard/profile",
+                  ],
+                ].map(([name, icon, href]) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => {
+                      if (name === "Home") {
+                        setActiveTab("Home");
+                      }
 
-          <div className="grid grid-cols-5 gap-1">
+                      window.location.href = href;
+                    }}
+                    className={`btn btn-sm ${
+                      activeTab === name
+                        ? "btn-primary"
+                        : "btn-secondary"
+                    }`}
+                  >
+                    <span className="text-lg">
+                      {icon}
+                    </span>
 
-            {[
-              ["Home", "⌂", "/patient-dashboard"],
-              [
-                "Appointments",
-                "📅",
-                "/patient-dashboard/appointments",
-              ],
-              [
-                "Prescriptions",
-                "💊",
-                "/patient-dashboard/prescriptions",
-              ],
-              [
-                "Documents",
-                "📄",
-                "/patient-dashboard/documents",
-              ],
-              [
-                "Profile",
-                "👤",
-                "/patient-dashboard/profile",
-              ],
-            ].map(([name, icon, href]) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => {
-                  if (name === "Home") {
-                    setActiveTab("Home");
-                  }
-
-                  window.location.href = href;
-                }}
-                className={`rounded-2xl px-2 py-2.5 text-xs font-semibold transition ${
-                  activeTab === name
-                    ? "bg-blue-600 text-white shadow-lg"
-                    : "text-slate-500 hover:bg-white/80"
-                }`}
-              >
-
-                <div className="text-lg">
-                  {icon}
-                </div>
-
-                <div className="mt-1">
-                  {name}
-                </div>
-
-              </button>
-            ))}
-
+                    <span>{name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-
         </nav>
-
       </div>
-
     </main>
   );
 }

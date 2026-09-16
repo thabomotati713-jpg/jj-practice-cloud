@@ -372,458 +372,451 @@ export default function NewConsultationPage() {
 
   if (!patient) {
     return (
-      <main style={{ padding: 24 }}>
-        <h1>New Consultation</h1>
-        <p>{message || "Loading patient..."}</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">New Consultation</h1>
+            </div>
+          </div>
+          <div className="empty-state">
+            {message || "Loading patient..."}
+          </div>
+        </div>
       </main>
     );
   }
 
   return (
     <>
-      <main
-        className="consultation-page"
-        style={{
-          padding: 24,
-          maxWidth: 1100,
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            flexWrap: "wrap",
-            marginBottom: 24,
-          }}
-        >
-          <div>
-            <h1 style={{ marginBottom: 4 }}>New Consultation</h1>
-            <p style={{ margin: 0, color: "#666" }}>
-              Clinical consultation for {patientName}
-            </p>
+      <main className="page-shell consultation-page">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+            <div className="page-actions">
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() =>
+                  router.push(`/patients/${patientId}/consultations`)
+                }
+              >
+                Back to History
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">New Consultation</h1>
+              <p className="page-subtitle">
+                Clinical consultation for {patientName}
+              </p>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() =>
-              router.push(`/patients/${patientId}/consultations`)
-            }
+          <section className="card">
+            <div className="card-body">
+              <div className="grid gap-6 md:grid-cols-3">
+                <div>
+                  <strong>{patientName}</strong>
+                  <div>Patient ID: {patient.patient_id}</div>
+                  <div>Phone: {patient.phone || "Not provided"}</div>
+                  <div>Email: {patient.email || "Not provided"}</div>
+                </div>
+
+                <div>
+                  <strong>Provider</strong>
+                  <div>{providerName}</div>
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="consultation-date">
+                    Consultation Date
+                  </label>
+                  <input
+                    id="consultation-date"
+                    type="date"
+                    className="input"
+                    value={consultationDate}
+                    onChange={(e) => setConsultationDate(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {(patient.allergies || patient.chronic_conditions) && (
+                <div className="alert-info mt-4">
+                  <strong>Clinical Alerts</strong>
+
+                  {patient.allergies && (
+                    <div className="mt-2">
+                      <strong>Allergies:</strong> {patient.allergies}
+                    </div>
+                  )}
+
+                  {patient.chronic_conditions && (
+                    <div className="mt-1">
+                      <strong>Chronic Conditions:</strong>{" "}
+                      {patient.chronic_conditions}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {patient.medical_aid_provider && (
+                <div className="mt-4 text-sm text-slate-600">
+                  <strong>Medical Aid:</strong>{" "}
+                  {patient.medical_aid_provider}
+                  {patient.medical_aid_number
+                    ? ` — ${patient.medical_aid_number}`
+                    : ""}
+                  {patient.medical_aid_plan
+                    ? ` — ${patient.medical_aid_plan}`
+                    : ""}
+                </div>
+              )}
+
+              {appointment && (
+                <div className="mt-4">
+                  <strong>Linked Appointment</strong>
+                  <div>
+                    {appointment.appointment_date}{" "}
+                    {appointment.start_time?.slice(0, 5)} –{" "}
+                    {appointment.end_time?.slice(0, 5)}
+                  </div>
+                  <div>
+                    {appointment.appointment_type || "Appointment"}
+                    {appointment.reason ? ` — ${appointment.reason}` : ""}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {message && <div className="alert-error">{message}</div>}
+
+          <form
+            onSubmit={(event) => saveConsultation(event, "history")}
+            className="space-y-5"
           >
-            Back to History
-          </button>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Presenting Complaint</h2>
+              </div>
+              <div className="card-body">
+                <label className="field">
+                  <span className="label">Chief Complaint</span>
+                  <textarea
+                    className="input"
+                    value={chiefComplaint}
+                    onChange={(e) => setChiefComplaint(e.target.value)}
+                    rows={3}
+                    placeholder="What brought the patient to the practice?"
+                  />
+                </label>
+
+                <label className="field">
+                  <span className="label">History of Present Illness</span>
+                  <textarea
+                    className="input"
+                    value={history}
+                    onChange={(e) => setHistory(e.target.value)}
+                    rows={5}
+                    placeholder="Relevant history, symptoms, duration and progression..."
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Vital Signs</h2>
+              </div>
+              <div className="card-body">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <label className="field">
+                    <span className="label">Temperature (°C)</span>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.1"
+                      value={temperature}
+                      onChange={(e) => setTemperature(e.target.value)}
+                      placeholder="e.g. 36.8"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Pulse (bpm)</span>
+                    <input
+                      type="number"
+                      className="input"
+                      value={pulse}
+                      onChange={(e) => setPulse(e.target.value)}
+                      placeholder="e.g. 72"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Respiratory Rate (/min)</span>
+                    <input
+                      type="number"
+                      className="input"
+                      value={respiratoryRate}
+                      onChange={(e) => setRespiratoryRate(e.target.value)}
+                      placeholder="e.g. 18"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Systolic BP</span>
+                    <input
+                      type="number"
+                      className="input"
+                      value={bloodPressureSystolic}
+                      onChange={(e) =>
+                        setBloodPressureSystolic(e.target.value)
+                      }
+                      placeholder="e.g. 120"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Diastolic BP</span>
+                    <input
+                      type="number"
+                      className="input"
+                      value={bloodPressureDiastolic}
+                      onChange={(e) =>
+                        setBloodPressureDiastolic(e.target.value)
+                      }
+                      placeholder="e.g. 80"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Oxygen Saturation (%)</span>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.1"
+                      value={oxygenSaturation}
+                      onChange={(e) => setOxygenSaturation(e.target.value)}
+                      placeholder="e.g. 98"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Weight (kg)</span>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.1"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      placeholder="e.g. 70"
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Height (cm)</span>
+                    <input
+                      type="number"
+                      className="input"
+                      step="0.1"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      placeholder="e.g. 170"
+                    />
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Clinical Assessment</h2>
+              </div>
+              <div className="card-body">
+                <label className="field">
+                  <span className="label">Examination</span>
+                  <textarea
+                    className="input"
+                    value={examination}
+                    onChange={(e) => setExamination(e.target.value)}
+                    rows={5}
+                    placeholder="Physical examination findings..."
+                  />
+                </label>
+
+                <label className="field">
+                  <span className="label">Diagnosis</span>
+                  <textarea
+                    className="input"
+                    value={diagnosis}
+                    onChange={(e) => setDiagnosis(e.target.value)}
+                    rows={4}
+                    placeholder="Diagnosis / clinical impression..."
+                  />
+                </label>
+
+                <label className="field">
+                  <span className="label">Diagnosis Code</span>
+                  <input
+                    type="text"
+                    className="input"
+                    value={diagnosisCode}
+                    onChange={(e) => setDiagnosisCode(e.target.value)}
+                    placeholder="Optional ICD-10 code"
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Treatment & Procedures</h2>
+              </div>
+              <div className="card-body">
+                <label className="field">
+                  <span className="label">Treatment</span>
+                  <textarea
+                    className="input"
+                    value={treatment}
+                    onChange={(e) => setTreatment(e.target.value)}
+                    rows={4}
+                    placeholder="Treatment provided or recommended..."
+                  />
+                </label>
+
+                <label className="field">
+                  <span className="label">Procedures</span>
+                  <textarea
+                    className="input"
+                    value={procedures}
+                    onChange={(e) => setProcedures(e.target.value)}
+                    rows={4}
+                    placeholder="Procedures performed..."
+                  />
+                </label>
+
+                <label className="field">
+                  <span className="label">Clinical Notes</span>
+                  <textarea
+                    className="input"
+                    value={clinicalNotes}
+                    onChange={(e) => setClinicalNotes(e.target.value)}
+                    rows={6}
+                    placeholder="Additional clinical notes..."
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Follow-up</h2>
+              </div>
+              <div className="card-body">
+                <label className="field">
+                  <span className="label">Follow-up Date</span>
+                  <input
+                    type="date"
+                    className="input"
+                    value={followUpDate}
+                    onChange={(e) => setFollowUpDate(e.target.value)}
+                  />
+                </label>
+
+                <label className="field">
+                  <span className="label">Follow-up Notes</span>
+                  <textarea
+                    className="input"
+                    value={followUpNotes}
+                    onChange={(e) => setFollowUpNotes(e.target.value)}
+                    rows={4}
+                    placeholder="Instructions for follow-up..."
+                  />
+                </label>
+              </div>
+            </section>
+
+            <div className="page-actions justify-end">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() =>
+                  router.push(`/patients/${patientId}/consultations`)
+                }
+                disabled={saving}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={printConsultation}
+                disabled={saving}
+              >
+                🖨 Print
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={saving}
+                onClick={(event) =>
+                  saveConsultation(
+                    event as unknown as React.FormEvent<HTMLFormElement>,
+                    "prescription"
+                  )
+                }
+              >
+                Save & Create Prescription
+              </button>
+
+              <button
+                type="button"
+                className="btn btn-secondary"
+                disabled={saving}
+                onClick={(event) =>
+                  saveConsultation(
+                    event as unknown as React.FormEvent<HTMLFormElement>,
+                    "sick-note"
+                  )
+                }
+              >
+                Save & Create Sick Note
+              </button>
+
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? "Saving Consultation..." : "Save Consultation"}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <section
-          style={{
-            padding: 18,
-            marginBottom: 20,
-            border: "1px solid #ddd",
-            borderRadius: 10,
-            background: "#f8fafc",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 14,
-            }}
-          >
-            <div>
-              <strong>{patientName}</strong>
-              <div>Patient ID: {patient.patient_id}</div>
-              <div>Phone: {patient.phone || "Not provided"}</div>
-              <div>Email: {patient.email || "Not provided"}</div>
-            </div>
-
-            <div>
-              <strong>Provider</strong>
-              <div>{providerName}</div>
-            </div>
-
-            <div>
-              <strong>Consultation Date</strong>
-              <input
-                type="date"
-                value={consultationDate}
-                onChange={(e) => setConsultationDate(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              />
-            </div>
-          </div>
-
-          {(patient.allergies || patient.chronic_conditions) && (
-            <div
-              style={{
-                marginTop: 16,
-                padding: 14,
-                border: "1px solid #f59e0b",
-                borderRadius: 8,
-                background: "#fffbeb",
-              }}
-            >
-              <strong>Clinical Alerts</strong>
-
-              {patient.allergies && (
-                <div style={{ marginTop: 8 }}>
-                  <strong>Allergies:</strong> {patient.allergies}
-                </div>
-              )}
-
-              {patient.chronic_conditions && (
-                <div style={{ marginTop: 6 }}>
-                  <strong>Chronic Conditions:</strong>{" "}
-                  {patient.chronic_conditions}
-                </div>
-              )}
-            </div>
-          )}
-
-          {patient.medical_aid_provider && (
-            <div style={{ marginTop: 14, color: "#555" }}>
-              <strong>Medical Aid:</strong>{" "}
-              {patient.medical_aid_provider}
-              {patient.medical_aid_number
-                ? ` — ${patient.medical_aid_number}`
-                : ""}
-              {patient.medical_aid_plan
-                ? ` — ${patient.medical_aid_plan}`
-                : ""}
-            </div>
-          )}
-
-          {appointment && (
-            <div style={{ marginTop: 16 }}>
-              <strong>Linked Appointment</strong>
-              <div>
-                {appointment.appointment_date}{" "}
-                {appointment.start_time?.slice(0, 5)} –{" "}
-                {appointment.end_time?.slice(0, 5)}
-              </div>
-              <div>
-                {appointment.appointment_type || "Appointment"}
-                {appointment.reason ? ` — ${appointment.reason}` : ""}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {message && (
-          <div
-            style={{
-              padding: 12,
-              marginBottom: 20,
-              borderRadius: 8,
-              background: "#f1f5f9",
-            }}
-          >
-            {message}
-          </div>
-        )}
-
-        <form
-          onSubmit={(event) => saveConsultation(event, "history")}
-          style={{ display: "grid", gap: 20 }}
-        >
-          <section className="card">
-            <h2>Presenting Complaint</h2>
-
-            <label>
-              Chief Complaint
-              <textarea
-                value={chiefComplaint}
-                onChange={(e) => setChiefComplaint(e.target.value)}
-                rows={3}
-                placeholder="What brought the patient to the practice?"
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 16 }}>
-              History of Present Illness
-              <textarea
-                value={history}
-                onChange={(e) => setHistory(e.target.value)}
-                rows={5}
-                placeholder="Relevant history, symptoms, duration and progression..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-          </section>
-
-          <section className="card">
-            <h2>Vital Signs</h2>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(180px, 1fr))",
-                gap: 16,
-              }}
-            >
-              <label>
-                Temperature (°C)
-                <input
-                  type="number"
-                  step="0.1"
-                  value={temperature}
-                  onChange={(e) => setTemperature(e.target.value)}
-                  placeholder="e.g. 36.8"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Pulse (bpm)
-                <input
-                  type="number"
-                  value={pulse}
-                  onChange={(e) => setPulse(e.target.value)}
-                  placeholder="e.g. 72"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Respiratory Rate (/min)
-                <input
-                  type="number"
-                  value={respiratoryRate}
-                  onChange={(e) => setRespiratoryRate(e.target.value)}
-                  placeholder="e.g. 18"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Systolic BP
-                <input
-                  type="number"
-                  value={bloodPressureSystolic}
-                  onChange={(e) =>
-                    setBloodPressureSystolic(e.target.value)
-                  }
-                  placeholder="e.g. 120"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Diastolic BP
-                <input
-                  type="number"
-                  value={bloodPressureDiastolic}
-                  onChange={(e) =>
-                    setBloodPressureDiastolic(e.target.value)
-                  }
-                  placeholder="e.g. 80"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Oxygen Saturation (%)
-                <input
-                  type="number"
-                  step="0.1"
-                  value={oxygenSaturation}
-                  onChange={(e) => setOxygenSaturation(e.target.value)}
-                  placeholder="e.g. 98"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Weight (kg)
-                <input
-                  type="number"
-                  step="0.1"
-                  value={weight}
-                  onChange={(e) => setWeight(e.target.value)}
-                  placeholder="e.g. 70"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-
-              <label>
-                Height (cm)
-                <input
-                  type="number"
-                  step="0.1"
-                  value={height}
-                  onChange={(e) => setHeight(e.target.value)}
-                  placeholder="e.g. 170"
-                  style={{ width: "100%", padding: 10, marginTop: 6 }}
-                />
-              </label>
-            </div>
-          </section>
-
-          <section className="card">
-            <h2>Clinical Assessment</h2>
-
-            <label>
-              Examination
-              <textarea
-                value={examination}
-                onChange={(e) => setExamination(e.target.value)}
-                rows={5}
-                placeholder="Physical examination findings..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 16 }}>
-              Diagnosis
-              <textarea
-                value={diagnosis}
-                onChange={(e) => setDiagnosis(e.target.value)}
-                rows={4}
-                placeholder="Diagnosis / clinical impression..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 16 }}>
-              Diagnosis Code
-              <input
-                type="text"
-                value={diagnosisCode}
-                onChange={(e) => setDiagnosisCode(e.target.value)}
-                placeholder="Optional ICD-10 code"
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-          </section>
-
-          <section className="card">
-            <h2>Treatment & Procedures</h2>
-
-            <label>
-              Treatment
-              <textarea
-                value={treatment}
-                onChange={(e) => setTreatment(e.target.value)}
-                rows={4}
-                placeholder="Treatment provided or recommended..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 16 }}>
-              Procedures
-              <textarea
-                value={procedures}
-                onChange={(e) => setProcedures(e.target.value)}
-                rows={4}
-                placeholder="Procedures performed..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 16 }}>
-              Clinical Notes
-              <textarea
-                value={clinicalNotes}
-                onChange={(e) => setClinicalNotes(e.target.value)}
-                rows={6}
-                placeholder="Additional clinical notes..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-          </section>
-
-          <section className="card">
-            <h2>Follow-up</h2>
-
-            <label>
-              Follow-up Date
-              <input
-                type="date"
-                value={followUpDate}
-                onChange={(e) => setFollowUpDate(e.target.value)}
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-
-            <label style={{ display: "block", marginTop: 16 }}>
-              Follow-up Notes
-              <textarea
-                value={followUpNotes}
-                onChange={(e) => setFollowUpNotes(e.target.value)}
-                rows={4}
-                placeholder="Instructions for follow-up..."
-                style={{ width: "100%", padding: 10, marginTop: 6 }}
-              />
-            </label>
-          </section>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() =>
-                router.push(`/patients/${patientId}/consultations`)
-              }
-              disabled={saving}
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              onClick={printConsultation}
-              disabled={saving}
-            >
-              🖨 Print
-            </button>
-
-            <button
-              type="button"
-              disabled={saving}
-              onClick={(event) =>
-                saveConsultation(
-                  event as unknown as React.FormEvent<HTMLFormElement>,
-                  "prescription"
-                )
-              }
-            >
-              Save & Create Prescription
-            </button>
-
-            <button
-              type="button"
-              disabled={saving}
-              onClick={(event) =>
-                saveConsultation(
-                  event as unknown as React.FormEvent<HTMLFormElement>,
-                  "sick-note"
-                )
-              }
-            >
-              Save & Create Sick Note
-            </button>
-
-            <button type="submit" disabled={saving}>
-              {saving ? "Saving Consultation..." : "Save Consultation"}
-            </button>
-          </div>
-        </form>
       </main>
 
       <section className="consultation-print">

@@ -99,6 +99,46 @@ export default function ClaimsPage() {
       .replace(/\b\w/g, (letter) => letter.toUpperCase());
   }
 
+  function statusBadgeClass(status: string | null) {
+    const value = (status || "").toLowerCase();
+
+    if (
+      value === "paid" ||
+      value === "completed" ||
+      value === "approved" ||
+      value === "active"
+    ) {
+      return "badge badge-green";
+    }
+
+    if (
+      value === "pending" ||
+      value === "submitted" ||
+      value === "partially paid" ||
+      value === "partially_approved" ||
+      value === "partially approved" ||
+      value === "scheduled" ||
+      value === "confirmed"
+    ) {
+      return "badge badge-blue";
+    }
+
+    if (value === "low stock" || value === "no show") {
+      return "badge badge-amber";
+    }
+
+    if (
+      value === "cancelled" ||
+      value === "rejected" ||
+      value === "overdue" ||
+      value === "out of stock"
+    ) {
+      return "badge badge-red";
+    }
+
+    return "badge badge-gray";
+  }
+
   const filteredClaims = claims.filter((claim) => {
     const patient = getPatient(claim.patient_id);
 
@@ -140,330 +180,168 @@ export default function ClaimsPage() {
   ).length;
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "20px",
-            marginBottom: "30px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img src="/logo.jpg" alt="J&J Practice Cloud" className="app-brand-logo" />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+
+          <div className="page-actions">
             <button
               onClick={() => router.push("/dashboard")}
-              style={{
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                padding: 0,
-                marginBottom: "10px",
-                color: "#555",
-              }}
+              className="btn btn-secondary btn-sm"
             >
               ← Back to Dashboard
             </button>
 
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "32px",
-                color: "#1f2937",
-              }}
+            <button
+              onClick={() => router.push("/claims/new")}
+              className="btn btn-primary btn-sm"
             >
-              Medical Aid Claims
-            </h1>
-
-            <p
-              style={{
-                marginTop: "8px",
-                color: "#6b7280",
-              }}
-            >
-              Manage and track medical aid claims.
-            </p>
+              + New Claim
+            </button>
           </div>
-
-          <button
-            onClick={() => router.push("/claims/new")}
-            style={{
-              background: "#2563eb",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "12px 20px",
-              fontSize: "15px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            + New Claim
-          </button>
         </div>
+      </header>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-            marginBottom: "25px",
-          }}
-        >
-          <div style={cardStyle}>
-            <div style={cardTitleStyle}>Total Claims</div>
-            <div style={cardValueStyle}>{claims.length}</div>
-          </div>
-
-          <div style={cardStyle}>
-            <div style={cardTitleStyle}>Total Claimed</div>
-            <div style={cardValueStyle}>{formatCurrency(totalClaimed)}</div>
-          </div>
-
-          <div style={cardStyle}>
-            <div style={cardTitleStyle}>Total Approved</div>
-            <div style={cardValueStyle}>{formatCurrency(totalApproved)}</div>
-          </div>
-
-          <div style={cardStyle}>
-            <div style={cardTitleStyle}>Total Rejected</div>
-            <div style={cardValueStyle}>{formatCurrency(totalRejected)}</div>
-          </div>
-
-          <div style={cardStyle}>
-            <div style={cardTitleStyle}>Pending / Submitted</div>
-            <div style={cardValueStyle}>{pendingClaims}</div>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Medical Aid Claims</h1>
+            <p className="page-subtitle">Manage and track medical aid claims.</p>
           </div>
         </div>
 
-        <div
-          style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "20px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-          }}
-        >
-          <div style={{ marginBottom: "20px" }}>
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="stat-label">Total Claims</div>
+            <div className="stat-value">{claims.length}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Total Claimed</div>
+            <div className="stat-value">{formatCurrency(totalClaimed)}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Total Approved</div>
+            <div className="stat-value">{formatCurrency(totalApproved)}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Total Rejected</div>
+            <div className="stat-value">{formatCurrency(totalRejected)}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Pending / Submitted</div>
+            <div className="stat-value">{pendingClaims}</div>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body">
             <input
               type="text"
               placeholder="Search by patient, claim number, medical aid or membership number..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              style={{
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "13px 15px",
-                border: "1px solid #d1d5db",
-                borderRadius: "8px",
-                fontSize: "15px",
-              }}
+              className="input"
             />
           </div>
+        </div>
 
-          {loading ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "50px",
-                color: "#6b7280",
-              }}
-            >
-              Loading claims...
-            </div>
-          ) : filteredClaims.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "50px",
-                color: "#6b7280",
-              }}
-            >
-              <h3 style={{ color: "#374151" }}>No medical aid claims found</h3>
+        {loading ? (
+          <div className="empty-state">Loading claims...</div>
+        ) : filteredClaims.length === 0 ? (
+          <div className="card">
+            <div className="empty-state">
+              <h3 className="card-title">No medical aid claims found</h3>
               <p>
                 {search
                   ? "Try a different search."
                   : "Create your first medical aid claim."}
               </p>
             </div>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  minWidth: "1000px",
-                }}
-              >
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #e5e7eb" }}>
-                    <th style={thStyle}>Claim Number</th>
-                    <th style={thStyle}>Patient</th>
-                    <th style={thStyle}>Medical Aid</th>
-                    <th style={thStyle}>Membership</th>
-                    <th style={thStyle}>Claim Date</th>
-                    <th style={thStyle}>Claimed</th>
-                    <th style={thStyle}>Approved</th>
-                    <th style={thStyle}>Status</th>
-                    <th style={thStyle}>Action</th>
-                  </tr>
-                </thead>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Claim Number</th>
+                  <th>Patient</th>
+                  <th>Medical Aid</th>
+                  <th>Membership</th>
+                  <th>Claim Date</th>
+                  <th>Claimed</th>
+                  <th>Approved</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-                <tbody>
-                  {filteredClaims.map((claim) => {
-                    const patient = getPatient(claim.patient_id);
+              <tbody>
+                {filteredClaims.map((claim) => {
+                  const patient = getPatient(claim.patient_id);
 
-                    return (
-                      <tr
-                        key={claim.id}
-                        style={{
-                          borderBottom: "1px solid #e5e7eb",
-                        }}
-                      >
-                        <td style={tdStyle}>
-                          <strong>
-                            {claim.claim_number || "Not assigned"}
-                          </strong>
-                        </td>
+                  return (
+                    <tr key={claim.id}>
+                      <td>
+                        <strong>
+                          {claim.claim_number || "Not assigned"}
+                        </strong>
+                      </td>
 
-                        <td style={tdStyle}>
-                          {patient ? (
-                            <div>
-                              <strong>
-                                {patient.first_name} {patient.last_name}
-                              </strong>
-                              <div
-                                style={{
-                                  fontSize: "12px",
-                                  color: "#6b7280",
-                                  marginTop: "3px",
-                                }}
-                              >
-                                {patient.patient_id}
-                              </div>
+                      <td>
+                        {patient ? (
+                          <div>
+                            <strong>
+                              {patient.first_name} {patient.last_name}
+                            </strong>
+                            <div className="text-xs text-slate-500 mt-0.5">
+                              {patient.patient_id}
                             </div>
-                          ) : (
-                            "Unknown patient"
-                          )}
-                        </td>
+                          </div>
+                        ) : (
+                          "Unknown patient"
+                        )}
+                      </td>
 
-                        <td style={tdStyle}>
-                          {claim.medical_aid_provider || "-"}
-                        </td>
+                      <td>{claim.medical_aid_provider || "-"}</td>
 
-                        <td style={tdStyle}>
-                          {claim.membership_number || "-"}
-                        </td>
+                      <td>{claim.membership_number || "-"}</td>
 
-                        <td style={tdStyle}>
-                          {formatDate(claim.claim_date)}
-                        </td>
+                      <td>{formatDate(claim.claim_date)}</td>
 
-                        <td style={tdStyle}>
-                          {formatCurrency(claim.claimed_amount)}
-                        </td>
+                      <td>{formatCurrency(claim.claimed_amount)}</td>
 
-                        <td style={tdStyle}>
-                          {formatCurrency(claim.approved_amount)}
-                        </td>
+                      <td>{formatCurrency(claim.approved_amount)}</td>
 
-                        <td style={tdStyle}>
-                          <span
-                            style={{
-                              display: "inline-block",
-                              padding: "5px 10px",
-                              borderRadius: "20px",
-                              fontSize: "12px",
-                              fontWeight: 600,
-                              background:
-                                claim.status?.toLowerCase() === "approved"
-                                  ? "#dcfce7"
-                                  : claim.status?.toLowerCase() === "rejected"
-                                  ? "#fee2e2"
-                                  : "#fef3c7",
-                              color:
-                                claim.status?.toLowerCase() === "approved"
-                                  ? "#166534"
-                                  : claim.status?.toLowerCase() === "rejected"
-                                  ? "#991b1b"
-                                  : "#92400e",
-                            }}
-                          >
-                            {statusLabel(claim.status)}
-                          </span>
-                        </td>
+                      <td>
+                        <span className={statusBadgeClass(claim.status)}>
+                          {statusLabel(claim.status)}
+                        </span>
+                      </td>
 
-                        <td style={tdStyle}>
-                          <button
-                            onClick={() => router.push(`/claims/${claim.id}`)}
-                            style={{
-                              border: "1px solid #2563eb",
-                              color: "#2563eb",
-                              background: "white",
-                              borderRadius: "6px",
-                              padding: "7px 12px",
-                              cursor: "pointer",
-                              fontWeight: 600,
-                            }}
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+                      <td>
+                        <button
+                          onClick={() => router.push(`/claims/${claim.id}`)}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </main>
   );
 }
-
-const cardStyle = {
-  background: "white",
-  borderRadius: "12px",
-  padding: "20px",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-};
-
-const cardTitleStyle = {
-  color: "#6b7280",
-  fontSize: "14px",
-  marginBottom: "8px",
-};
-
-const cardValueStyle = {
-  color: "#1f2937",
-  fontSize: "24px",
-  fontWeight: 700,
-};
-
-const thStyle = {
-  textAlign: "left" as const,
-  padding: "12px",
-  fontSize: "13px",
-  color: "#6b7280",
-  whiteSpace: "nowrap" as const,
-};
-
-const tdStyle = {
-  padding: "14px 12px",
-  fontSize: "14px",
-  color: "#374151",
-};

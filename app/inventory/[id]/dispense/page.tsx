@@ -196,203 +196,242 @@ export default function DispenseStockPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 p-6">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-gray-600">Loading...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body">
+              <p className="page-subtitle">Loading...</p>
+            </div>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Dispense Stock
-            </h1>
-            <p className="text-sm text-gray-600">
-              Stock is automatically issued using first-expiry-first-out.
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <div className="flex gap-2">
+          <div className="page-actions">
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+              className="btn btn-secondary btn-sm"
             >
               Dashboard
             </button>
 
             <button
               onClick={() => router.push(`/inventory/${productId}`)}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+              className="btn btn-secondary btn-sm"
             >
               Back to Product
             </button>
           </div>
         </div>
+      </header>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Dispense Stock</h1>
+            <p className="page-subtitle">
+              Stock is automatically issued using first-expiry-first-out.
+            </p>
           </div>
-        )}
+        </div>
 
-        {message && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {message}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
+
+        {message && <div className="alert-success">{message}</div>}
 
         {product && (
-          <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {product.name}
-            </h2>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <p className="stat-label">{product.name}</p>
+              <p className="stat-value">
+                {Number(product.current_stock).toFixed(2)}
+                {product.unit ? ` ${product.unit}` : ""}
+              </p>
+              <p className="page-subtitle">
+                {product.generic_name || ""}
+                {product.strength ? ` • ${product.strength}` : ""}
+                {product.dosage_form ? ` • ${product.dosage_form}` : ""}
+              </p>
+            </div>
 
-            <p className="mt-1 text-sm text-gray-600">
-              {product.generic_name || ""}
-              {product.strength ? ` • ${product.strength}` : ""}
-              {product.dosage_form ? ` • ${product.dosage_form}` : ""}
-            </p>
+            <div className="stat-card">
+              <p className="stat-label">Current Stock</p>
+              <p className="stat-value">
+                {Number(product.current_stock).toFixed(2)}
+                {product.unit ? ` ${product.unit}` : ""}
+              </p>
+            </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div>
-                <p className="text-sm text-gray-500">Current Stock</p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {Number(product.current_stock).toFixed(2)}
-                  {product.unit ? ` ${product.unit}` : ""}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">
-                  Available Non-Expired Batch Stock
-                </p>
-                <p className="text-3xl font-bold text-gray-900">
-                  {batches
-                    .reduce(
-                      (total, batch) =>
-                        total + Number(batch.quantity_remaining || 0),
-                      0
-                    )
-                    .toFixed(2)}
-                  {product.unit ? ` ${product.unit}` : ""}
-                </p>
-              </div>
+            <div className="stat-card">
+              <p className="stat-label">
+                Available Non-Expired Batch Stock
+              </p>
+              <p className="stat-value">
+                {batches
+                  .reduce(
+                    (total, batch) =>
+                      total + Number(batch.quantity_remaining || 0),
+                    0
+                  )
+                  .toFixed(2)}
+                {product.unit ? ` ${product.unit}` : ""}
+              </p>
             </div>
           </div>
         )}
 
-        <div className="rounded-xl bg-white p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Quantity to Dispense
-              </label>
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">Dispense Stock</span>
+          </div>
 
-              <input
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                required
-                disabled={saving}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 disabled:bg-gray-100"
-                placeholder="Enter quantity"
-              />
-            </div>
+          <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <div className="field">
+                <label
+                  className="label"
+                  htmlFor="dispense-quantity"
+                >
+                  Quantity to Dispense
+                </label>
 
-            <div>
-              <label className="mb-2 block text-sm font-medium text-gray-700">
-                Reason / Notes
-              </label>
+                <input
+                  id="dispense-quantity"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={quantity}
+                  onChange={(e) => setQuantity(e.target.value)}
+                  required
+                  disabled={saving}
+                  className="input"
+                  placeholder="Enter quantity"
+                />
+              </div>
 
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={3}
-                disabled={saving}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 outline-none focus:border-blue-500 disabled:bg-gray-100"
-                placeholder="Optional"
-              />
-            </div>
+              <div className="field">
+                <label
+                  className="label"
+                  htmlFor="dispense-reason"
+                >
+                  Reason / Notes
+                </label>
 
-            <div>
-              <h3 className="mb-3 text-sm font-semibold text-gray-800">
-                Available Batches — FEFO Order
-              </h3>
+                <textarea
+                  id="dispense-reason"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                  disabled={saving}
+                  className="input"
+                  placeholder="Optional"
+                />
+              </div>
 
-              {batches.length === 0 ? (
-                <p className="rounded-lg bg-gray-50 p-4 text-sm text-gray-600">
-                  No non-expired batches with available stock.
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="px-3 py-3">Batch</th>
-                        <th className="px-3 py-3">Expiry</th>
-                        <th className="px-3 py-3">Available</th>
-                      </tr>
-                    </thead>
+              <div className="field">
+                <h3 className="card-title">
+                  Available Batches — FEFO Order
+                </h3>
 
-                    <tbody>
-                      {batches.map((batch) => {
-                        const expiry = new Date(
-                          `${batch.expiry_date}T00:00:00`
-                        );
+                {batches.length === 0 ? (
+                  <div className="empty-state">
+                    No non-expired batches with available stock.
+                  </div>
+                ) : (
+                  <div className="table-wrap">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>Batch</th>
+                          <th>Expiry</th>
+                          <th>Available</th>
+                        </tr>
+                      </thead>
 
-                        const today = new Date();
-                        const daysUntilExpiry = Math.ceil(
-                          (expiry.getTime() -
-                            new Date(
-                              today.getFullYear(),
-                              today.getMonth(),
-                              today.getDate()
-                            ).getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        );
+                      <tbody>
+                        {batches.map((batch) => {
+                          const expiry = new Date(
+                            `${batch.expiry_date}T00:00:00`
+                          );
 
-                        return (
-                          <tr key={batch.id} className="border-b">
-                            <td className="px-3 py-3 font-medium">
-                              {batch.batch_number}
-                            </td>
+                          const today = new Date();
+                          const daysUntilExpiry = Math.ceil(
+                            (expiry.getTime() -
+                              new Date(
+                                today.getFullYear(),
+                                today.getMonth(),
+                                today.getDate()
+                              ).getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          );
 
-                            <td className="px-3 py-3">
-                              {batch.expiry_date}
-                              {daysUntilExpiry <= 30 && (
-                                <span className="ml-2 text-xs font-medium text-orange-600">
-                                  Expires soon
-                                </span>
-                              )}
-                            </td>
+                          return (
+                            <tr key={batch.id}>
+                              <td>
+                                <strong>{batch.batch_number}</strong>
+                              </td>
 
-                            <td className="px-3 py-3">
-                              {Number(batch.quantity_remaining).toFixed(2)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
+                              <td>
+                                {batch.expiry_date}
+                                {daysUntilExpiry <= 30 && (
+                                  <span className="badge badge-amber">
+                                    Expires soon
+                                  </span>
+                                )}
+                              </td>
 
-            <button
-              type="submit"
-              disabled={saving || batches.length === 0}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Dispensing..." : "Dispense Stock"}
-            </button>
-          </form>
+                              <td>
+                                {Number(
+                                  batch.quantity_remaining
+                                ).toFixed(2)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              <div className="page-actions sm:justify-end">
+                <button
+                  type="submit"
+                  disabled={saving || batches.length === 0}
+                  className="btn btn-primary"
+                >
+                  {saving ? "Dispensing..." : "Dispense Stock"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </main>

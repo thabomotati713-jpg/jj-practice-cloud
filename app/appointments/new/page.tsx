@@ -201,285 +201,265 @@ export default function NewAppointmentPage() {
 
   if (loading) {
     return (
-      <main style={{ padding: 24 }}>
-        <h1>New Appointment</h1>
-        <p>Loading patients...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">New Appointment</h1>
+            </div>
+          </div>
+
+          <div className="empty-state">Loading patients...</div>
+        </div>
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        padding: 24,
-        maxWidth: 900,
-        margin: "0 auto",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 12,
-          marginBottom: 24,
-        }}
-      >
-        <div>
-          <h1>New Appointment</h1>
-          <p style={{ color: "#666" }}>
-            Create an appointment for an existing patient.
-          </p>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+
+          <div className="page-actions">
+            <button
+              onClick={() => router.push("/appointments")}
+              className="btn btn-secondary btn-sm"
+            >
+              Back to Appointments
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">New Appointment</h1>
+            <p className="page-subtitle">
+              Create an appointment for an existing patient.
+            </p>
+          </div>
         </div>
 
-        <button onClick={() => router.push("/appointments")}>
-          Back to Appointments
-        </button>
-      </div>
-
-      {message && (
-        <div
-          style={{
-            padding: 12,
-            marginBottom: 20,
-            borderRadius: 8,
-            background: "#f1f5f9",
-          }}
-        >
-          {message}
-        </div>
-      )}
-
-      <form
-        onSubmit={saveAppointment}
-        style={{
-          display: "grid",
-          gap: 18,
-        }}
-      >
-        <section
-          style={{
-            padding: 20,
-            border: "1px solid #ddd",
-            borderRadius: 10,
-          }}
-        >
-          <h2>Patient</h2>
-
-          <label>
-            Patient *
-            <br />
-            <select
-              value={patientId}
-              onChange={(e) => setPatientId(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: 10,
-                marginTop: 6,
-              }}
-            >
-              <option value="">Select patient</option>
-
-              {patients.map((patient) => {
-                const name =
-                  `${patient.first_name} ${patient.middle_name || ""} ${patient.last_name}`
-                    .replace(/\s+/g, " ")
-                    .trim();
-
-                return (
-                  <option key={patient.id} value={patient.id}>
-                    {patient.patient_id} — {name}
-                  </option>
-                );
-              })}
-            </select>
-          </label>
-
-          {selectedPatient && (
-            <div
-              style={{
-                marginTop: 16,
-                padding: 14,
-                borderRadius: 8,
-                background: "#f8fafc",
-              }}
-            >
-              <strong>
-                {selectedPatient.first_name}{" "}
-                {selectedPatient.middle_name || ""}{" "}
-                {selectedPatient.last_name}
-              </strong>
-
-              <div>Patient ID: {selectedPatient.patient_id}</div>
-              <div>Phone: {selectedPatient.phone || "Not provided"}</div>
-              <div>Email: {selectedPatient.email || "Not provided"}</div>
-            </div>
-          )}
-        </section>
-
-        <section
-          style={{
-            padding: 20,
-            border: "1px solid #ddd",
-            borderRadius: 10,
-          }}
-        >
-          <h2>Appointment Details</h2>
-
+        {message && (
           <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-              gap: 16,
-            }}
+            className={
+              message.includes("successfully")
+                ? "alert-success"
+                : "alert-error"
+            }
           >
-            <label>
-              Date *
-              <br />
-              <input
-                type="date"
-                value={appointmentDate}
-                onChange={(e) => setAppointmentDate(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              />
-            </label>
-
-            <label>
-              Start Time *
-              <br />
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              />
-            </label>
-
-            <label>
-              End Time *
-              <br />
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-                required
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              />
-            </label>
-
-            <label>
-              Appointment Type
-              <br />
-              <select
-                value={appointmentType}
-                onChange={(e) => setAppointmentType(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              >
-                {appointmentTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              Status
-              <br />
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              >
-                {statuses.map((item) => (
-                  <option key={item} value={item}>
-                    {item.replace("_", " ")}
-                  </option>
-                ))}
-              </select>
-            </label>
+            {message}
           </div>
+        )}
 
-          <div style={{ marginTop: 16 }}>
-            <label>
-              Reason
-              <br />
-              <input
-                type="text"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Reason for appointment"
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              />
-            </label>
+        <form onSubmit={saveAppointment}>
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Patient</h2>
+            </div>
+
+            <div className="card-body">
+              <div className="field">
+                <label className="label" htmlFor="patient">
+                  Patient *
+                </label>
+                <select
+                  id="patient"
+                  value={patientId}
+                  onChange={(e) => setPatientId(e.target.value)}
+                  required
+                  className="input"
+                >
+                  <option value="">Select patient</option>
+
+                  {patients.map((patient) => {
+                    const name =
+                      `${patient.first_name} ${patient.middle_name || ""} ${patient.last_name}`
+                        .replace(/\s+/g, " ")
+                        .trim();
+
+                    return (
+                      <option key={patient.id} value={patient.id}>
+                        {patient.patient_id} — {name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {selectedPatient && (
+                <div className="alert-info">
+                  <strong>
+                    {selectedPatient.first_name}{" "}
+                    {selectedPatient.middle_name || ""}{" "}
+                    {selectedPatient.last_name}
+                  </strong>
+
+                  <div>Patient ID: {selectedPatient.patient_id}</div>
+                  <div>Phone: {selectedPatient.phone || "Not provided"}</div>
+                  <div>Email: {selectedPatient.email || "Not provided"}</div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Appointment Details</h2>
+            </div>
+
+            <div className="card-body">
+              <div className="stat-grid">
+                <div className="field">
+                  <label className="label" htmlFor="appointment-date">
+                    Date *
+                  </label>
+                  <input
+                    id="appointment-date"
+                    type="date"
+                    value={appointmentDate}
+                    onChange={(e) => setAppointmentDate(e.target.value)}
+                    required
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="start-time">
+                    Start Time *
+                  </label>
+                  <input
+                    id="start-time"
+                    type="time"
+                    value={startTime}
+                    onChange={(e) => setStartTime(e.target.value)}
+                    required
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="end-time">
+                    End Time *
+                  </label>
+                  <input
+                    id="end-time"
+                    type="time"
+                    value={endTime}
+                    onChange={(e) => setEndTime(e.target.value)}
+                    required
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="appointment-type">
+                    Appointment Type
+                  </label>
+                  <select
+                    id="appointment-type"
+                    value={appointmentType}
+                    onChange={(e) => setAppointmentType(e.target.value)}
+                    className="input"
+                  >
+                    {appointmentTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="appointment-status">
+                    Status
+                  </label>
+                  <select
+                    id="appointment-status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="input"
+                  >
+                    {statuses.map((item) => (
+                      <option key={item} value={item}>
+                        {item.replace("_", " ")}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="field">
+                <label className="label" htmlFor="reason">
+                  Reason
+                </label>
+                <input
+                  id="reason"
+                  type="text"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Reason for appointment"
+                  className="input"
+                />
+              </div>
+
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label className="label" htmlFor="notes">
+                  Notes
+                </label>
+                <textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={5}
+                  placeholder="Additional appointment notes"
+                  className="input"
+                />
+              </div>
+            </div>
+          </section>
+
+          <div className="page-actions" style={{ justifyContent: "flex-end" }}>
+            <button
+              type="button"
+              onClick={() => router.push("/appointments")}
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn btn-primary"
+            >
+              {saving ? "Saving..." : "Create Appointment"}
+            </button>
           </div>
-
-          <div style={{ marginTop: 16 }}>
-            <label>
-              Notes
-              <br />
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={5}
-                placeholder="Additional appointment notes"
-                style={{
-                  width: "100%",
-                  padding: 10,
-                  marginTop: 6,
-                }}
-              />
-            </label>
-          </div>
-        </section>
-
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            justifyContent: "flex-end",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => router.push("/appointments")}
-          >
-            Cancel
-          </button>
-
-          <button type="submit" disabled={saving}>
-            {saving ? "Saving..." : "Create Appointment"}
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </main>
   );
 }

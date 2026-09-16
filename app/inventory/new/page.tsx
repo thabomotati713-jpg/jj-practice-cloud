@@ -97,228 +97,224 @@ export default function NewInventoryProductPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              Inventory & Stock Management
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/dashboard";
-            }}
-            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Dashboard
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/inventory";
-            }}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Back to Inventory
-          </button>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900">
-            Add Product
-          </h2>
-          <p className="mt-1 text-slate-500">
-            Add a medicine or other inventory product.
-          </p>
-        </div>
-
-        {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-bold text-slate-900">
-              Product Information
-            </h3>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              <Field
-                label="Product Name *"
-                value={form.name}
-                onChange={(value) => updateField("name", value)}
-                placeholder="e.g. Panado"
-              />
-
-              <Field
-                label="Generic Name"
-                value={form.generic_name}
-                onChange={(value) =>
-                  updateField("generic_name", value)
-                }
-                placeholder="e.g. Paracetamol"
-              />
-
-              <Field
-                label="Product Code"
-                value={form.product_code}
-                onChange={(value) =>
-                  updateField("product_code", value)
-                }
-                placeholder="e.g. MED-0001"
-              />
-
-              <Field
-                label="Barcode"
-                value={form.barcode}
-                onChange={(value) => updateField("barcode", value)}
-                placeholder="Barcode number"
-              />
-
-              <Field
-                label="Category"
-                value={form.category}
-                onChange={(value) => updateField("category", value)}
-                placeholder="e.g. Analgesic"
-              />
-
-              <Field
-                label="Strength"
-                value={form.strength}
-                onChange={(value) => updateField("strength", value)}
-                placeholder="e.g. 500 mg"
-              />
-
-              <Field
-                label="Dosage Form"
-                value={form.dosage_form}
-                onChange={(value) =>
-                  updateField("dosage_form", value)
-                }
-                placeholder="e.g. Tablet"
-              />
-
-              <Field
-                label="Manufacturer"
-                value={form.manufacturer}
-                onChange={(value) =>
-                  updateField("manufacturer", value)
-                }
-                placeholder="Manufacturer"
-              />
-
-              <Field
-                label="Unit"
-                value={form.unit}
-                onChange={(value) => updateField("unit", value)}
-                placeholder="e.g. tablets, bottles, boxes"
-              />
-            </div>
-          </section>
-
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-bold text-slate-900">
-              Pricing & Stock
-            </h3>
-
-            <div className="grid gap-5 md:grid-cols-2">
-              <NumberField
-                label="Purchase Price (R)"
-                value={form.purchase_price}
-                onChange={(value) =>
-                  updateField("purchase_price", value)
-                }
-                step="0.01"
-              />
-
-              <NumberField
-                label="Selling Price (R)"
-                value={form.selling_price}
-                onChange={(value) =>
-                  updateField("selling_price", value)
-                }
-                step="0.01"
-              />
-
-              <NumberField
-                label="Current Stock"
-                value={form.current_stock}
-                onChange={(value) =>
-                  updateField("current_stock", value)
-                }
-                step="1"
-              />
-
-              <NumberField
-                label="Minimum Stock Level"
-                value={form.minimum_stock}
-                onChange={(value) =>
-                  updateField("minimum_stock", value)
-                }
-                step="1"
-              />
-            </div>
-          </section>
-
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-bold text-slate-900">
-              Product Settings
-            </h3>
-
-            <div className="space-y-4">
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={form.prescription_required}
-                  onChange={(event) =>
-                    updateField(
-                      "prescription_required",
-                      event.target.checked
-                    )
-                  }
-                  className="h-4 w-4"
-                />
-
-                <span className="text-sm font-medium text-slate-700">
-                  Prescription required
-                </span>
-              </label>
-
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={form.active}
-                  onChange={(event) =>
-                    updateField("active", event.target.checked)
-                  }
-                  className="h-4 w-4"
-                />
-
-                <span className="text-sm font-medium text-slate-700">
-                  Product is active
-                </span>
-              </label>
-            </div>
-          </section>
-
-          <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+          <div className="page-actions">
             <button
               type="button"
               onClick={() => {
                 window.location.href = "/inventory";
               }}
-              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700"
+              className="btn btn-secondary btn-sm"
+            >
+              Back to Inventory
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Add Product</h1>
+            <p className="page-subtitle">
+              Add a medicine or other inventory product.
+            </p>
+          </div>
+        </div>
+
+        {error && (
+          <div className="alert-error">{error}</div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">Product Information</h3>
+            </div>
+
+            <div className="card-body">
+              <div className="grid gap-5 md:grid-cols-2">
+                <Field
+                  label="Product Name *"
+                  value={form.name}
+                  onChange={(value) => updateField("name", value)}
+                  placeholder="e.g. Panado"
+                />
+
+                <Field
+                  label="Generic Name"
+                  value={form.generic_name}
+                  onChange={(value) =>
+                    updateField("generic_name", value)
+                  }
+                  placeholder="e.g. Paracetamol"
+                />
+
+                <Field
+                  label="Product Code"
+                  value={form.product_code}
+                  onChange={(value) =>
+                    updateField("product_code", value)
+                  }
+                  placeholder="e.g. MED-0001"
+                />
+
+                <Field
+                  label="Barcode"
+                  value={form.barcode}
+                  onChange={(value) => updateField("barcode", value)}
+                  placeholder="Barcode number"
+                />
+
+                <Field
+                  label="Category"
+                  value={form.category}
+                  onChange={(value) => updateField("category", value)}
+                  placeholder="e.g. Analgesic"
+                />
+
+                <Field
+                  label="Strength"
+                  value={form.strength}
+                  onChange={(value) => updateField("strength", value)}
+                  placeholder="e.g. 500 mg"
+                />
+
+                <Field
+                  label="Dosage Form"
+                  value={form.dosage_form}
+                  onChange={(value) =>
+                    updateField("dosage_form", value)
+                  }
+                  placeholder="e.g. Tablet"
+                />
+
+                <Field
+                  label="Manufacturer"
+                  value={form.manufacturer}
+                  onChange={(value) =>
+                    updateField("manufacturer", value)
+                  }
+                  placeholder="Manufacturer"
+                />
+
+                <Field
+                  label="Unit"
+                  value={form.unit}
+                  onChange={(value) => updateField("unit", value)}
+                  placeholder="e.g. tablets, bottles, boxes"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">Pricing &amp; Stock</h3>
+            </div>
+
+            <div className="card-body">
+              <div className="grid gap-5 md:grid-cols-2">
+                <NumberField
+                  label="Purchase Price (R)"
+                  value={form.purchase_price}
+                  onChange={(value) =>
+                    updateField("purchase_price", value)
+                  }
+                  step="0.01"
+                />
+
+                <NumberField
+                  label="Selling Price (R)"
+                  value={form.selling_price}
+                  onChange={(value) =>
+                    updateField("selling_price", value)
+                  }
+                  step="0.01"
+                />
+
+                <NumberField
+                  label="Current Stock"
+                  value={form.current_stock}
+                  onChange={(value) =>
+                    updateField("current_stock", value)
+                  }
+                  step="1"
+                />
+
+                <NumberField
+                  label="Minimum Stock Level"
+                  value={form.minimum_stock}
+                  onChange={(value) =>
+                    updateField("minimum_stock", value)
+                  }
+                  step="1"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">Product Settings</h3>
+            </div>
+
+            <div className="card-body">
+              <div className="space-y-4">
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={form.prescription_required}
+                    onChange={(event) =>
+                      updateField(
+                        "prescription_required",
+                        event.target.checked
+                      )
+                    }
+                    className="h-4 w-4"
+                  />
+
+                  <span className="text-sm font-medium text-slate-700">
+                    Prescription required
+                  </span>
+                </label>
+
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={form.active}
+                    onChange={(event) =>
+                      updateField("active", event.target.checked)
+                    }
+                    className="h-4 w-4"
+                  />
+
+                  <span className="text-sm font-medium text-slate-700">
+                    Product is active
+                  </span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <div className="page-actions flex-col-reverse sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/inventory";
+              }}
+              className="btn btn-secondary"
             >
               Cancel
             </button>
@@ -326,7 +322,7 @@ export default function NewInventoryProductPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="btn btn-primary"
             >
               {saving ? "Saving..." : "Save Product"}
             </button>
@@ -348,20 +344,24 @@ function Field({
   onChange: (value: string) => void;
   placeholder?: string;
 }) {
+  const id = `field-${label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")}`;
+
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
-        {label}
-      </label>
+    <label className="field" htmlFor={id}>
+      <span className="label">{label}</span>
 
       <input
+        id={id}
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
+        className="input"
       />
-    </div>
+    </label>
   );
 }
 
@@ -376,20 +376,24 @@ function NumberField({
   onChange: (value: string) => void;
   step: string;
 }) {
+  const id = `field-${label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")}`;
+
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
-        {label}
-      </label>
+    <label className="field" htmlFor={id}>
+      <span className="label">{label}</span>
 
       <input
+        id={id}
         type="number"
         min="0"
         step={step}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
+        className="input"
       />
-    </div>
+    </label>
   );
 }

@@ -240,330 +240,363 @@ export default function NewClaimPage() {
 
   if (loading) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          background: "#f5f7fb",
-          padding: "30px",
-        }}
-      >
-        <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
-          <p>Loading...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img src="/logo.jpg" alt="J&J Practice Cloud" className="app-brand-logo" />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="empty-state">Loading...</div>
         </div>
       </main>
     );
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f5f7fb",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1000px",
-          margin: "0 auto",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => router.push("/claims")}
-          style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            padding: 0,
-            marginBottom: "10px",
-            color: "#555",
-          }}
-        >
-          ← Back to Claims
-        </button>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img src="/logo.jpg" alt="J&J Practice Cloud" className="app-brand-logo" />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-        <h1
-          style={{
-            margin: "0 0 8px",
-            fontSize: "32px",
-            color: "#1f2937",
-          }}
-        >
-          New Medical Aid Claim
-        </h1>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => router.push("/claims")}
+              className="btn btn-secondary btn-sm"
+            >
+              ← Back to Claims
+            </button>
+          </div>
+        </div>
+      </header>
 
-        <p
-          style={{
-            color: "#6b7280",
-            marginBottom: "25px",
-          }}
-        >
-          Create a new medical aid claim for a patient.
-        </p>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">New Medical Aid Claim</h1>
+            <p className="page-subtitle">
+              Create a new medical aid claim for a patient.
+            </p>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Patient & Invoice</h2>
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Patient &amp; Invoice</h2>
+            </div>
 
-            <div style={gridStyle}>
-              <div>
-                <label style={labelStyle}>Patient *</label>
+            <div className="card-body">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field">
+                  <label className="label" htmlFor="claim-patient">
+                    Patient *
+                  </label>
 
-                <select
-                  value={patientId}
-                  onChange={(e) => handlePatientChange(e.target.value)}
-                  style={inputStyle}
-                  required
-                >
-                  <option value="">Select patient</option>
+                  <select
+                    id="claim-patient"
+                    value={patientId}
+                    onChange={(e) => handlePatientChange(e.target.value)}
+                    className="input"
+                    required
+                  >
+                    <option value="">Select patient</option>
 
-                  {patients.map((patient) => (
-                    <option key={patient.id} value={patient.id}>
-                      {patient.patient_id} — {patient.first_name}{" "}
-                      {patient.last_name}
+                    {patients.map((patient) => (
+                      <option key={patient.id} value={patient.id}>
+                        {patient.patient_id} — {patient.first_name}{" "}
+                        {patient.last_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-invoice">
+                    Invoice
+                  </label>
+
+                  <select
+                    id="claim-invoice"
+                    value={invoiceId}
+                    onChange={(e) => handleInvoiceChange(e.target.value)}
+                    className="input"
+                    disabled={!patientId}
+                  >
+                    <option value="">
+                      {patientId
+                        ? "Select invoice (optional)"
+                        : "Select a patient first"}
                     </option>
-                  ))}
-                </select>
+
+                    {patientInvoices.map((invoice) => (
+                      <option key={invoice.id} value={invoice.id}>
+                        {invoice.invoice_number} — R{" "}
+                        {Number(invoice.total || 0).toFixed(2)} — Balance R{" "}
+                        {Number(invoice.balance || 0).toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+            </div>
+          </div>
 
-              <div>
-                <label style={labelStyle}>Invoice</label>
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Claim Information</h2>
+            </div>
 
-                <select
-                  value={invoiceId}
-                  onChange={(e) => handleInvoiceChange(e.target.value)}
-                  style={inputStyle}
-                  disabled={!patientId}
-                >
-                  <option value="">
-                    {patientId
-                      ? "Select invoice (optional)"
-                      : "Select a patient first"}
-                  </option>
+            <div className="card-body">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field">
+                  <label className="label" htmlFor="claim-number">
+                    Claim Number
+                  </label>
+                  <input
+                    id="claim-number"
+                    value={claimNumber}
+                    onChange={(e) => setClaimNumber(e.target.value)}
+                    placeholder="Leave blank to generate automatically"
+                    className="input"
+                  />
+                </div>
 
-                  {patientInvoices.map((invoice) => (
-                    <option key={invoice.id} value={invoice.id}>
-                      {invoice.invoice_number} — R{" "}
-                      {Number(invoice.total || 0).toFixed(2)} — Balance R{" "}
-                      {Number(invoice.balance || 0).toFixed(2)}
+                <div className="field">
+                  <label className="label" htmlFor="claim-date">
+                    Claim Date *
+                  </label>
+                  <input
+                    id="claim-date"
+                    type="date"
+                    value={claimDate}
+                    onChange={(e) => setClaimDate(e.target.value)}
+                    className="input"
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-provider">
+                    Medical Aid Provider *
+                  </label>
+                  <input
+                    id="claim-provider"
+                    value={medicalAidProvider}
+                    onChange={(e) => setMedicalAidProvider(e.target.value)}
+                    placeholder="e.g. Discovery Health"
+                    className="input"
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-membership">
+                    Membership Number *
+                  </label>
+                  <input
+                    id="claim-membership"
+                    value={membershipNumber}
+                    onChange={(e) => setMembershipNumber(e.target.value)}
+                    placeholder="Membership number"
+                    className="input"
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-dependent-code">
+                    Dependent Code
+                  </label>
+                  <input
+                    id="claim-dependent-code"
+                    value={dependentCode}
+                    onChange={(e) => setDependentCode(e.target.value)}
+                    placeholder="e.g. 00"
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-main-member">
+                    Main Member Name
+                  </label>
+                  <input
+                    id="claim-main-member"
+                    value={mainMemberName}
+                    onChange={(e) => setMainMemberName(e.target.value)}
+                    placeholder="Main member's name"
+                    className="input"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Claim Amounts</h2>
+            </div>
+
+            <div className="card-body">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field">
+                  <label className="label" htmlFor="claim-claimed-amount">
+                    Claimed Amount *
+                  </label>
+                  <input
+                    id="claim-claimed-amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={claimedAmount}
+                    onChange={(e) => setClaimedAmount(e.target.value)}
+                    placeholder="0.00"
+                    className="input"
+                    required
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-approved-amount">
+                    Approved Amount
+                  </label>
+                  <input
+                    id="claim-approved-amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={approvedAmount}
+                    onChange={(e) => setApprovedAmount(e.target.value)}
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-rejected-amount">
+                    Rejected Amount
+                  </label>
+                  <input
+                    id="claim-rejected-amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={rejectedAmount}
+                    onChange={(e) => setRejectedAmount(e.target.value)}
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-status">
+                    Status *
+                  </label>
+
+                  <select
+                    id="claim-status"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="input"
+                    required
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="approved">Approved</option>
+                    <option value="partially_approved">
+                      Partially Approved
                     </option>
-                  ))}
-                </select>
+                    <option value="rejected">Rejected</option>
+                    <option value="paid">Paid</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
 
-          <div style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Claim Information</h2>
-
-            <div style={gridStyle}>
-              <div>
-                <label style={labelStyle}>Claim Number</label>
-                <input
-                  value={claimNumber}
-                  onChange={(e) => setClaimNumber(e.target.value)}
-                  placeholder="Leave blank to generate automatically"
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Claim Date *</label>
-                <input
-                  type="date"
-                  value={claimDate}
-                  onChange={(e) => setClaimDate(e.target.value)}
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Medical Aid Provider *</label>
-                <input
-                  value={medicalAidProvider}
-                  onChange={(e) => setMedicalAidProvider(e.target.value)}
-                  placeholder="e.g. Discovery Health"
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Membership Number *</label>
-                <input
-                  value={membershipNumber}
-                  onChange={(e) => setMembershipNumber(e.target.value)}
-                  placeholder="Membership number"
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Dependent Code</label>
-                <input
-                  value={dependentCode}
-                  onChange={(e) => setDependentCode(e.target.value)}
-                  placeholder="e.g. 00"
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Main Member Name</label>
-                <input
-                  value={mainMemberName}
-                  onChange={(e) => setMainMemberName(e.target.value)}
-                  placeholder="Main member's name"
-                  style={inputStyle}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Claim Amounts</h2>
-
-            <div style={gridStyle}>
-              <div>
-                <label style={labelStyle}>Claimed Amount *</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={claimedAmount}
-                  onChange={(e) => setClaimedAmount(e.target.value)}
-                  placeholder="0.00"
-                  style={inputStyle}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Approved Amount</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={approvedAmount}
-                  onChange={(e) => setApprovedAmount(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Rejected Amount</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={rejectedAmount}
-                  onChange={(e) => setRejectedAmount(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Status *</label>
-
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  style={inputStyle}
-                  required
-                >
-                  <option value="pending">Pending</option>
-                  <option value="submitted">Submitted</option>
-                  <option value="approved">Approved</option>
-                  <option value="partially_approved">
-                    Partially Approved
-                  </option>
-                  <option value="rejected">Rejected</option>
-                  <option value="paid">Paid</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Submission & Response</h2>
-
-            <div style={gridStyle}>
-              <div>
-                <label style={labelStyle}>Submission Date</label>
-                <input
-                  type="date"
-                  value={submissionDate}
-                  onChange={(e) => setSubmissionDate(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label style={labelStyle}>Response Date</label>
-                <input
-                  type="date"
-                  value={responseDate}
-                  onChange={(e) => setResponseDate(e.target.value)}
-                  style={inputStyle}
-                />
-              </div>
+          <div className="card">
+            <div className="card-header">
+              <h2 className="card-title">Submission &amp; Response</h2>
             </div>
 
-            <div style={{ marginTop: "20px" }}>
-              <label style={labelStyle}>Rejection Reason</label>
+            <div className="card-body">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="field">
+                  <label className="label" htmlFor="claim-submission-date">
+                    Submission Date
+                  </label>
+                  <input
+                    id="claim-submission-date"
+                    type="date"
+                    value={submissionDate}
+                    onChange={(e) => setSubmissionDate(e.target.value)}
+                    className="input"
+                  />
+                </div>
 
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Enter rejection reason if applicable"
-                rows={3}
-                style={textareaStyle}
-              />
-            </div>
+                <div className="field">
+                  <label className="label" htmlFor="claim-response-date">
+                    Response Date
+                  </label>
+                  <input
+                    id="claim-response-date"
+                    type="date"
+                    value={responseDate}
+                    onChange={(e) => setResponseDate(e.target.value)}
+                    className="input"
+                  />
+                </div>
+              </div>
 
-            <div style={{ marginTop: "20px" }}>
-              <label style={labelStyle}>Notes</label>
+              <div className="field">
+                <label className="label" htmlFor="claim-rejection-reason">
+                  Rejection Reason
+                </label>
 
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Additional claim notes"
-                rows={4}
-                style={textareaStyle}
-              />
+                <textarea
+                  id="claim-rejection-reason"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Enter rejection reason if applicable"
+                  rows={3}
+                  className="input"
+                />
+              </div>
+
+              <div className="field" >
+                <label className="label" htmlFor="claim-notes">
+                  Notes
+                </label>
+
+                <textarea
+                  id="claim-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Additional claim notes"
+                  rows={4}
+                  className="input"
+                />
+              </div>
             </div>
           </div>
 
           {message && (
-            <div
-              style={{
-                background: "#fee2e2",
-                color: "#991b1b",
-                padding: "12px 15px",
-                borderRadius: "8px",
-                marginBottom: "20px",
-              }}
-            >
-              {message}
-            </div>
+            <div className="alert-error">{message}</div>
           )}
 
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              justifyContent: "flex-end",
-              marginBottom: "40px",
-            }}
-          >
+          <div className="page-actions justify-end mb-10">
             <button
               type="button"
               onClick={() => router.push("/claims")}
-              style={secondaryButtonStyle}
+              className="btn btn-secondary"
             >
               Cancel
             </button>
@@ -571,10 +604,7 @@ export default function NewClaimPage() {
             <button
               type="submit"
               disabled={saving}
-              style={{
-                ...primaryButtonStyle,
-                opacity: saving ? 0.6 : 1,
-              }}
+              className="btn btn-primary"
             >
               {saving ? "Saving..." : "Create Claim"}
             </button>
@@ -584,73 +614,3 @@ export default function NewClaimPage() {
     </main>
   );
 }
-
-const sectionStyle = {
-  background: "white",
-  borderRadius: "12px",
-  padding: "24px",
-  marginBottom: "20px",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-};
-
-const sectionTitleStyle = {
-  margin: "0 0 20px",
-  fontSize: "20px",
-  color: "#1f2937",
-};
-
-const gridStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-  gap: "18px",
-};
-
-const labelStyle = {
-  display: "block",
-  marginBottom: "7px",
-  fontSize: "14px",
-  fontWeight: 600,
-  color: "#374151",
-};
-
-const inputStyle = {
-  width: "100%",
-  boxSizing: "border-box" as const,
-  padding: "11px 12px",
-  border: "1px solid #d1d5db",
-  borderRadius: "7px",
-  fontSize: "14px",
-  background: "white",
-};
-
-const textareaStyle = {
-  width: "100%",
-  boxSizing: "border-box" as const,
-  padding: "11px 12px",
-  border: "1px solid #d1d5db",
-  borderRadius: "7px",
-  fontSize: "14px",
-  resize: "vertical" as const,
-};
-
-const primaryButtonStyle = {
-  background: "#2563eb",
-  color: "white",
-  border: "none",
-  borderRadius: "7px",
-  padding: "12px 20px",
-  fontSize: "15px",
-  fontWeight: 600,
-  cursor: "pointer",
-};
-
-const secondaryButtonStyle = {
-  background: "white",
-  color: "#374151",
-  border: "1px solid #d1d5db",
-  borderRadius: "7px",
-  padding: "12px 20px",
-  fontSize: "15px",
-  fontWeight: 600,
-  cursor: "pointer",
-};

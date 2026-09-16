@@ -40,6 +40,19 @@ type Patient = {
   notes: string | null;
 };
 
+function statusBadgeClass(status: string | null | undefined): string {
+  const s = (status || "").toLowerCase();
+  if (["paid", "completed", "active", "in stock"].includes(s)) return "badge badge-green";
+  if (
+    ["pending", "submitted", "partially paid", "scheduled", "confirmed"].includes(s)
+  )
+    return "badge badge-blue";
+  if (["low stock", "no show"].includes(s)) return "badge badge-amber";
+  if (["cancelled", "rejected", "overdue", "out of stock"].includes(s))
+    return "badge badge-red";
+  return "badge badge-gray";
+}
+
 export default function EditPatient({
   params,
 }: {
@@ -219,17 +232,21 @@ export default function EditPatient({
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-slate-500">Loading patient...</p>
+      <main className="page-shell flex min-h-screen items-center justify-center">
+        <p className="text-sm text-[var(--muted)]">Loading patient...</p>
       </main>
     );
   }
 
   if (error && !patient) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm">
-          <p className="text-red-600">{error}</p>
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body">
+              <p className="alert-error">{error}</p>
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -238,52 +255,62 @@ export default function EditPatient({
   if (!patient) return null;
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              Edit Patient
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
           <button
             onClick={async () => {
               await supabase.auth.signOut();
               window.location.href = "/";
             }}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+            className="btn btn-secondary btn-sm"
           >
             Sign out
           </button>
         </div>
       </header>
 
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        <button
-          type="button"
-          onClick={() => {
-            window.location.href = `/patients/${patient.id}`;
-          }}
-          className="mb-6 text-sm font-semibold text-blue-700 hover:text-blue-800"
-        >
-          ← Back to Patient
-        </button>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <p className="text-sm font-semibold text-[var(--brand-600)]">
+              {patient.patient_id}
+            </p>
+            <h1 className="page-title">Edit Patient</h1>
+            <p className="page-subtitle">
+              Update this patient&apos;s personal, contact and medical details.
+            </p>
+          </div>
 
-        <div className="mb-6 rounded-2xl bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold text-blue-700">
-            {patient.patient_id}
-          </p>
-
-          <h2 className="mt-1 text-3xl font-bold text-slate-900">
-            Edit Patient
-          </h2>
+          <div className="page-actions">
+            <span className={statusBadgeClass(patient.status)}>
+              {patient.status || "active"}
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/patients/${patient.id}`;
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              ← Back to Patient
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-6">
+        {error && <div className="alert-error">{error}</div>}
+        {success && <div className="alert-success">{success}</div>}
+
+        <form onSubmit={handleSave}>
           <Section title="Personal Information">
             <Field
               label="Title"
@@ -523,25 +550,13 @@ export default function EditPatient({
             />
           </Section>
 
-          {error && (
-            <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="rounded-xl bg-green-50 p-4 text-sm font-medium text-green-700">
-              {success}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <div className="page-actions justify-end">
             <button
               type="button"
               onClick={() => {
                 window.location.href = `/patients/${patient.id}`;
               }}
-              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="btn btn-secondary"
             >
               Cancel
             </button>
@@ -549,7 +564,7 @@ export default function EditPatient({
             <button
               type="submit"
               disabled={saving}
-              className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+              className="btn btn-primary"
             >
               {saving ? "Saving..." : "Save Changes"}
             </button>
@@ -568,13 +583,15 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm">
-      <h3 className="mb-5 text-xl font-semibold text-slate-900">
-        {title}
-      </h3>
+    <section className="card">
+      <div className="card-header">
+        <h3 className="card-title">{title}</h3>
+      </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        {children}
+      <div className="card-body">
+        <div className="grid gap-5 sm:grid-cols-2">
+          {children}
+        </div>
       </div>
     </section>
   );
@@ -598,11 +615,8 @@ function Field({
   required?: boolean;
 }) {
   return (
-    <div>
-      <label
-        htmlFor={name}
-        className="mb-2 block text-sm font-medium text-slate-700"
-      >
+    <div className="field">
+      <label htmlFor={name} className="label">
         {label}
       </label>
 
@@ -614,7 +628,7 @@ function Field({
         onChange={(e) => onChange(name, e.target.value)}
         placeholder={placeholder}
         required={required}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+        className="input"
       />
     </div>
   );
@@ -632,11 +646,8 @@ function TextArea({
   onChange: (name: string, value: string) => void;
 }) {
   return (
-    <div className="sm:col-span-2">
-      <label
-        htmlFor={name}
-        className="mb-2 block text-sm font-medium text-slate-700"
-      >
+    <div className="field sm:col-span-2">
+      <label htmlFor={name} className="label">
         {label}
       </label>
 
@@ -646,7 +657,7 @@ function TextArea({
         value={value || ""}
         onChange={(e) => onChange(name, e.target.value)}
         rows={4}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+        className="input"
       />
     </div>
   );

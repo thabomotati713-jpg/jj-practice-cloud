@@ -122,77 +122,77 @@ export default function InventoryPage() {
     if (stock <= 0) {
       return {
         label: "Out of stock",
-        className: "bg-red-100 text-red-700",
+        className: "badge badge-red",
       };
     }
 
     if (stock <= minimum) {
       return {
         label: "Low stock",
-        className: "bg-amber-100 text-amber-700",
+        className: "badge badge-amber",
       };
     }
 
     return {
       label: "In stock",
-      className: "bg-green-100 text-green-700",
+      className: "badge badge-green",
     };
   };
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              Inventory & Stock Management
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/dashboard";
-            }}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Dashboard
-          </button>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/dashboard";
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              Dashboard
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="page-inner">
+        <div className="page-header">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">
-              Inventory
-            </h2>
-            <p className="mt-1 text-slate-500">
+            <h1 className="page-title">Inventory</h1>
+            <p className="page-subtitle">
               Manage medicines, products and stock levels.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/inventory/new";
-            }}
-            className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-          >
-            + Add Product
-          </button>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/inventory/new";
+              }}
+              className="btn btn-primary"
+            >
+              + Add Product
+            </button>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
+          <div className="alert-error">{error}</div>
         )}
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="stat-grid">
           <SummaryCard
             title="Total Products"
             value={totalProducts}
@@ -214,145 +214,132 @@ export default function InventoryPage() {
           />
         </div>
 
-        <div className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Search Inventory
-          </label>
+        <div className="card">
+          <div className="card-body">
+            <label className="label" htmlFor="inventory-search">
+              Search Inventory
+            </label>
 
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by name, generic name, product code, barcode..."
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
-          />
+            <input
+              id="inventory-search"
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search by name, generic name, product code, barcode..."
+              className="input"
+            />
+          </div>
         </div>
 
         {loading ? (
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-slate-500">
+          <div className="card">
+            <div className="empty-state">
               Loading inventory...
-            </p>
+            </div>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-            <p className="text-lg font-semibold text-slate-900">
-              No products found
-            </p>
+          <div className="card">
+            <div className="empty-state">
+              <p className="font-semibold text-slate-900">
+                No products found
+              </p>
 
-            <p className="mt-2 text-sm text-slate-500">
-              {products.length === 0
-                ? "Your inventory is currently empty."
-                : "Try changing your search."}
-            </p>
+              <p className="mt-2">
+                {products.length === 0
+                  ? "Your inventory is currently empty."
+                  : "Try changing your search."}
+              </p>
+            </div>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="border-b bg-slate-50">
-                  <tr>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Product
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Code
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Category
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Stock
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Selling Price
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Status
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Code</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Selling Price</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
 
-                <tbody className="divide-y">
-                  {filteredProducts.map((product) => {
-                    const status = stockStatus(product);
+              <tbody>
+                {filteredProducts.map((product) => {
+                  const status = stockStatus(product);
 
-                    return (
-                      <tr key={product.id} className="hover:bg-slate-50">
-                        <td className="px-5 py-4">
-                          <div className="font-semibold text-slate-900">
-                            {product.name}
-                          </div>
+                  return (
+                    <tr key={product.id}>
+                      <td>
+                        <div className="font-semibold text-slate-900">
+                          {product.name}
+                        </div>
 
-                          {product.generic_name && (
-                            <div className="mt-1 text-xs text-slate-500">
-                              {product.generic_name}
-                            </div>
-                          )}
-
-                          {(product.strength || product.dosage_form) && (
-                            <div className="mt-1 text-xs text-slate-500">
-                              {[product.strength, product.dosage_form]
-                                .filter(Boolean)
-                                .join(" • ")}
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="px-5 py-4 text-slate-600">
-                          {product.product_code || "—"}
-                        </td>
-
-                        <td className="px-5 py-4 text-slate-600">
-                          {product.category || "—"}
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <div className="font-semibold text-slate-900">
-                            {Number(product.current_stock || 0)}
-                            {product.unit
-                              ? ` ${product.unit}`
-                              : ""}
-                          </div>
-
+                        {product.generic_name && (
                           <div className="mt-1 text-xs text-slate-500">
-                            Minimum:{" "}
-                            {Number(product.minimum_stock || 0)}
+                            {product.generic_name}
                           </div>
-                        </td>
+                        )}
 
-                        <td className="px-5 py-4 font-medium text-slate-700">
-                          {formatMoney(product.selling_price)}
-                        </td>
+                        {(product.strength || product.dosage_form) && (
+                          <div className="mt-1 text-xs text-slate-500">
+                            {[product.strength, product.dosage_form]
+                              .filter(Boolean)
+                              .join(" • ")}
+                          </div>
+                        )}
+                      </td>
 
-                        <td className="px-5 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
-                          >
-                            {status.label}
-                          </span>
-                        </td>
+                      <td className="text-slate-600">
+                        {product.product_code || "—"}
+                      </td>
 
-                        <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              window.location.href = `/inventory/${product.id}`;
-                            }}
-                            className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      <td className="text-slate-600">
+                        {product.category || "—"}
+                      </td>
+
+                      <td>
+                        <div className="font-semibold text-slate-900">
+                          {Number(product.current_stock || 0)}
+                          {product.unit
+                            ? ` ${product.unit}`
+                            : ""}
+                        </div>
+
+                        <div className="mt-1 text-xs text-slate-500">
+                          Minimum:{" "}
+                          {Number(product.minimum_stock || 0)}
+                        </div>
+                      </td>
+
+                      <td className="font-medium text-slate-700">
+                        {formatMoney(product.selling_price)}
+                      </td>
+
+                      <td>
+                        <span className={status.className}>
+                          {status.label}
+                        </span>
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.href = `/inventory/${product.id}`;
+                          }}
+                          className="btn btn-secondary btn-sm"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -368,14 +355,10 @@ function SummaryCard({
   value: number;
 }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">
-        {title}
-      </p>
+    <div className="stat-card">
+      <p className="stat-label">{title}</p>
 
-      <p className="mt-2 text-3xl font-bold text-slate-900">
-        {value}
-      </p>
+      <p className="stat-value">{value}</p>
     </div>
   );
 }

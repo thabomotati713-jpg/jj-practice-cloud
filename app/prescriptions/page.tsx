@@ -33,6 +33,45 @@ type PrescriptionItem = {
   instructions: string | null;
 };
 
+const statusBadgeClass = (status: string) => {
+  const value = status.toLowerCase();
+
+  if (
+    value === "paid" ||
+    value === "completed" ||
+    value === "active" ||
+    value === "in stock"
+  ) {
+    return "badge badge-green";
+  }
+
+  if (
+    value === "pending" ||
+    value === "submitted" ||
+    value === "partially paid" ||
+    value === "scheduled" ||
+    value === "confirmed"
+  ) {
+    return "badge badge-blue";
+  }
+
+  if (value === "low stock" || value === "no show") {
+    return "badge badge-amber";
+  }
+
+  if (
+    value === "cancelled" ||
+    value === "canceled" ||
+    value === "rejected" ||
+    value === "overdue" ||
+    value === "out of stock"
+  ) {
+    return "badge badge-red";
+  }
+
+  return "badge badge-gray";
+};
+
 export default function PrescriptionsPage() {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -155,35 +194,36 @@ export default function PrescriptionsPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-slate-500">
-          Loading prescriptions...
-        </p>
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="empty-state">
+            Loading prescriptions...
+          </div>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-            <p className="text-sm text-slate-500">
-              Prescriptions
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
+          <div className="page-actions">
             <button
               type="button"
               onClick={() => {
                 window.location.href = "/dashboard";
               }}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+              className="btn btn-secondary btn-sm"
             >
               Dashboard
             </button>
@@ -194,7 +234,7 @@ export default function PrescriptionsPage() {
                 await supabase.auth.signOut();
                 window.location.href = "/";
               }}
-              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+              className="btn btn-secondary btn-sm"
             >
               Sign out
             </button>
@@ -202,54 +242,48 @@ export default function PrescriptionsPage() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="page-inner">
+        <div className="page-header">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900">
-              Prescriptions
-            </h2>
+            <h1 className="page-title">Prescriptions</h1>
 
-            <p className="mt-1 text-slate-500">
+            <p className="page-subtitle">
               Manage prescriptions for your practice.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/patients";
-            }}
-            className="w-fit rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-          >
-            New Prescription
-          </button>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/patients";
+              }}
+              className="btn btn-primary"
+            >
+              New Prescription
+            </button>
+          </div>
         </div>
 
-        {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
 
-        <section className="overflow-hidden rounded-2xl bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-5">
-            <h3 className="font-semibold text-slate-900">
-              Prescription List
-            </h3>
+        <section className="card">
+          <div className="card-header">
+            <h3 className="card-title">Prescription List</h3>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="page-subtitle">
               {prescriptions.length} prescription
               {prescriptions.length === 1 ? "" : "s"}
             </p>
           </div>
 
           {prescriptions.length === 0 ? (
-            <div className="p-10 text-center">
+            <div className="empty-state">
               <p className="font-medium text-slate-700">
                 No prescriptions found
               </p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1">
                 Prescriptions you create will appear here.
               </p>
             </div>
@@ -274,11 +308,11 @@ export default function PrescriptionsPage() {
                             }}
                             className="text-left"
                           >
-                            <p className="text-sm font-semibold text-blue-700">
+                            <p className="text-sm font-semibold text-slate-500">
                               {patient.patient_id}
                             </p>
 
-                            <h4 className="mt-1 text-lg font-semibold text-slate-900 hover:text-blue-700">
+                            <h4 className="mt-1 text-lg font-semibold text-slate-900">
                               {formatName(patient)}
                             </h4>
                           </button>
@@ -302,7 +336,14 @@ export default function PrescriptionsPage() {
                         </p>
                       </div>
 
-                      <span className="w-fit rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold capitalize text-blue-700">
+                      <span
+                        className={statusBadgeClass(
+                          (prescription.status || "active").replace(
+                            "_",
+                            " "
+                          )
+                        )}
+                      >
                         {(prescription.status || "active").replace(
                           "_",
                           " "
@@ -312,7 +353,7 @@ export default function PrescriptionsPage() {
 
                     {prescriptionItems.length > 0 && (
                       <div className="mt-5 rounded-xl bg-slate-50 p-4">
-                        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="stat-label mb-3">
                           Medication
                         </p>
 
@@ -320,7 +361,7 @@ export default function PrescriptionsPage() {
                           {prescriptionItems.map((item, index) => (
                             <div
                               key={`${prescription.id}-${index}`}
-                              className="rounded-xl bg-white p-4"
+                              className="rounded-xl border border-slate-200 bg-white p-4"
                             >
                               <p className="font-semibold text-slate-900">
                                 {item.medicine_name}
@@ -380,9 +421,7 @@ export default function PrescriptionsPage() {
 
                     {prescription.notes && (
                       <div className="mt-4">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                          Notes
-                        </p>
+                        <p className="stat-label">Notes</p>
 
                         <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
                           {prescription.notes}

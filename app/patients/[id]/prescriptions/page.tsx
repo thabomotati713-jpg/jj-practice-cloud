@@ -491,22 +491,18 @@ export default function PatientPrescriptionsPage() {
     }
   };
 
-  const statusClass = (status: string | null) => {
+  const statusBadgeClass = (status: string | null) => {
     const value = (status || "").toLowerCase();
 
-    if (value === "active") {
-      return "bg-green-100 text-green-800";
+    if (value === "active" || value === "completed") {
+      return "badge badge-green";
     }
 
     if (value === "cancelled" || value === "canceled") {
-      return "bg-red-100 text-red-800";
+      return "badge badge-red";
     }
 
-    if (value === "completed" || value === "dispensed") {
-      return "bg-blue-100 text-blue-800";
-    }
-
-    return "bg-gray-100 text-gray-700";
+    return "badge badge-gray";
   };
 
   function printPrescription(prescription: PrescriptionWithItems) {
@@ -571,125 +567,128 @@ export default function PatientPrescriptionsPage() {
         }
       `}</style>
 
-      <main className="min-h-screen bg-gray-50 p-4 md:p-6 no-print">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <button
-                  onClick={() => router.push(`/patients/${patientId}`)}
-                  className="mb-2 text-sm font-medium text-blue-600 hover:underline"
-                >
-                  ← Back to Patient Profile
-                </button>
+      <main className="page-shell no-print">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
 
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Prescription History
-                </h1>
+            <button
+              onClick={() => router.push(`/patients/${patientId}`)}
+              className="btn btn-secondary btn-sm"
+            >
+              ← Back to Patient Profile
+            </button>
+          </div>
+        </header>
 
-                {patient && (
-                  <div className="mt-1 text-sm text-gray-600">
-                    <span className="font-semibold text-gray-800">
-                      {patientName}
-                    </span>
-                    <span className="mx-2">•</span>
-                    Patient ID: {patient.patient_id}
-                  </div>
-                )}
-              </div>
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Prescription History</h1>
 
+              {patient && (
+                <p className="page-subtitle">
+                  <span className="font-semibold">{patientName}</span>
+                  <span className="mx-2">•</span>
+                  Patient ID: {patient.patient_id}
+                </p>
+              )}
+            </div>
+
+            <div className="page-actions">
               <button
                 onClick={() =>
                   router.push(`/patients/${patientId}/prescriptions/new`)
                 }
-                className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+                className="btn btn-primary"
               >
                 + New Prescription
               </button>
             </div>
           </div>
 
-          {message && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {message}
-            </div>
-          )}
+          {message && <div className="alert-error">{message}</div>}
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <div className="text-sm text-gray-500">
-                Total Prescriptions
-              </div>
-              <div className="mt-1 text-3xl font-bold text-gray-900">
-                {prescriptions.length}
-              </div>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <div className="stat-label">Total Prescriptions</div>
+              <div className="stat-value">{prescriptions.length}</div>
             </div>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <div className="text-sm text-gray-500">Active</div>
-              <div className="mt-1 text-3xl font-bold text-green-700">
-                {activeCount}
-              </div>
+            <div className="stat-card">
+              <div className="stat-label">Active</div>
+              <div className="stat-value">{activeCount}</div>
             </div>
 
-            <div className="rounded-2xl bg-white p-5 shadow-sm">
-              <div className="text-sm text-gray-500">Cancelled</div>
-              <div className="mt-1 text-3xl font-bold text-red-700">
-                {cancelledCount}
-              </div>
+            <div className="stat-card">
+              <div className="stat-label">Cancelled</div>
+              <div className="stat-value">{cancelledCount}</div>
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white p-4 shadow-sm">
-            <div className="flex flex-col gap-3 md:flex-row">
-              <input
-                type="text"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search prescription number, medicine, doctor, diagnosis..."
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              />
+          <div className="card">
+            <div className="card-body">
+              <div className="flex flex-col gap-3 md:flex-row">
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search prescription number, medicine, doctor, diagnosis..."
+                  className="input"
+                />
 
-              <select
-                value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value)}
-                className="rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
-              >
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="completed">Completed</option>
-                <option value="dispensed">Dispensed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                  className="input md:max-w-xs"
+                >
+                  <option value="all">All statuses</option>
+                  <option value="active">Active</option>
+                  <option value="completed">Completed</option>
+                  <option value="dispensed">Dispensed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
             </div>
           </div>
 
           {loading ? (
-            <div className="rounded-2xl bg-white p-10 text-center text-gray-500 shadow-sm">
-              Loading prescription history...
+            <div className="card">
+              <div className="empty-state">
+                Loading prescription history...
+              </div>
             </div>
           ) : filteredPrescriptions.length === 0 ? (
-            <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <div className="text-lg font-semibold text-gray-800">
-                No prescriptions found
+            <div className="card">
+              <div className="empty-state">
+                <div className="text-lg font-semibold text-gray-800">
+                  No prescriptions found
+                </div>
+
+                <p className="mt-2">
+                  {prescriptions.length === 0
+                    ? "This patient does not have any prescriptions yet."
+                    : "No prescriptions match your current search or filter."}
+                </p>
+
+                {prescriptions.length === 0 && (
+                  <button
+                    onClick={() =>
+                      router.push(`/patients/${patientId}/prescriptions/new`)
+                    }
+                    className="btn btn-primary mt-5"
+                  >
+                    Create First Prescription
+                  </button>
+                )}
               </div>
-
-              <p className="mt-2 text-sm text-gray-500">
-                {prescriptions.length === 0
-                  ? "This patient does not have any prescriptions yet."
-                  : "No prescriptions match your current search or filter."}
-              </p>
-
-              {prescriptions.length === 0 && (
-                <button
-                  onClick={() =>
-                    router.push(`/patients/${patientId}/prescriptions/new`)
-                  }
-                  className="mt-5 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  Create First Prescription
-                </button>
-              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -697,10 +696,7 @@ export default function PatientPrescriptionsPage() {
                 const expanded = expandedId === prescription.id;
 
                 return (
-                  <div
-                    key={prescription.id}
-                    className="overflow-hidden rounded-2xl bg-white shadow-sm"
-                  >
+                  <div key={prescription.id} className="card">
                     <button
                       type="button"
                       onClick={() =>
@@ -715,11 +711,7 @@ export default function PatientPrescriptionsPage() {
                               {prescription.prescription_number}
                             </span>
 
-                            <span
-                              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass(
-                                prescription.status
-                              )}`}
-                            >
+                            <span className={statusBadgeClass(prescription.status)}>
                               {statusLabel(prescription.status)}
                             </span>
                           </div>
@@ -765,21 +757,21 @@ export default function PatientPrescriptionsPage() {
                     {expanded && (
                       <div className="border-t border-gray-100 bg-gray-50 p-5">
                         {prescription.consultation && (
-                          <div className="mb-5 rounded-xl border border-blue-100 bg-blue-50 p-4">
-                            <div className="text-sm font-semibold text-blue-900">
+                          <div className="alert-info mb-5">
+                            <div className="text-sm font-semibold">
                               Linked Consultation
                             </div>
 
                             <div className="mt-2 grid grid-cols-1 gap-2 text-sm md:grid-cols-3">
                               <div>
-                                <span className="text-blue-700">Date:</span>{" "}
+                                <span className="font-semibold">Date:</span>{" "}
                                 {formatDate(
                                   prescription.consultation.consultation_date
                                 )}
                               </div>
 
                               <div>
-                                <span className="text-blue-700">
+                                <span className="font-semibold">
                                   Chief complaint:
                                 </span>{" "}
                                 {prescription.consultation.chief_complaint ||
@@ -787,7 +779,7 @@ export default function PatientPrescriptionsPage() {
                               </div>
 
                               <div>
-                                <span className="text-blue-700">
+                                <span className="font-semibold">
                                   Diagnosis:
                                 </span>{" "}
                                 {prescription.consultation.diagnosis || "—"}
@@ -798,7 +790,7 @@ export default function PatientPrescriptionsPage() {
 
                         <div className="space-y-3">
                           {prescription.items.length === 0 ? (
-                            <div className="rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800">
+                            <div className="alert-error">
                               No medicine items were found for this
                               prescription.
                             </div>
@@ -825,44 +817,36 @@ export default function PatientPrescriptionsPage() {
                                   </div>
 
                                   {item.quantity !== null && (
-                                    <div className="rounded-lg bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-700">
+                                    <span className="badge badge-gray">
                                       Qty: {item.quantity}
-                                    </div>
+                                    </span>
                                   )}
                                 </div>
 
                                 <div className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
                                   <div>
-                                    <div className="text-xs font-medium uppercase text-gray-400">
-                                      Dosage
-                                    </div>
+                                    <div className="stat-label">Dosage</div>
                                     <div className="mt-1 text-gray-800">
                                       {item.dosage || "—"}
                                     </div>
                                   </div>
 
                                   <div>
-                                    <div className="text-xs font-medium uppercase text-gray-400">
-                                      Frequency
-                                    </div>
+                                    <div className="stat-label">Frequency</div>
                                     <div className="mt-1 text-gray-800">
                                       {item.frequency || "—"}
                                     </div>
                                   </div>
 
                                   <div>
-                                    <div className="text-xs font-medium uppercase text-gray-400">
-                                      Duration
-                                    </div>
+                                    <div className="stat-label">Duration</div>
                                     <div className="mt-1 text-gray-800">
                                       {item.duration || "—"}
                                     </div>
                                   </div>
 
                                   <div>
-                                    <div className="text-xs font-medium uppercase text-gray-400">
-                                      Route
-                                    </div>
+                                    <div className="stat-label">Route</div>
                                     <div className="mt-1 text-gray-800">
                                       {item.route || "—"}
                                     </div>
@@ -872,7 +856,7 @@ export default function PatientPrescriptionsPage() {
                                 <div className="mt-4 rounded-xl border border-gray-200 bg-gray-50 p-4">
                                   <div className="flex flex-wrap items-center gap-4">
                                     <div>
-                                      <div className="text-xs font-medium uppercase text-gray-400">
+                                      <div className="stat-label">
                                         Prescribed
                                       </div>
                                       <div className="mt-1 text-sm font-semibold text-gray-900">
@@ -881,7 +865,7 @@ export default function PatientPrescriptionsPage() {
                                     </div>
 
                                     <div>
-                                      <div className="text-xs font-medium uppercase text-gray-400">
+                                      <div className="stat-label">
                                         Dispensed
                                       </div>
                                       <div className="mt-1 text-sm font-semibold text-gray-900">
@@ -890,7 +874,7 @@ export default function PatientPrescriptionsPage() {
                                     </div>
 
                                     <div>
-                                      <div className="text-xs font-medium uppercase text-gray-400">
+                                      <div className="stat-label">
                                         Remaining
                                       </div>
                                       <div className="mt-1 text-sm font-semibold text-gray-900">
@@ -905,7 +889,7 @@ export default function PatientPrescriptionsPage() {
                                           <div>
                                             <label
                                               htmlFor={`dispense-${item.id}`}
-                                              className="mb-1 block text-xs font-medium text-gray-600"
+                                              className="label text-xs"
                                             >
                                               Quantity to dispense
                                             </label>
@@ -926,7 +910,7 @@ export default function PatientPrescriptionsPage() {
                                                   event.target.value
                                                 )
                                               }
-                                              className="w-28 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                              className="input w-28"
                                             />
                                           </div>
 
@@ -936,7 +920,7 @@ export default function PatientPrescriptionsPage() {
                                             disabled={
                                               dispensingItemId === item.id
                                             }
-                                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                            className="btn btn-primary btn-sm"
                                           >
                                             {dispensingItemId === item.id
                                               ? "Dispensing..."
@@ -944,12 +928,12 @@ export default function PatientPrescriptionsPage() {
                                           </button>
                                         </div>
                                       ) : (
-                                        <span className="ml-auto rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                        <span className="badge badge-green ml-auto">
                                           Fully dispensed
                                         </span>
                                       )
                                     ) : (
-                                      <span className="ml-auto rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-700">
+                                      <span className="badge badge-amber ml-auto">
                                         Not linked to inventory
                                       </span>
                                     )}
@@ -958,7 +942,7 @@ export default function PatientPrescriptionsPage() {
 
                                 {item.instructions && (
                                   <div className="mt-4 rounded-lg bg-gray-50 p-3">
-                                    <div className="text-xs font-medium uppercase text-gray-400">
+                                    <div className="stat-label">
                                       Instructions
                                     </div>
                                     <div className="mt-1 text-sm text-gray-800">
@@ -973,7 +957,7 @@ export default function PatientPrescriptionsPage() {
 
                         {prescription.notes && (
                           <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4">
-                            <div className="text-xs font-medium uppercase text-gray-400">
+                            <div className="stat-label">
                               Prescription Notes
                             </div>
                             <div className="mt-1 text-sm text-gray-800">
@@ -982,11 +966,11 @@ export default function PatientPrescriptionsPage() {
                           </div>
                         )}
 
-                        <div className="mt-5 flex flex-wrap gap-3">
+                        <div className="page-actions mt-5">
                           <button
                             type="button"
                             onClick={() => printPrescription(prescription)}
-                            className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800"
+                            className="btn btn-secondary btn-sm"
                           >
                             🖨 Print Prescription
                           </button>
@@ -999,7 +983,7 @@ export default function PatientPrescriptionsPage() {
                                   `/patients/${patientId}/consultations`
                                 )
                               }
-                              className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                              className="btn btn-secondary btn-sm"
                             >
                               View Consultations
                             </button>
@@ -1010,7 +994,7 @@ export default function PatientPrescriptionsPage() {
                             onClick={() =>
                               router.push(`/patients/${patientId}`)
                             }
-                            className="rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100"
+                            className="btn btn-secondary btn-sm"
                           >
                             Patient Profile
                           </button>

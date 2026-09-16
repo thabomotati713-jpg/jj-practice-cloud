@@ -155,400 +155,407 @@ export default function NewPatientPage() {
     }, 700);
   };
 
-  const inputClass =
-    "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500";
-
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              New Patient
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">
+              J&J Practice Cloud
+            </span>
+          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/patients";
-            }}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+          <a
+            href="/patients"
+            className="btn btn-secondary btn-sm"
           >
             Back to Patients
-          </button>
+          </a>
         </div>
       </header>
 
-      <div className="mx-auto max-w-5xl px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900">
-            Add New Patient
-          </h2>
-          <p className="mt-1 text-slate-500">
-            Create a new patient record.
-          </p>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">
+              Add New Patient
+            </h1>
+            <p className="page-subtitle">
+              Create a new patient record.
+            </p>
+          </div>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+          <div className="alert-error">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-6 rounded-xl bg-green-50 p-4 text-sm text-green-700">
+          <div className="alert-success">
             {success}
           </div>
         )}
 
-        <form
-          onSubmit={createPatient}
-          className="space-y-6"
-        >
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-semibold text-slate-900">
-              Personal Information
-            </h3>
+        <form onSubmit={createPatient}>
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">
+                Personal Information
+              </h3>
+            </div>
+            <div className="card-body">
+              <div className="grid gap-4 md:grid-cols-3">
+                <select
+                  value={form.title}
+                  onChange={(e) =>
+                    updateField("title", e.target.value)
+                  }
+                  className="input"
+                >
+                  <option value="">Title</option>
+                  <option value="Mr">Mr</option>
+                  <option value="Mrs">Mrs</option>
+                  <option value="Ms">Ms</option>
+                  <option value="Dr">Dr</option>
+                  <option value="Prof">Prof</option>
+                </select>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <select
-                value={form.title}
-                onChange={(e) =>
-                  updateField("title", e.target.value)
-                }
-                className={inputClass}
-              >
-                <option value="">Title</option>
-                <option value="Mr">Mr</option>
-                <option value="Mrs">Mrs</option>
-                <option value="Ms">Ms</option>
-                <option value="Dr">Dr</option>
-                <option value="Prof">Prof</option>
-              </select>
+                <input
+                  required
+                  placeholder="First Name"
+                  value={form.first_name}
+                  onChange={(e) =>
+                    updateField("first_name", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                required
-                placeholder="First Name"
-                value={form.first_name}
-                onChange={(e) =>
-                  updateField("first_name", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Middle Name"
+                  value={form.middle_name}
+                  onChange={(e) =>
+                    updateField("middle_name", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Middle Name"
-                value={form.middle_name}
-                onChange={(e) =>
-                  updateField("middle_name", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  required
+                  placeholder="Last Name"
+                  value={form.last_name}
+                  onChange={(e) =>
+                    updateField("last_name", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                required
-                placeholder="Last Name"
-                value={form.last_name}
-                onChange={(e) =>
-                  updateField("last_name", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  type="date"
+                  value={form.date_of_birth}
+                  onChange={(e) =>
+                    updateField("date_of_birth", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                type="date"
-                value={form.date_of_birth}
-                onChange={(e) =>
-                  updateField("date_of_birth", e.target.value)
-                }
-                className={inputClass}
-              />
+                <select
+                  value={form.gender}
+                  onChange={(e) =>
+                    updateField("gender", e.target.value)
+                  }
+                  className="input"
+                >
+                  <option value="">Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
 
-              <select
-                value={form.gender}
-                onChange={(e) =>
-                  updateField("gender", e.target.value)
-                }
-                className={inputClass}
-              >
-                <option value="">Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
+                <input
+                  placeholder="ID Number"
+                  value={form.id_number}
+                  onChange={(e) =>
+                    updateField("id_number", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="ID Number"
-                value={form.id_number}
-                onChange={(e) =>
-                  updateField("id_number", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Passport Number"
+                  value={form.passport_number}
+                  onChange={(e) =>
+                    updateField("passport_number", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Passport Number"
-                value={form.passport_number}
-                onChange={(e) =>
-                  updateField("passport_number", e.target.value)
-                }
-                className={inputClass}
-              />
-
-              <input
-                placeholder="Occupation"
-                value={form.occupation}
-                onChange={(e) =>
-                  updateField("occupation", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Occupation"
+                  value={form.occupation}
+                  onChange={(e) =>
+                    updateField("occupation", e.target.value)
+                  }
+                  className="input"
+                />
+              </div>
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-semibold text-slate-900">
-              Contact Information
-            </h3>
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">
+                Contact Information
+              </h3>
+            </div>
+            <div className="card-body">
+              <div className="grid gap-4 md:grid-cols-2">
+                <input
+                  placeholder="Phone"
+                  value={form.phone}
+                  onChange={(e) =>
+                    updateField("phone", e.target.value)
+                  }
+                  className="input"
+                />
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <input
-                placeholder="Phone"
-                value={form.phone}
-                onChange={(e) =>
-                  updateField("phone", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Alternative Phone"
+                  value={form.alternative_phone}
+                  onChange={(e) =>
+                    updateField("alternative_phone", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Alternative Phone"
-                value={form.alternative_phone}
-                onChange={(e) =>
-                  updateField("alternative_phone", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={form.email}
+                  onChange={(e) =>
+                    updateField("email", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                type="email"
-                placeholder="Email"
-                value={form.email}
-                onChange={(e) =>
-                  updateField("email", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Address Line 1"
+                  value={form.address_line_1}
+                  onChange={(e) =>
+                    updateField("address_line_1", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Address Line 1"
-                value={form.address_line_1}
-                onChange={(e) =>
-                  updateField("address_line_1", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Address Line 2"
+                  value={form.address_line_2}
+                  onChange={(e) =>
+                    updateField("address_line_2", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Address Line 2"
-                value={form.address_line_2}
-                onChange={(e) =>
-                  updateField("address_line_2", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="City"
+                  value={form.city}
+                  onChange={(e) =>
+                    updateField("city", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="City"
-                value={form.city}
-                onChange={(e) =>
-                  updateField("city", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Province"
+                  value={form.province}
+                  onChange={(e) =>
+                    updateField("province", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Province"
-                value={form.province}
-                onChange={(e) =>
-                  updateField("province", e.target.value)
-                }
-                className={inputClass}
-              />
-
-              <input
-                placeholder="Postal Code"
-                value={form.postal_code}
-                onChange={(e) =>
-                  updateField("postal_code", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Postal Code"
+                  value={form.postal_code}
+                  onChange={(e) =>
+                    updateField("postal_code", e.target.value)
+                  }
+                  className="input"
+                />
+              </div>
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-semibold text-slate-900">
-              Medical Aid & Emergency Contact
-            </h3>
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">
+                Medical Aid & Emergency Contact
+              </h3>
+            </div>
+            <div className="card-body">
+              <div className="grid gap-4 md:grid-cols-2">
+                <input
+                  placeholder="Medical Aid Provider"
+                  value={form.medical_aid_provider}
+                  onChange={(e) =>
+                    updateField("medical_aid_provider", e.target.value)
+                  }
+                  className="input"
+                />
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <input
-                placeholder="Medical Aid Provider"
-                value={form.medical_aid_provider}
-                onChange={(e) =>
-                  updateField("medical_aid_provider", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Medical Aid Number"
+                  value={form.medical_aid_number}
+                  onChange={(e) =>
+                    updateField("medical_aid_number", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Medical Aid Number"
-                value={form.medical_aid_number}
-                onChange={(e) =>
-                  updateField("medical_aid_number", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Medical Aid Plan"
+                  value={form.medical_aid_plan}
+                  onChange={(e) =>
+                    updateField("medical_aid_plan", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Medical Aid Plan"
-                value={form.medical_aid_plan}
-                onChange={(e) =>
-                  updateField("medical_aid_plan", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Dependent Code"
+                  value={form.medical_aid_dependent_code}
+                  onChange={(e) =>
+                    updateField(
+                      "medical_aid_dependent_code",
+                      e.target.value
+                    )
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Dependent Code"
-                value={form.medical_aid_dependent_code}
-                onChange={(e) =>
-                  updateField(
-                    "medical_aid_dependent_code",
-                    e.target.value
-                  )
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Main Member"
+                  value={form.medical_aid_main_member}
+                  onChange={(e) =>
+                    updateField(
+                      "medical_aid_main_member",
+                      e.target.value
+                    )
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Main Member"
-                value={form.medical_aid_main_member}
-                onChange={(e) =>
-                  updateField(
-                    "medical_aid_main_member",
-                    e.target.value
-                  )
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Emergency Contact Name"
+                  value={form.emergency_contact_name}
+                  onChange={(e) =>
+                    updateField(
+                      "emergency_contact_name",
+                      e.target.value
+                    )
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Emergency Contact Name"
-                value={form.emergency_contact_name}
-                onChange={(e) =>
-                  updateField(
-                    "emergency_contact_name",
-                    e.target.value
-                  )
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Emergency Contact Relationship"
+                  value={form.emergency_contact_relationship}
+                  onChange={(e) =>
+                    updateField(
+                      "emergency_contact_relationship",
+                      e.target.value
+                    )
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Emergency Contact Relationship"
-                value={form.emergency_contact_relationship}
-                onChange={(e) =>
-                  updateField(
-                    "emergency_contact_relationship",
-                    e.target.value
-                  )
-                }
-                className={inputClass}
-              />
-
-              <input
-                placeholder="Emergency Contact Phone"
-                value={form.emergency_contact_phone}
-                onChange={(e) =>
-                  updateField(
-                    "emergency_contact_phone",
-                    e.target.value
-                  )
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Emergency Contact Phone"
+                  value={form.emergency_contact_phone}
+                  onChange={(e) =>
+                    updateField(
+                      "emergency_contact_phone",
+                      e.target.value
+                    )
+                  }
+                  className="input"
+                />
+              </div>
             </div>
           </section>
 
-          <section className="rounded-2xl bg-white p-6 shadow-sm">
-            <h3 className="mb-5 text-lg font-semibold text-slate-900">
-              Medical Information
-            </h3>
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">
+                Medical Information
+              </h3>
+            </div>
+            <div className="card-body">
+              <div className="grid gap-4 md:grid-cols-2">
+                <input
+                  placeholder="Blood Type"
+                  value={form.blood_type}
+                  onChange={(e) =>
+                    updateField("blood_type", e.target.value)
+                  }
+                  className="input"
+                />
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <input
-                placeholder="Blood Type"
-                value={form.blood_type}
-                onChange={(e) =>
-                  updateField("blood_type", e.target.value)
-                }
-                className={inputClass}
-              />
+                <input
+                  placeholder="Marital Status"
+                  value={form.marital_status}
+                  onChange={(e) =>
+                    updateField("marital_status", e.target.value)
+                  }
+                  className="input"
+                />
 
-              <input
-                placeholder="Marital Status"
-                value={form.marital_status}
-                onChange={(e) =>
-                  updateField("marital_status", e.target.value)
-                }
-                className={inputClass}
-              />
+                <textarea
+                  placeholder="Allergies"
+                  value={form.allergies}
+                  onChange={(e) =>
+                    updateField("allergies", e.target.value)
+                  }
+                  className="input min-h-24"
+                />
 
-              <textarea
-                placeholder="Allergies"
-                value={form.allergies}
-                onChange={(e) =>
-                  updateField("allergies", e.target.value)
-                }
-                className={`${inputClass} min-h-24`}
-              />
+                <textarea
+                  placeholder="Chronic Conditions"
+                  value={form.chronic_conditions}
+                  onChange={(e) =>
+                    updateField(
+                      "chronic_conditions",
+                      e.target.value
+                    )
+                  }
+                  className="input min-h-24"
+                />
 
-              <textarea
-                placeholder="Chronic Conditions"
-                value={form.chronic_conditions}
-                onChange={(e) =>
-                  updateField(
-                    "chronic_conditions",
-                    e.target.value
-                  )
-                }
-                className={`${inputClass} min-h-24`}
-              />
-
-              <textarea
-                placeholder="Notes"
-                value={form.notes}
-                onChange={(e) =>
-                  updateField("notes", e.target.value)
-                }
-                className={`${inputClass} min-h-24 md:col-span-2`}
-              />
+                <textarea
+                  placeholder="Notes"
+                  value={form.notes}
+                  onChange={(e) =>
+                    updateField("notes", e.target.value)
+                  }
+                  className="input min-h-24 md:col-span-2"
+                />
+              </div>
             </div>
           </section>
 
-          <div className="flex justify-end gap-3">
+          <div className="page-actions justify-end">
             <button
               type="button"
               onClick={() => {
                 window.location.href = "/patients";
               }}
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700"
+              className="btn btn-secondary"
             >
               Cancel
             </button>
@@ -556,7 +563,7 @@ export default function NewPatientPage() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-blue-700 px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+              className="btn btn-primary"
             >
               {loading ? "Creating..." : "Create Patient"}
             </button>

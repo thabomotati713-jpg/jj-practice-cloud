@@ -194,9 +194,28 @@ export default function EditAppointmentPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-50 p-6">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-slate-600">Loading appointment...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Edit Appointment</h1>
+            </div>
+          </div>
+
+          <div className="empty-state">Loading appointment...</div>
         </div>
       </main>
     );
@@ -204,16 +223,40 @@ export default function EditAppointmentPage() {
 
   if (!appointment) {
     return (
-      <main className="min-h-screen bg-slate-50 p-6">
-        <div className="mx-auto max-w-4xl">
-          <div className="rounded-xl bg-white p-6 shadow-sm">
-            <p className="text-red-600">{error || "Appointment not found."}</p>
-            <button
-              onClick={() => router.push("/appointments")}
-              className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
-            >
-              Back to Appointments
-            </button>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">Edit Appointment</h1>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="card-body">
+              {error && <div className="alert-error">{error}</div>}
+
+              {!error && <div className="alert-error">Appointment not found.</div>}
+
+              <button
+                onClick={() => router.push("/appointments")}
+                className="btn btn-secondary btn-sm"
+              >
+                Back to Appointments
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -221,23 +264,36 @@ export default function EditAppointmentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+
+          <div className="page-actions">
             <button
               onClick={() => router.push("/appointments")}
-              className="mb-2 text-sm text-blue-600 hover:underline"
+              className="btn btn-secondary btn-sm"
             >
               ← Back to Appointments
             </button>
+          </div>
+        </div>
+      </header>
 
-            <h1 className="text-2xl font-bold text-slate-900">
-              Edit Appointment
-            </h1>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Edit Appointment</h1>
 
             {patient && (
-              <p className="mt-1 text-sm text-slate-600">
+              <p className="page-subtitle">
                 {patient.patient_id} — {patient.first_name}{" "}
                 {patient.middle_name ? `${patient.middle_name} ` : ""}
                 {patient.last_name}
@@ -246,144 +302,152 @@ export default function EditAppointmentPage() {
           </div>
         </div>
 
-        <div className="rounded-xl bg-white p-6 shadow-sm">
-          {message && (
-            <div className="mb-5 rounded-lg bg-green-50 p-4 text-sm text-green-700">
-              {message}
-            </div>
-          )}
+        {message && <div className="alert-success">{message}</div>}
 
-          {error && (
-            <div className="mb-5 rounded-lg bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+        {error && <div className="alert-error">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Appointment Date
+        <div className="card">
+          <div className="card-header">
+            <h2 className="card-title">Appointment Details</h2>
+          </div>
+
+          <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <div className="stat-grid">
+                <div className="field">
+                  <label className="label" htmlFor="appointment-date">
+                    Appointment Date
+                  </label>
+                  <input
+                    id="appointment-date"
+                    type="date"
+                    value={form.appointment_date}
+                    onChange={(e) =>
+                      updateField("appointment_date", e.target.value)
+                    }
+                    required
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="appointment-type">
+                    Appointment Type
+                  </label>
+                  <select
+                    id="appointment-type"
+                    value={form.appointment_type}
+                    onChange={(e) =>
+                      updateField("appointment_type", e.target.value)
+                    }
+                    className="input"
+                  >
+                    <option value="">Select type</option>
+                    <option value="Consultation">Consultation</option>
+                    <option value="Follow-up">Follow-up</option>
+                    <option value="Procedure">Procedure</option>
+                    <option value="Review">Review</option>
+                    <option value="Emergency">Emergency</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="start-time">
+                    Start Time
+                  </label>
+                  <input
+                    id="start-time"
+                    type="time"
+                    value={form.start_time}
+                    onChange={(e) => updateField("start_time", e.target.value)}
+                    required
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="end-time">
+                    End Time
+                  </label>
+                  <input
+                    id="end-time"
+                    type="time"
+                    value={form.end_time}
+                    onChange={(e) => updateField("end_time", e.target.value)}
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="status">
+                    Status
+                  </label>
+                  <select
+                    id="status"
+                    value={form.status}
+                    onChange={(e) => updateField("status", e.target.value)}
+                    className="input"
+                  >
+                    <option value="scheduled">Scheduled</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="no_show">No Show</option>
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="reason">
+                    Reason
+                  </label>
+                  <input
+                    id="reason"
+                    type="text"
+                    value={form.reason}
+                    onChange={(e) => updateField("reason", e.target.value)}
+                    className="input"
+                    placeholder="Reason for appointment"
+                  />
+                </div>
+              </div>
+
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label className="label" htmlFor="notes">
+                  Notes
                 </label>
-                <input
-                  type="date"
-                  value={form.appointment_date}
-                  onChange={(e) =>
-                    updateField("appointment_date", e.target.value)
-                  }
-                  required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                <textarea
+                  id="notes"
+                  value={form.notes}
+                  onChange={(e) => updateField("notes", e.target.value)}
+                  rows={5}
+                  className="input"
+                  placeholder="Appointment notes"
                 />
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Appointment Type
-                </label>
-                <select
-                  value={form.appointment_type}
-                  onChange={(e) =>
-                    updateField("appointment_type", e.target.value)
-                  }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                >
-                  <option value="">Select type</option>
-                  <option value="Consultation">Consultation</option>
-                  <option value="Follow-up">Follow-up</option>
-                  <option value="Procedure">Procedure</option>
-                  <option value="Review">Review</option>
-                  <option value="Emergency">Emergency</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Start Time
-                </label>
-                <input
-                  type="time"
-                  value={form.start_time}
-                  onChange={(e) => updateField("start_time", e.target.value)}
-                  required
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  End Time
-                </label>
-                <input
-                  type="time"
-                  value={form.end_time}
-                  onChange={(e) => updateField("end_time", e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Status
-                </label>
-                <select
-                  value={form.status}
-                  onChange={(e) => updateField("status", e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                >
-                  <option value="scheduled">Scheduled</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                  <option value="no_show">No Show</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Reason
-                </label>
-                <input
-                  type="text"
-                  value={form.reason}
-                  onChange={(e) => updateField("reason", e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="Reason for appointment"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm font-medium text-slate-700">
-                Notes
-              </label>
-              <textarea
-                value={form.notes}
-                onChange={(e) => updateField("notes", e.target.value)}
-                rows={5}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                placeholder="Appointment notes"
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 border-t border-slate-200 pt-5">
-              <button
-                type="button"
-                onClick={() => router.push("/appointments")}
-                className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              <div
+                className="page-actions"
+                style={{ justifyContent: "flex-end", marginTop: 20 }}
               >
-                Cancel
-              </button>
+                <button
+                  type="button"
+                  onClick={() => router.push("/appointments")}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
 
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                {saving ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </form>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary"
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </main>

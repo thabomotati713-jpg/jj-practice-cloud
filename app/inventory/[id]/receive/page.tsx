@@ -194,71 +194,94 @@ export default function ReceiveStockPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 p-6">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-gray-600">Loading...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body">
+              <p className="page-subtitle">Loading...</p>
+            </div>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Receive Stock
-            </h1>
-            <p className="text-sm text-gray-600">
-              Add stock to the selected product and create a stock movement.
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <div className="flex gap-2">
+          <div className="page-actions">
             <button
               onClick={() => router.push("/dashboard")}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+              className="btn btn-secondary btn-sm"
             >
               Dashboard
             </button>
 
             <button
               onClick={() => router.push(`/inventory/${productId}`)}
-              className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+              className="btn btn-secondary btn-sm"
             >
               Back to Product
             </button>
           </div>
         </div>
+      </header>
 
-        {error && (
-          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            {error}
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Receive Stock</h1>
+            <p className="page-subtitle">
+              Add stock to the selected product and create a stock movement.
+            </p>
           </div>
-        )}
+        </div>
 
-        {message && (
-          <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
-            {message}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
+
+        {message && <div className="alert-success">{message}</div>}
 
         {product && (
-          <div className="mb-6 rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {product.name}
-            </h2>
+          <div className="stat-grid">
+            <div className="stat-card">
+              <p className="stat-label">{product.name}</p>
+              <p className="stat-value">
+                {Number(product.current_stock || 0).toFixed(2)}
+                {product.unit ? ` ${product.unit}` : ""}
+              </p>
+              <p className="page-subtitle">
+                {product.generic_name || ""}
+                {product.strength ? ` • ${product.strength}` : ""}
+                {product.dosage_form ? ` • ${product.dosage_form}` : ""}
+              </p>
+            </div>
 
-            <p className="mt-1 text-sm text-gray-600">
-              {product.generic_name || ""}
-              {product.strength ? ` • ${product.strength}` : ""}
-              {product.dosage_form ? ` • ${product.dosage_form}` : ""}
-            </p>
-
-            <div className="mt-4">
-              <p className="text-sm text-gray-500">Current Stock</p>
-              <p className="text-3xl font-bold text-gray-900">
+            <div className="stat-card">
+              <p className="stat-label">Current Stock</p>
+              <p className="stat-value">
                 {Number(product.current_stock || 0).toFixed(2)}
                 {product.unit ? ` ${product.unit}` : ""}
               </p>
@@ -266,99 +289,114 @@ export default function ReceiveStockPage() {
           </div>
         )}
 
-        <div className="rounded-xl bg-white p-6 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <Field
-              label="Batch Number"
-              value={batchNumber}
-              onChange={setBatchNumber}
-              placeholder="e.g. PND-002"
-            />
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">Receive Stock</span>
+          </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Expiry Date
+          <div className="card-body">
+            <form onSubmit={handleSubmit}>
+              <Field
+                label="Batch Number"
+                value={batchNumber}
+                onChange={setBatchNumber}
+                placeholder="e.g. PND-002"
+              />
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="field">
+                  <label
+                    className="label"
+                    htmlFor="expiry-date"
+                  >
+                    Expiry Date
+                  </label>
+
+                  <input
+                    id="expiry-date"
+                    type="date"
+                    value={expiryDate}
+                    onChange={(e) => setExpiryDate(e.target.value)}
+                    required
+                    className="input"
+                  />
+                </div>
+
+                <NumberField
+                  label="Quantity Received"
+                  value={quantity}
+                  onChange={setQuantity}
+                  step="0.01"
+                />
+
+                <NumberField
+                  label="Purchase Price"
+                  value={purchasePrice}
+                  onChange={setPurchasePrice}
+                  step="0.01"
+                />
+
+                <div className="field">
+                  <label
+                    className="label"
+                    htmlFor="received-date"
+                  >
+                    Received Date
+                  </label>
+
+                  <input
+                    id="received-date"
+                    type="date"
+                    value={receivedDate}
+                    onChange={(e) => setReceivedDate(e.target.value)}
+                    required
+                    className="input"
+                  />
+                </div>
+              </div>
+
+              <Field
+                label="Supplier"
+                value={supplier}
+                onChange={setSupplier}
+                placeholder="Optional supplier name"
+              />
+
+              <div className="field">
+                <label className="label" htmlFor="reason-notes">
+                  Reason / Notes
                 </label>
 
-                <input
-                  type="date"
-                  value={expiryDate}
-                  onChange={(e) => setExpiryDate(e.target.value)}
-                  required
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
+                <textarea
+                  id="reason-notes"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  rows={3}
+                  className="input"
+                  placeholder="Stock received"
                 />
               </div>
 
-              <NumberField
-                label="Quantity Received"
-                value={quantity}
-                onChange={setQuantity}
-                step="0.01"
-              />
+              <div className="page-actions sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/inventory/${productId}`)}
+                  disabled={saving}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
 
-              <NumberField
-                label="Purchase Price"
-                value={purchasePrice}
-                onChange={setPurchasePrice}
-                step="0.01"
-              />
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-slate-700">
-                  Received Date
-                </label>
-
-                <input
-                  type="date"
-                  value={receivedDate}
-                  onChange={(e) => setReceivedDate(e.target.value)}
-                  required
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
-                />
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary"
+                >
+                  {saving ? "Receiving Stock..." : "Receive Stock"}
+                </button>
               </div>
-            </div>
-
-            <Field
-              label="Supplier"
-              value={supplier}
-              onChange={setSupplier}
-              placeholder="Optional supplier name"
-            />
-
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Reason / Notes
-              </label>
-
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                rows={3}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
-                placeholder="Stock received"
-              />
-            </div>
-
-            <div className="flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => router.push(`/inventory/${productId}`)}
-                disabled={saving}
-                className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 disabled:opacity-50"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
-              >
-                {saving ? "Receiving Stock..." : "Receive Stock"}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </main>
@@ -377,17 +415,15 @@ function Field({
   placeholder?: string;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
-        {label}
-      </label>
+    <div className="field">
+      <label className="label">{label}</label>
 
       <input
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
+        className="input"
       />
     </div>
   );
@@ -405,10 +441,8 @@ function NumberField({
   step?: string;
 }) {
   return (
-    <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
-        {label}
-      </label>
+    <div className="field">
+      <label className="label">{label}</label>
 
       <input
         type="number"
@@ -416,7 +450,7 @@ function NumberField({
         step={step}
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
+        className="input"
       />
     </div>
   );

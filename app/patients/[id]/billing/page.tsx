@@ -40,6 +40,32 @@ type InvoiceItem = {
   service_code: string | null;
 };
 
+const statusVariant = (status: string | null) => {
+  const value = (status || "").toLowerCase().replace("_", " ");
+
+  if (["paid", "completed", "active", "in stock"].includes(value)) {
+    return "badge badge-green";
+  }
+
+  if (
+    ["pending", "submitted", "partially paid", "scheduled", "confirmed"].includes(
+      value
+    )
+  ) {
+    return "badge badge-blue";
+  }
+
+  if (["low stock", "no show"].includes(value)) {
+    return "badge badge-amber";
+  }
+
+  if (["cancelled", "rejected", "overdue", "out of stock"].includes(value)) {
+    return "badge badge-red";
+  }
+
+  return "badge badge-gray";
+};
+
 export default function PatientBillingPage() {
   const params = useParams();
   const patientId = params.id as string;
@@ -167,21 +193,21 @@ export default function PatientBillingPage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-slate-500">
-          Loading billing...
-        </p>
+      <main className="page-shell">
+        <div className="page-inner">
+          <p className="empty-state">Loading billing...</p>
+        </div>
       </main>
     );
   }
 
   if (!patient) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
-        <div className="mx-auto max-w-5xl rounded-2xl bg-white p-8 shadow-sm">
-          <p className="text-red-600">
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="alert-error">
             {error || "Patient not found."}
-          </p>
+          </div>
         </div>
       </main>
     );
@@ -196,115 +222,100 @@ export default function PatientBillingPage() {
     .join(" ");
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">
+              J&J Practice Cloud
+            </span>
+          </a>
 
-            <p className="text-sm text-slate-500">
-              Patient Billing
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = `/patients/${patientId}`;
-            }}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+          <a
+            href={`/patients/${patientId}`}
+            className="btn btn-secondary btn-sm"
           >
             Back to Patient
-          </button>
+          </a>
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-6 py-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="page-inner">
+        <div className="page-header">
           <div>
-            <p className="text-sm font-semibold text-blue-700">
-              {patient.patient_id}
-            </p>
+            <h1 className="page-title">Billing</h1>
 
-            <h2 className="mt-1 text-3xl font-bold text-slate-900">
-              Billing
-            </h2>
-
-            <p className="mt-1 text-slate-500">
-              {patientName}
+            <p className="page-subtitle">
+              {patient.patient_id} &middot; {patientName}
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = `/patients/${patientId}/billing/new`;
-            }}
-            className="w-fit rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-          >
-            New Invoice
-          </button>
+          <div className="page-actions">
+            <a
+              href={`/patients/${patientId}/billing/new`}
+              className="btn btn-primary"
+            >
+              New Invoice
+            </a>
+          </div>
         </div>
 
-        {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
 
         {invoices.length === 0 ? (
-          <section className="rounded-2xl bg-white p-10 text-center shadow-sm">
-            <p className="font-semibold text-slate-800">
-              No invoices found
+          <div className="empty-state">
+            <p>
+              <strong>No invoices found</strong>
             </p>
 
-            <p className="mt-1 text-sm text-slate-500">
-              This patient does not have any invoices yet.
-            </p>
+            <p>This patient does not have any invoices yet.</p>
 
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href = `/patients/${patientId}/billing/new`;
-              }}
-              className="mt-5 rounded-xl bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-            >
-              Create First Invoice
-            </button>
-          </section>
+            <p className="mt-5">
+              <a
+                href={`/patients/${patientId}/billing/new`}
+                className="btn btn-primary"
+              >
+                Create First Invoice
+              </a>
+            </p>
+          </div>
         ) : (
-          <div className="space-y-6">
+          <div>
             {invoices.map((invoice) => {
               const invoiceItems = getItems(invoice.id);
 
               return (
-                <section
-                  key={invoice.id}
-                  className="rounded-2xl bg-white p-6 shadow-sm"
-                >
-                  <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-start sm:justify-between">
+                <section key={invoice.id} className="card">
+                  <div className="card-header">
                     <div>
-                      <p className="text-sm font-semibold text-blue-700">
+                      <span className="card-title">
                         {invoice.invoice_number ||
                           "Invoice"}
-                      </p>
+                      </span>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="page-subtitle">
                         Invoice date:{" "}
                         {formatDate(invoice.invoice_date)}
                       </p>
 
                       {invoice.due_date && (
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="page-subtitle">
                           Due date:{" "}
                           {formatDate(invoice.due_date)}
                         </p>
                       )}
                     </div>
 
-                    <span className="w-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
+                    <span
+                      className={statusVariant(
+                        invoice.status
+                      )}
+                    >
                       {(invoice.status || "unpaid").replace(
                         "_",
                         " "
@@ -312,109 +323,110 @@ export default function PatientBillingPage() {
                     </span>
                   </div>
 
-                  {invoiceItems.length > 0 && (
-                    <div className="mt-5 overflow-x-auto">
-                      <table className="w-full min-w-[600px] text-sm">
-                        <thead>
-                          <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
-                            <th className="px-3 py-3">
-                              Description
-                            </th>
-                            <th className="px-3 py-3">
-                              Qty
-                            </th>
-                            <th className="px-3 py-3">
-                              Unit Price
-                            </th>
-                            <th className="px-3 py-3">
-                              Total
-                            </th>
-                          </tr>
-                        </thead>
-
-                        <tbody>
-                          {invoiceItems.map((item, index) => (
-                            <tr
-                              key={`${invoice.id}-${index}`}
-                              className="border-b border-slate-100"
-                            >
-                              <td className="px-3 py-3">
-                                <p className="font-medium text-slate-800">
-                                  {item.description}
-                                </p>
-
-                                {item.service_code && (
-                                  <p className="text-xs text-slate-400">
-                                    {item.service_code}
-                                  </p>
-                                )}
-                              </td>
-
-                              <td className="px-3 py-3 text-slate-600">
-                                {item.quantity ?? 0}
-                              </td>
-
-                              <td className="px-3 py-3 text-slate-600">
-                                {currency(item.unit_price)}
-                              </td>
-
-                              <td className="px-3 py-3 font-medium text-slate-800">
-                                {currency(item.line_total)}
-                              </td>
+                  <div className="card-body">
+                    {invoiceItems.length > 0 && (
+                      <div className="table-wrap">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>
+                                Description
+                              </th>
+                              <th>
+                                Qty
+                              </th>
+                              <th>
+                                Unit Price
+                              </th>
+                              <th>
+                                Total
+                              </th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+
+                          <tbody>
+                            {invoiceItems.map((item, index) => (
+                              <tr
+                                key={`${invoice.id}-${index}`}
+                              >
+                                <td>
+                                  <p>
+                                    {item.description}
+                                  </p>
+
+                                  {item.service_code && (
+                                    <p className="page-subtitle">
+                                      {item.service_code}
+                                    </p>
+                                  )}
+                                </td>
+
+                                <td>
+                                  {item.quantity ?? 0}
+                                </td>
+
+                                <td>
+                                  {currency(item.unit_price)}
+                                </td>
+
+                                <td>
+                                  {currency(item.line_total)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+
+                    <div className="stat-grid">
+                      <Summary
+                        label="Subtotal"
+                        value={currency(invoice.subtotal)}
+                      />
+
+                      <Summary
+                        label="Discount"
+                        value={currency(invoice.discount)}
+                      />
+
+                      <Summary
+                        label="Tax"
+                        value={currency(invoice.tax)}
+                      />
+
+                      <Summary
+                        label="Total"
+                        value={currency(invoice.total)}
+                        strong
+                      />
                     </div>
-                  )}
 
-                  <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Summary
-                      label="Subtotal"
-                      value={currency(invoice.subtotal)}
-                    />
+                    <div className="stat-grid">
+                      <Summary
+                        label="Amount Paid"
+                        value={currency(invoice.amount_paid)}
+                      />
 
-                    <Summary
-                      label="Discount"
-                      value={currency(invoice.discount)}
-                    />
-
-                    <Summary
-                      label="Tax"
-                      value={currency(invoice.tax)}
-                    />
-
-                    <Summary
-                      label="Total"
-                      value={currency(invoice.total)}
-                      strong
-                    />
-                  </div>
-
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                    <Summary
-                      label="Amount Paid"
-                      value={currency(invoice.amount_paid)}
-                    />
-
-                    <Summary
-                      label="Balance"
-                      value={currency(invoice.balance)}
-                      strong
-                    />
-                  </div>
-
-                  {invoice.notes && (
-                    <div className="mt-5 border-t border-slate-200 pt-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                        Notes
-                      </p>
-
-                      <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
-                        {invoice.notes}
-                      </p>
+                      <Summary
+                        label="Balance"
+                        value={currency(invoice.balance)}
+                        strong
+                      />
                     </div>
-                  )}
+
+                    {invoice.notes && (
+                      <div className="mt-4 border-t border-slate-200 pt-4">
+                        <p className="stat-label">
+                          Notes
+                        </p>
+
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
+                          {invoice.notes}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </section>
               );
             })}
@@ -435,16 +447,16 @@ function Summary({
   strong?: boolean;
 }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+    <div className="stat-card">
+      <p className="stat-label">
         {label}
       </p>
 
       <p
-        className={`mt-1 ${
+        className={`stat-value ${
           strong
-            ? "text-lg font-bold text-slate-900"
-            : "font-medium text-slate-700"
+            ? ""
+            : "text-base font-semibold"
         }`}
       >
         {value}

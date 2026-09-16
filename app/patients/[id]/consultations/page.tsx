@@ -288,46 +288,94 @@ export default function ConsultationHistoryPage() {
 
   if (loading) {
     return (
-      <main style={styles.page}>
-        <div style={styles.loading}>Loading consultations...</div>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="empty-state">Loading consultations...</div>
+        </div>
       </main>
     );
   }
 
   if (error || !patient) {
     return (
-      <main style={styles.page}>
-        <div style={styles.errorBox}>
-          <h2>Unable to load consultations</h2>
-          <p>{error || "Patient not found."}</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
 
-          <button
-            onClick={() => router.push(`/patients/${patientId}`)}
-            style={styles.primaryButton}
-          >
-            Back to Patient
-          </button>
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body text-center">
+              <h2 className="card-title">Unable to load consultations</h2>
+
+              <div className="alert-error">{error || "Patient not found."}</div>
+
+              <button
+                onClick={() => router.push(`/patients/${patientId}`)}
+                className="btn btn-primary"
+              >
+                Back to Patient
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main style={styles.page}>
-      <div style={styles.container}>
-        <header style={styles.header}>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+
+          <button
+            onClick={() => router.push(`/patients/${patientId}`)}
+            className="btn btn-secondary btn-sm"
+          >
+            ← Patient File
+          </button>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
           <div>
-            <button
-              onClick={() => router.push(`/patients/${patientId}`)}
-              style={styles.backButton}
-            >
-              ← Patient File
-            </button>
+            <h1 className="page-title">Consultation History</h1>
 
-            <h1 style={styles.title}>Consultation History</h1>
-
-            <div style={styles.patientMeta}>
-              <strong>{patientName()}</strong>
+            <div className="page-subtitle flex flex-wrap gap-x-4 gap-y-1">
+              <strong className="text-[color:var(--foreground)]">
+                {patientName()}
+              </strong>
               <span>Patient ID: {patient.patient_id}</span>
 
               {patient.date_of_birth && (
@@ -338,12 +386,12 @@ export default function ConsultationHistoryPage() {
             </div>
           </div>
 
-          <div style={styles.actions}>
+          <div className="page-actions">
             <button
               onClick={() =>
                 router.push(`/patients/${patientId}/appointments`)
               }
-              style={styles.secondaryButton}
+              className="btn btn-secondary"
             >
               Appointments
             </button>
@@ -352,75 +400,81 @@ export default function ConsultationHistoryPage() {
               onClick={() =>
                 router.push(`/patients/${patientId}/consultations/new`)
               }
-              style={styles.primaryButton}
+              className="btn btn-primary"
             >
               + New Consultation
             </button>
           </div>
-        </header>
+        </div>
 
-        <section style={styles.summaryGrid}>
-          <div style={styles.summaryCard}>
-            <span>Total Consultations</span>
-            <strong>{consultations.length}</strong>
+        <section className="stat-grid">
+          <div className="stat-card">
+            <span className="stat-label">Total Consultations</span>
+            <div className="stat-value">{consultations.length}</div>
           </div>
 
-          <div style={styles.summaryCard}>
-            <span>Showing</span>
-            <strong>{filteredConsultations.length}</strong>
+          <div className="stat-card">
+            <span className="stat-label">Showing</span>
+            <div className="stat-value">{filteredConsultations.length}</div>
           </div>
 
-          <div style={styles.summaryCard}>
-            <span>Latest Visit</span>
-            <strong>
+          <div className="stat-card">
+            <span className="stat-label">Latest Visit</span>
+            <div className="stat-value">
               {consultations.length > 0
                 ? formatDate(consultations[0].consultation_date)
                 : "—"}
-            </strong>
+            </div>
           </div>
         </section>
 
-        <section style={styles.searchPanel}>
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search diagnosis, complaint, treatment, provider..."
-            style={styles.searchInput}
-          />
+        <section className="card">
+          <div className="card-body flex flex-wrap items-center gap-3">
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search diagnosis, complaint, treatment, provider..."
+              className="input flex-1"
+            />
 
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              style={styles.clearButton}
-            >
-              Clear
-            </button>
-          )}
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="btn btn-secondary btn-sm"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </section>
 
         {filteredConsultations.length === 0 ? (
-          <section style={styles.emptyBox}>
-            <h2>No consultations found</h2>
+          <section className="card">
+            <div className="empty-state">
+              <h2 className="card-title">No consultations found</h2>
 
-            <p>
-              {search
-                ? "Try a different search term."
-                : "This patient does not have any consultations yet."}
-            </p>
+              <p className="mt-2">
+                {search
+                  ? "Try a different search term."
+                  : "This patient does not have any consultations yet."}
+              </p>
 
-            {!search && (
-              <button
-                onClick={() =>
-                  router.push(`/patients/${patientId}/consultations/new`)
-                }
-                style={styles.primaryButton}
-              >
-                + Start Consultation
-              </button>
-            )}
+              {!search && (
+                <div className="mt-4">
+                  <button
+                    onClick={() =>
+                      router.push(`/patients/${patientId}/consultations/new`)
+                    }
+                    className="btn btn-primary"
+                  >
+                    + Start Consultation
+                  </button>
+                </div>
+              )}
+            </div>
           </section>
         ) : (
-          <section style={styles.timeline}>
+          <section className="flex flex-col gap-4">
             {filteredConsultations.map((consultation, index) => {
               const expanded = expandedId === consultation.id;
               const appointment = consultation.appointment_id
@@ -428,43 +482,43 @@ export default function ConsultationHistoryPage() {
                 : null;
 
               return (
-                <article key={consultation.id} style={styles.card}>
-                  <div style={styles.timelineMarker}>
-                    <div style={styles.markerCircle}>
-                      {filteredConsultations.length - index}
-                    </div>
-                  </div>
+                <article key={consultation.id} className="card">
+                  <div className="card-header">
+                    <div className="flex items-start gap-4">
+                      <div className="hidden sm:flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+                        {filteredConsultations.length - index}
+                      </div>
 
-                  <div style={styles.cardContent}>
-                    <div style={styles.cardHeader}>
                       <div>
-                        <h2 style={styles.cardTitle}>
+                        <h2 className="card-title">
                           {consultation.diagnosis ||
                             consultation.chief_complaint ||
                             "Clinical Consultation"}
                         </h2>
 
-                        <div style={styles.dateLine}>
+                        <div className="mt-1 text-sm text-slate-600">
                           {formatDateTime(consultation.consultation_date)}
                         </div>
 
-                        <div style={styles.providerLine}>
+                        <div className="mt-0.5 text-sm text-muted">
                           Provider: {providerName(consultation.provider_id)}
                         </div>
                       </div>
-
-                      <button
-                        onClick={() =>
-                          setExpandedId(expanded ? null : consultation.id)
-                        }
-                        style={styles.smallButton}
-                      >
-                        {expanded ? "Collapse" : "View Details"}
-                      </button>
                     </div>
 
+                    <button
+                      onClick={() =>
+                        setExpandedId(expanded ? null : consultation.id)
+                      }
+                      className="btn btn-secondary btn-sm whitespace-nowrap"
+                    >
+                      {expanded ? "Collapse" : "View Details"}
+                    </button>
+                  </div>
+
+                  <div className="card-body">
                     {appointment && (
-                      <div style={styles.appointmentBox}>
+                      <div className="alert-info flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
                         <strong>Linked Appointment</strong>
 
                         <span>
@@ -482,7 +536,7 @@ export default function ConsultationHistoryPage() {
                       </div>
                     )}
 
-                    <div style={styles.quickInfoGrid}>
+                    <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                       <Info
                         label="Chief Complaint"
                         value={consultation.chief_complaint}
@@ -509,12 +563,12 @@ export default function ConsultationHistoryPage() {
                     </div>
 
                     {expanded && (
-                      <div style={styles.expandedArea}>
-                        <h3 style={styles.subheading}>
+                      <div className="mt-5 border-t border-line pt-5">
+                        <h3 className="mb-3 text-[15px] font-bold">
                           Clinical Details
                         </h3>
 
-                        <div style={styles.detailGrid}>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
                           <Info
                             label="History of Present Illness"
                             value={consultation.history_of_present_illness}
@@ -550,9 +604,11 @@ export default function ConsultationHistoryPage() {
                           />
                         </div>
 
-                        <h3 style={styles.subheading}>Vital Signs</h3>
+                        <h3 className="mb-3 mt-5 text-[15px] font-bold">
+                          Vital Signs
+                        </h3>
 
-                        <div style={styles.vitalsGrid}>
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
                           <Vital
                             label="Temperature"
                             value={
@@ -618,14 +674,14 @@ export default function ConsultationHistoryPage() {
                           />
                         </div>
 
-                        <div style={styles.actionRow}>
+                        <div className="page-actions mt-5">
                           <button
                             onClick={() =>
                               router.push(
                                 `/patients/${patientId}/prescriptions/new?consultation_id=${consultation.id}`
                               )
                             }
-                            style={styles.secondaryButton}
+                            className="btn btn-secondary btn-sm"
                           >
                             💊 Prescription
                           </button>
@@ -636,7 +692,7 @@ export default function ConsultationHistoryPage() {
                                 `/sick-notes?patient_id=${patientId}&consultation_id=${consultation.id}`
                               )
                             }
-                            style={styles.secondaryButton}
+                            className="btn btn-secondary btn-sm"
                           >
                             📄 Sick Note
                           </button>
@@ -665,13 +721,14 @@ function Info({
 }) {
   return (
     <div
-      style={{
-        ...styles.info,
-        gridColumn: wide ? "1 / -1" : undefined,
-      }}
+      className={`rounded-xl border border-line bg-slate-50 p-3 ${
+        wide ? "col-span-full" : ""
+      }`}
     >
-      <span style={styles.infoLabel}>{label}</span>
-      <div style={styles.infoValue}>{value || "—"}</div>
+      <span className="stat-label block">{label}</span>
+      <div className="mt-1 whitespace-pre-wrap text-[13px]">
+        {value || "—"}
+      </div>
     </div>
   );
 }
@@ -684,302 +741,9 @@ function Vital({
   value: string | null;
 }) {
   return (
-    <div style={styles.vital}>
-      <span>{label}</span>
+    <div className="flex flex-col gap-1 rounded-xl border border-line bg-slate-50 p-3">
+      <span className="stat-label">{label}</span>
       <strong>{value || "—"}</strong>
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    background: "#f5f7fb",
-    padding: "24px",
-    color: "#111827",
-  },
-
-  container: {
-    maxWidth: "1400px",
-    margin: "0 auto",
-  },
-
-  loading: {
-    maxWidth: "800px",
-    margin: "80px auto",
-    textAlign: "center",
-    fontSize: "18px",
-  },
-
-  errorBox: {
-    maxWidth: "600px",
-    margin: "80px auto",
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "14px",
-    padding: "30px",
-    textAlign: "center",
-  },
-
-  header: {
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "16px",
-    padding: "24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "20px",
-    marginBottom: "16px",
-  },
-
-  backButton: {
-    border: "none",
-    background: "transparent",
-    color: "#2563eb",
-    padding: 0,
-    cursor: "pointer",
-    marginBottom: "10px",
-  },
-
-  title: {
-    margin: "0 0 10px",
-    fontSize: "28px",
-  },
-
-  patientMeta: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "8px 18px",
-    color: "#6b7280",
-    fontSize: "14px",
-  },
-
-  actions: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
-
-  primaryButton: {
-    border: "none",
-    background: "#2563eb",
-    color: "white",
-    borderRadius: "8px",
-    padding: "11px 16px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-
-  secondaryButton: {
-    border: "1px solid #d1d5db",
-    background: "white",
-    color: "#111827",
-    borderRadius: "8px",
-    padding: "10px 14px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "12px",
-    marginBottom: "16px",
-  },
-
-  summaryCard: {
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "12px",
-    padding: "16px",
-  },
-
-  searchPanel: {
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "12px",
-    padding: "12px",
-    display: "flex",
-    gap: "10px",
-    marginBottom: "18px",
-  },
-
-  searchInput: {
-    flex: 1,
-    border: "1px solid #d1d5db",
-    borderRadius: "8px",
-    padding: "11px 12px",
-    fontSize: "14px",
-    outline: "none",
-  },
-
-  clearButton: {
-    border: "1px solid #d1d5db",
-    background: "white",
-    borderRadius: "8px",
-    padding: "0 14px",
-    cursor: "pointer",
-  },
-
-  emptyBox: {
-    background: "white",
-    border: "1px dashed #cbd5e1",
-    borderRadius: "14px",
-    padding: "45px 20px",
-    textAlign: "center",
-  },
-
-  timeline: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "14px",
-  },
-
-  card: {
-    display: "flex",
-    gap: "14px",
-    alignItems: "flex-start",
-  },
-
-  timelineMarker: {
-    width: "42px",
-    display: "flex",
-    justifyContent: "center",
-    paddingTop: "18px",
-  },
-
-  markerCircle: {
-    width: "32px",
-    height: "32px",
-    borderRadius: "50%",
-    background: "#2563eb",
-    color: "white",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "12px",
-    fontWeight: 700,
-  },
-
-  cardContent: {
-    flex: 1,
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "14px",
-    padding: "18px",
-  },
-
-  cardHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "15px",
-  },
-
-  cardTitle: {
-    margin: 0,
-    fontSize: "18px",
-  },
-
-  dateLine: {
-    marginTop: "5px",
-    color: "#374151",
-    fontSize: "14px",
-  },
-
-  providerLine: {
-    marginTop: "4px",
-    color: "#6b7280",
-    fontSize: "13px",
-  },
-
-  smallButton: {
-    border: "1px solid #d1d5db",
-    background: "white",
-    borderRadius: "7px",
-    padding: "7px 11px",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  },
-
-  appointmentBox: {
-    marginTop: "14px",
-    padding: "11px 13px",
-    background: "#eff6ff",
-    border: "1px solid #dbeafe",
-    borderRadius: "9px",
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "8px 15px",
-    fontSize: "13px",
-  },
-
-  quickInfoGrid: {
-    marginTop: "15px",
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "10px",
-  },
-
-  info: {
-    border: "1px solid #e5e7eb",
-    borderRadius: "9px",
-    padding: "11px",
-    background: "#fafafa",
-  },
-
-  infoLabel: {
-    display: "block",
-    color: "#6b7280",
-    fontSize: "12px",
-    fontWeight: 600,
-    marginBottom: "4px",
-  },
-
-  infoValue: {
-    fontSize: "13px",
-    whiteSpace: "pre-wrap",
-  },
-
-  expandedArea: {
-    marginTop: "18px",
-    paddingTop: "18px",
-    borderTop: "1px solid #e5e7eb",
-  },
-
-  subheading: {
-    fontSize: "15px",
-    margin: "0 0 10px",
-  },
-
-  detailGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "10px",
-    marginBottom: "18px",
-  },
-
-  vitalsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-    gap: "10px",
-    marginBottom: "18px",
-  },
-
-  vital: {
-    border: "1px solid #e5e7eb",
-    borderRadius: "9px",
-    padding: "11px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "5px",
-    background: "#fafafa",
-  },
-
-  actionRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "10px",
-  },
-};

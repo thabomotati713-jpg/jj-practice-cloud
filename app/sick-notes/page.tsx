@@ -393,428 +393,363 @@ export default function SickNotesPage() {
         }
       `}</style>
 
-      <main className="min-h-screen bg-gray-50 p-4 md:p-8 no-print">
-        <div className="mx-auto max-w-7xl">
+      <main className="page-shell">
+        <header className="app-header no-print">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
 
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="page-inner no-print">
+          <div className="page-header">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Sick Notes
-              </h1>
-
-              <p className="mt-1 text-gray-600">
+              <h1 className="page-title">Sick Notes</h1>
+              <p className="page-subtitle">
                 Create and manage patient sick notes.
               </p>
             </div>
-
-            <button
-              onClick={() => {
-                resetForm();
-                setShowForm(true);
-              }}
-              className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
-            >
-              + New Sick Note
-            </button>
+            <div className="page-actions">
+              <button
+                onClick={() => {
+                  resetForm();
+                  setShowForm(true);
+                }}
+                className="btn btn-primary"
+              >
+                + New Sick Note
+              </button>
+            </div>
           </div>
 
           {showForm && (
-            <section className="mb-8 rounded-xl bg-white p-6 shadow-sm">
-
-              <div className="mb-6 flex items-center justify-between">
+            <section className="card">
+              <div className="card-header">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Create Sick Note
-                  </h2>
-
-                  <p className="mt-1 text-sm text-gray-500">
+                  <h2 className="card-title">Create Sick Note</h2>
+                  <p className="page-subtitle">
                     Issue a sick note for an existing patient.
                   </p>
                 </div>
-
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="text-xl text-gray-400 hover:text-gray-700"
+                  className="btn btn-secondary btn-sm"
                 >
                   ✕
                 </button>
               </div>
 
-              <form onSubmit={createSickNote} className="space-y-6">
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Patient
-                  </label>
-
-                  <select
-                    value={patientId}
-                    onChange={(e) => setPatientId(e.target.value)}
-                    className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-blue-500"
-                    required
-                  >
-                    <option value="">Select patient</option>
-
-                    {patients.map((patient) => (
-                      <option key={patient.id} value={patient.id}>
-                        {patient.patient_id} — {patient.first_name}{" "}
-                        {patient.last_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {patientId && (
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                    {(() => {
-                      const patient = patients.find(
-                        (p) => p.id === patientId
-                      );
-
-                      if (!patient) return null;
-
-                      return (
-                        <div className="grid gap-4 md:grid-cols-3">
-
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              Patient ID
-                            </p>
-
-                            <p className="font-semibold text-gray-900">
-                              {patient.patient_id}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              Patient
-                            </p>
-
-                            <p className="font-semibold text-gray-900">
-                              {patient.first_name} {patient.last_name}
-                            </p>
-                          </div>
-
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              Phone
-                            </p>
-
-                            <p className="font-semibold text-gray-900">
-                              {patient.phone || "—"}
-                            </p>
-                          </div>
-
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                <div className="grid gap-5 md:grid-cols-3">
-
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Issue Date
+              <div className="card-body">
+                <form onSubmit={createSickNote}>
+                  <div className="field">
+                    <label className="label" htmlFor="sick-note-patient">
+                      Patient
                     </label>
-
-                    <input
-                      type="date"
-                      value={issueDate}
-                      onChange={(e) => setIssueDate(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3"
+                    <select
+                      id="sick-note-patient"
+                      value={patientId}
+                      onChange={(e) => setPatientId(e.target.value)}
+                      className="input"
                       required
+                    >
+                      <option value="">Select patient</option>
+
+                      {patients.map((patient) => (
+                        <option key={patient.id} value={patient.id}>
+                          {patient.patient_id} — {patient.first_name}{" "}
+                          {patient.last_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {patientId && (
+                    <div className="card">
+                      <div className="card-body">
+                        {(() => {
+                          const patient = patients.find(
+                            (p) => p.id === patientId
+                          );
+
+                          if (!patient) return null;
+
+                          return (
+                            <div className="grid gap-4 md:grid-cols-3">
+                              <div>
+                                <p className="stat-label">Patient ID</p>
+                                <p className="stat-value">
+                                  {patient.patient_id}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="stat-label">Patient</p>
+                                <p className="stat-value">
+                                  {patient.first_name} {patient.last_name}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="stat-label">Phone</p>
+                                <p className="stat-value">
+                                  {patient.phone || "—"}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="grid gap-5 md:grid-cols-3">
+                    <div className="field">
+                      <label
+                        className="label"
+                        htmlFor="sick-note-issue-date"
+                      >
+                        Issue Date
+                      </label>
+                      <input
+                        id="sick-note-issue-date"
+                        type="date"
+                        value={issueDate}
+                        onChange={(e) => setIssueDate(e.target.value)}
+                        className="input"
+                        required
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label
+                        className="label"
+                        htmlFor="sick-note-start-date"
+                      >
+                        Leave From
+                      </label>
+                      <input
+                        id="sick-note-start-date"
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="input"
+                        required
+                      />
+                    </div>
+
+                    <div className="field">
+                      <label className="label" htmlFor="sick-note-end-date">
+                        Leave To
+                      </label>
+                      <input
+                        id="sick-note-end-date"
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="input"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {startDate && endDate && (
+                    <div className="alert-info">
+                      <span>
+                        Sick leave duration:{" "}
+                        <strong>
+                          {calculateDays(startDate, endDate)} day(s)
+                        </strong>
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="field">
+                    <label className="label" htmlFor="sick-note-reason">
+                      Reason / Diagnosis
+                    </label>
+                    <input
+                      id="sick-note-reason"
+                      type="text"
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder="e.g. Not fit for work"
+                      className="input"
                     />
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Leave From
+                  <div className="field">
+                    <label className="label" htmlFor="sick-note-notes">
+                      Additional Notes
                     </label>
-
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3"
-                      required
+                    <textarea
+                      id="sick-note-notes"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      rows={4}
+                      placeholder="Additional information..."
+                      className="input"
                     />
                   </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Leave To
-                    </label>
+                  <div className="page-actions justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="btn btn-secondary"
+                    >
+                      Cancel
+                    </button>
 
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3"
-                      required
-                    />
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className="btn btn-primary"
+                    >
+                      {saving ? "Saving..." : "Create Sick Note"}
+                    </button>
                   </div>
-
-                </div>
-
-                {startDate && endDate && (
-                  <div className="rounded-lg bg-blue-50 p-4">
-                    <span className="text-sm text-gray-600">
-                      Sick leave duration:
-                    </span>
-
-                    <span className="ml-2 font-bold text-blue-700">
-                      {calculateDays(startDate, endDate)} day(s)
-                    </span>
-                  </div>
-                )}
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Reason / Diagnosis
-                  </label>
-
-                  <input
-                    type="text"
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="e.g. Not fit for work"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Additional Notes
-                  </label>
-
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={4}
-                    placeholder="Additional information..."
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="rounded-lg bg-blue-600 px-5 py-3 font-semibold text-white disabled:opacity-50"
-                  >
-                    {saving ? "Saving..." : "Create Sick Note"}
-                  </button>
-
-                </div>
-
-              </form>
+                </form>
+              </div>
             </section>
           )}
 
-          <section className="rounded-xl bg-white shadow-sm">
-
-            <div className="flex flex-col gap-4 border-b border-gray-200 p-6 md:flex-row md:items-center md:justify-between">
-
+          <section className="card">
+            <div className="card-header">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
-                  Sick Note History
-                </h2>
-
-                <p className="text-sm text-gray-500">
+                <h2 className="card-title">Sick Note History</h2>
+                <p className="page-subtitle">
                   {sickNotes.length} sick note(s)
                 </p>
               </div>
-
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search patient or note..."
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 md:w-80"
+                className="input md:w-80"
               />
-
             </div>
 
             {loading ? (
-              <div className="p-8 text-center text-gray-500">
-                Loading sick notes...
-              </div>
+              <div className="empty-state">Loading sick notes...</div>
             ) : filteredNotes.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
+              <div className="empty-state">
                 {search
                   ? "No sick notes match your search."
                   : "No sick notes have been created yet."}
               </div>
             ) : (
-              <div className="overflow-x-auto">
-
-                <table className="w-full min-w-[1100px]">
-
-                  <thead className="bg-gray-50">
+              <div className="table-wrap">
+                <table className="table min-w-[1100px]">
+                  <thead>
                     <tr>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Note Number
-                      </th>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Patient
-                      </th>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Issue Date
-                      </th>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Leave Period
-                      </th>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Days
-                      </th>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Reason
-                      </th>
-
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                        Actions
-                      </th>
-
+                      <th>Note Number</th>
+                      <th>Patient</th>
+                      <th>Issue Date</th>
+                      <th>Leave Period</th>
+                      <th>Days</th>
+                      <th>Reason</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-gray-200">
-
+                  <tbody>
                     {filteredNotes.map((note) => (
-                      <tr
-                        key={note.id}
-                        className="hover:bg-gray-50"
-                      >
-
-                        <td className="px-6 py-4 font-semibold text-gray-900">
+                      <tr key={note.id}>
+                        <td className="font-semibold">
                           {note.note_number || "—"}
                         </td>
 
-                        <td className="px-6 py-4">
-
-                          <div className="font-medium text-gray-900">
+                        <td>
+                          <div className="font-medium">
                             {note.patient
                               ? `${note.patient.first_name} ${note.patient.last_name}`
                               : "Unknown patient"}
                           </div>
-
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-muted">
                             {note.patient?.patient_id || note.patient_id}
                           </div>
-
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-700">
-                          {formatDate(note.issue_date)}
-                        </td>
+                        <td>{formatDate(note.issue_date)}</td>
 
-                        <td className="px-6 py-4 text-sm text-gray-700">
+                        <td>
                           {formatDate(note.start_date)} →{" "}
                           {formatDate(note.end_date)}
                         </td>
 
-                        <td className="px-6 py-4 font-semibold text-gray-900">
+                        <td className="font-semibold">
                           {calculateDays(
                             note.start_date,
                             note.end_date
                           )}
                         </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-700">
-                          {note.reason || "—"}
-                        </td>
+                        <td>{note.reason || "—"}</td>
 
-                        <td className="px-6 py-4">
-
+                        <td>
                           <div className="flex flex-wrap gap-2">
-
                             <button
                               onClick={() => setSelectedNote(note)}
-                              className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
+                              className="btn btn-secondary btn-sm"
                             >
                               View
                             </button>
 
                             <button
                               onClick={() => printSickNote(note)}
-                              className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm font-medium text-green-700 hover:bg-green-100"
+                              className="btn btn-primary btn-sm"
                             >
                               Print
                             </button>
 
                             <button
                               onClick={() => deleteSickNote(note.id)}
-                              className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100"
+                              className="btn btn-danger btn-sm"
                             >
                               Delete
                             </button>
-
                           </div>
-
                         </td>
-
                       </tr>
                     ))}
-
                   </tbody>
-
                 </table>
-
               </div>
             )}
-
           </section>
-
         </div>
       </main>
 
       {selectedNote && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 p-4">
-
           <div className="mx-auto max-w-3xl">
-
-            <div className="mb-4 flex justify-end gap-2 no-print">
-
+            <div className="page-actions justify-end py-4 no-print">
               <button
                 onClick={() => printSickNote(selectedNote)}
-                className="rounded-lg bg-green-600 px-5 py-3 font-semibold text-white"
+                className="btn btn-primary"
               >
                 Print
               </button>
 
               <button
                 onClick={() => setSelectedNote(null)}
-                className="rounded-lg bg-white px-5 py-3 font-semibold text-gray-700"
+                className="btn btn-secondary"
               >
                 Close
               </button>
-
             </div>
 
             <article className="sick-note-print rounded-xl bg-white p-8 shadow-xl md:p-12">
-
               <div className="border-b-2 border-gray-900 pb-6">
-
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-
                   <div>
                     {practiceSettings.logo_url && (
                       <img
@@ -869,7 +804,6 @@ export default function SickNotesPage() {
                   </div>
 
                   <div className="text-left sm:text-right">
-
                     <h2 className="text-3xl font-bold tracking-wide text-gray-900">
                       SICK NOTE
                     </h2>
@@ -905,26 +839,18 @@ export default function SickNotesPage() {
                         </p>
                       </div>
                     )}
-
                   </div>
-
                 </div>
-
               </div>
 
               <div className="mt-8">
-
                 <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
                   Patient Information
                 </h3>
 
                 <div className="grid gap-4 rounded-lg border border-gray-200 p-5 sm:grid-cols-2">
-
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Patient Name
-                    </p>
-
+                    <p className="text-xs text-gray-500">Patient Name</p>
                     <p className="font-semibold text-gray-900">
                       {selectedNote.patient
                         ? `${selectedNote.patient.first_name} ${selectedNote.patient.last_name}`
@@ -933,10 +859,7 @@ export default function SickNotesPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Patient ID
-                    </p>
-
+                    <p className="text-xs text-gray-500">Patient ID</p>
                     <p className="font-semibold text-gray-900">
                       {selectedNote.patient?.patient_id ||
                         selectedNote.patient_id}
@@ -944,10 +867,7 @@ export default function SickNotesPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Phone
-                    </p>
-
+                    <p className="text-xs text-gray-500">Phone</p>
                     <p className="font-semibold text-gray-900">
                       {selectedNote.patient?.phone || "—"}
                     </p>
@@ -955,53 +875,37 @@ export default function SickNotesPage() {
 
                   {selectedNote.patient?.id_number && (
                     <div>
-                      <p className="text-xs text-gray-500">
-                        ID Number
-                      </p>
-
+                      <p className="text-xs text-gray-500">ID Number</p>
                       <p className="font-semibold text-gray-900">
                         {selectedNote.patient.id_number}
                       </p>
                     </div>
                   )}
-
                 </div>
-
               </div>
 
               <div className="mt-8">
-
                 <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
                   Medical Leave
                 </h3>
 
                 <div className="grid gap-5 rounded-lg border border-gray-200 p-5 sm:grid-cols-3">
-
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Leave From
-                    </p>
-
+                    <p className="text-xs text-gray-500">Leave From</p>
                     <p className="font-semibold text-gray-900">
                       {formatDate(selectedNote.start_date)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Leave To
-                    </p>
-
+                    <p className="text-xs text-gray-500">Leave To</p>
                     <p className="font-semibold text-gray-900">
                       {formatDate(selectedNote.end_date)}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs text-gray-500">
-                      Total Days
-                    </p>
-
+                    <p className="text-xs text-gray-500">Total Days</p>
                     <p className="font-bold text-gray-900">
                       {calculateDays(
                         selectedNote.start_date,
@@ -1010,13 +914,10 @@ export default function SickNotesPage() {
                       day(s)
                     </p>
                   </div>
-
                 </div>
-
               </div>
 
               <div className="mt-8">
-
                 <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
                   Reason / Diagnosis
                 </h3>
@@ -1024,12 +925,10 @@ export default function SickNotesPage() {
                 <div className="min-h-[90px] rounded-lg border border-gray-200 p-5 text-gray-800">
                   {selectedNote.reason || "Not specified"}
                 </div>
-
               </div>
 
               {selectedNote.notes && (
                 <div className="mt-8">
-
                   <h3 className="mb-3 text-sm font-bold uppercase tracking-wide text-gray-500">
                     Additional Notes
                   </h3>
@@ -1037,12 +936,10 @@ export default function SickNotesPage() {
                   <div className="min-h-[80px] rounded-lg border border-gray-200 p-5 whitespace-pre-wrap text-gray-800">
                     {selectedNote.notes}
                   </div>
-
                 </div>
               )}
 
               <div className="mt-16 grid gap-12 sm:grid-cols-2">
-
                 <div>
                   <div className="border-b border-gray-900 pb-2" />
                   <p className="mt-2 text-sm font-medium text-gray-700">
@@ -1056,17 +953,13 @@ export default function SickNotesPage() {
                     Date
                   </p>
                 </div>
-
               </div>
 
               <div className="mt-12 border-t pt-4 text-center text-xs text-gray-500">
                 This document was generated by J&J PRACTICE CLOUD.
               </div>
-
             </article>
-
           </div>
-
         </div>
       )}
     </>

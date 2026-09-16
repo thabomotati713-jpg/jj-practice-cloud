@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
@@ -110,139 +110,139 @@ export default function EditStaff({
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
-        <div className="mx-auto max-w-3xl rounded-xl bg-white p-6 shadow">
-          Loading staff member...
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card mx-auto max-w-3xl">
+            <div className="empty-state">Loading staff member...</div>
+          </div>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              Edit Staff
-            </h1>
-            <p className="text-sm text-slate-500">
-              Update staff member details
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/staff";
-            }}
-            className="rounded-lg border bg-white px-4 py-2 text-sm font-medium text-slate-700"
-          >
-            Back to Staff
-          </button>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/staff";
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              Back to Staff
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Edit Staff</h1>
+            <p className="page-subtitle">Update staff member details</p>
+          </div>
         </div>
 
         <form
           onSubmit={handleSave}
-          className="space-y-6 rounded-xl bg-white p-6 shadow"
+          className="card mx-auto max-w-3xl"
         >
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+          <div className="card-body">
+            {error && <div className="alert-error">{error}</div>}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                First Name *
+            <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+              <label className="field">
+                <span className="label">First Name *</span>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  className="input"
+                />
               </label>
-              <input
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                required
-                className="w-full rounded-lg border px-3 py-2"
-              />
-            </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Last Name *
+              <label className="field">
+                <span className="label">Last Name *</span>
+                <input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  className="input"
+                />
               </label>
-              <input
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                required
-                className="w-full rounded-lg border px-3 py-2"
-              />
-            </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Display Name
+              <label className="field">
+                <span className="label">Display Name</span>
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="input"
+                />
               </label>
-              <input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2"
-              />
-            </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Role
+              <label className="field">
+                <span className="label">Role</span>
+                <input
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  className="input"
+                  placeholder="Doctor, Reception, Nurse..."
+                />
               </label>
-              <input
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="Doctor, Reception, Nurse..."
-              />
-            </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Email
+              <label className="field">
+                <span className="label">Email</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input"
+                />
               </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2"
-              />
+
+              <label className="field">
+                <span className="label">Phone</span>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="input"
+                />
+              </label>
             </div>
 
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">
-                Phone
+            <div className="alert-info">
+              <label className="flex cursor-pointer items-center gap-2.5">
+                <input
+                  type="checkbox"
+                  checked={active}
+                  onChange={(e) => setActive(e.target.checked)}
+                />
+                <span className="font-semibold">Active staff member</span>
               </label>
-              <input
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-lg border px-3 py-2"
-              />
+            </div>
+
+            <div className="page-actions">
+              <button
+                type="submit"
+                disabled={saving}
+                className="btn btn-primary w-full"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           </div>
-
-          <label className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-              className="h-4 w-4"
-            />
-            <span className="text-sm font-medium text-slate-700">
-              Active staff member
-            </span>
-          </label>
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full rounded-lg bg-slate-900 px-4 py-3 font-medium text-white disabled:opacity-50"
-          >
-            {saving ? "Saving..." : "Save Changes"}
-          </button>
         </form>
       </div>
     </main>

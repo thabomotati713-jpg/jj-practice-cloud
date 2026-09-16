@@ -391,207 +391,221 @@ export default function PatientDocumentsPage({
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100">
-        <p className="text-slate-500">Loading patient documents...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="empty-state">Loading patient documents...</div>
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/patients/${patientId}`;
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              Patient Profile
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/patients/${patientId}/edit`;
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              Edit Patient
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <p className="page-subtitle">Patient File</p>
+
+            <h1 className="page-title">Patient Documents</h1>
+
+            <p className="page-subtitle">{patientName}</p>
+          </div>
+        </div>
+
+        {error && <div className="alert-error">{error}</div>}
+
+        {message && <div className="alert-success">{message}</div>}
+
+        <div className="stat-grid">
+          <div className="stat-card">
+            <p className="stat-label">Total Documents</p>
+            <p className="stat-value">{documents.length}</p>
+          </div>
+
+          <div className="stat-card">
+            <p className="stat-label">Showing</p>
+            <p className="stat-value">{filteredDocuments.length}</p>
+          </div>
+
+          <div className="stat-card">
+            <p className="stat-label">Document Types</p>
+            <p className="stat-value">{documentTypesInUse.length}</p>
+          </div>
+
+          <div className="stat-card">
+            <p className="stat-label">Patient</p>
+            <p className="stat-value">{patientName || "—"}</p>
+          </div>
+        </div>
+
+        <section className="card">
+          <div className="card-header">
             <div>
-              <p className="text-sm font-medium text-slate-500">
-                Patient File
-              </p>
+              <h2 className="card-title">Upload Patient Document</h2>
 
-              <h1 className="mt-1 text-2xl font-bold text-slate-900">
-                Patient Documents
-              </h1>
-
-              <p className="mt-1 text-sm text-slate-600">
-                {patientName}
+              <p className="page-subtitle">
+                Upload medical records, referrals, results, IDs and other
+                documents. Maximum file size: 10 MB.
               </p>
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `/patients/${patientId}`;
-                }}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Patient Profile
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `/patients/${patientId}/edit`;
-                }}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                Edit Patient
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {error && (
-          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-            {message}
-          </div>
-        )}
-
-        <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Total Documents</p>
-            <p className="mt-1 text-3xl font-bold text-slate-900">
-              {documents.length}
-            </p>
           </div>
 
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Showing</p>
-            <p className="mt-1 text-3xl font-bold text-slate-900">
-              {filteredDocuments.length}
-            </p>
-          </div>
+          <div className="card-body">
+            <form onSubmit={handleUpload}>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="field">
+                  <label className="label" htmlFor="document-name">
+                    Document Name
+                  </label>
 
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-sm text-slate-500">Document Types</p>
-            <p className="mt-1 text-3xl font-bold text-slate-900">
-              {documentTypesInUse.length}
-            </p>
-          </div>
-        </div>
+                  <input
+                    id="document-name"
+                    value={documentName}
+                    onChange={(e) => setDocumentName(e.target.value)}
+                    placeholder="e.g. Blood Test Results"
+                    className="input"
+                  />
+                </div>
 
-        <section className="mb-6 rounded-2xl bg-white p-5 shadow-sm">
-          <div className="mb-4">
-            <h2 className="text-lg font-bold text-slate-900">
-              Upload Patient Document
-            </h2>
+                <div className="field">
+                  <label className="label" htmlFor="document-type">
+                    Document Type
+                  </label>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Upload medical records, referrals, results, IDs and other
-              documents. Maximum file size: 10 MB.
-            </p>
-          </div>
+                  <select
+                    id="document-type"
+                    value={documentType}
+                    onChange={(e) => setDocumentType(e.target.value)}
+                    className="input"
+                  >
+                    {DOCUMENT_TYPES.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <form onSubmit={handleUpload}>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Document Name
-                </label>
+                <div className="field">
+                  <label className="label" htmlFor="document-file">
+                    File
+                  </label>
 
-                <input
-                  value={documentName}
-                  onChange={(e) => setDocumentName(e.target.value)}
-                  placeholder="e.g. Blood Test Results"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                />
+                  <input
+                    id="document-file"
+                    type="file"
+                    onChange={(e) =>
+                      setFile(e.target.files?.[0] || null)
+                    }
+                    className="input"
+                  />
+
+                  {file && (
+                    <p className="page-subtitle">
+                      Selected: {file.name} (
+                      {(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  )}
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="document-description">
+                    Description
+                  </label>
+
+                  <input
+                    id="document-description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Optional description"
+                    className="input"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Document Type
-                </label>
-
-                <select
-                  value={documentType}
-                  onChange={(e) => setDocumentType(e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              <div className="page-actions">
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className="btn btn-primary"
                 >
-                  {DOCUMENT_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
+                  {uploading ? "Uploading..." : "Upload Document"}
+                </button>
               </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  File
-                </label>
-
-                <input
-                  id="document-file"
-                  type="file"
-                  onChange={(e) =>
-                    setFile(e.target.files?.[0] || null)
-                  }
-                  className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
-                />
-
-                {file && (
-                  <p className="mt-1 text-xs text-slate-500">
-                    Selected: {file.name} (
-                    {(file.size / 1024 / 1024).toFixed(2)} MB)
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Description
-                </label>
-
-                <input
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Optional description"
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500"
-                />
-              </div>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <button
-                type="submit"
-                disabled={uploading}
-                className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {uploading ? "Uploading..." : "Upload Document"}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </section>
 
-        <section className="rounded-2xl bg-white p-5 shadow-sm">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <section className="card">
+          <div className="card-header">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Document History
-              </h2>
+              <h2 className="card-title">Document History</h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="page-subtitle">
                 Search and manage documents stored in this patient file.
               </p>
             </div>
 
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <div className="page-actions">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search documents..."
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-slate-500 sm:w-64"
+                className="input sm:w-64"
               />
 
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="input sm:w-auto"
               >
                 <option value="All">All Types</option>
 
@@ -605,95 +619,90 @@ export default function PatientDocumentsPage({
           </div>
 
           {documents.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
-              <p className="text-base font-medium text-slate-700">
-                No documents yet
-              </p>
+            <div className="empty-state">
+              <p>No documents yet</p>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p>
                 Upload the first document for this patient above.
               </p>
             </div>
           ) : filteredDocuments.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
-              <p className="text-base font-medium text-slate-700">
-                No matching documents
-              </p>
+            <div className="empty-state">
+              <p>No matching documents</p>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setSearch("");
-                  setTypeFilter("All");
-                }}
-                className="mt-3 text-sm font-medium text-blue-600 hover:underline"
-              >
-                Clear filters
-              </button>
+              <div className="page-actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setTypeFilter("All");
+                  }}
+                  className="btn btn-secondary btn-sm"
+                >
+                  Clear filters
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[800px] text-left text-sm">
+            <div className="table-wrap">
+              <table className="table">
                 <thead>
-                  <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                    <th className="px-3 py-3">Document</th>
-                    <th className="px-3 py-3">Type</th>
-                    <th className="px-3 py-3">Description</th>
-                    <th className="px-3 py-3">Date</th>
-                    <th className="px-3 py-3">Actions</th>
+                  <tr>
+                    <th>Document</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {filteredDocuments.map((document) => (
-                    <tr
-                      key={document.id}
-                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                    >
-                      <td className="px-3 py-4">
+                    <tr key={document.id}>
+                      <td>
                         <div className="flex items-center gap-3">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-bold text-slate-600">
                             {getDocumentIcon(document.storage_path)}
                           </div>
 
                           <div className="min-w-0">
-                            <p className="max-w-[280px] truncate font-medium text-slate-900">
+                            <p className="max-w-[280px] truncate font-medium">
                               {document.document_name}
                             </p>
 
-                            <p className="text-xs text-slate-500">
+                            <p className="text-xs text-muted">
                               {getFileExtension(document.storage_path)} file
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-3 py-4">
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                      <td>
+                        <span className="badge badge-gray">
                           {document.document_type || "Other"}
                         </span>
                       </td>
 
-                      <td className="max-w-[260px] px-3 py-4 text-slate-600">
+                      <td className="max-w-[260px] text-muted">
                         <span className="line-clamp-2">
                           {document.description || "—"}
                         </span>
                       </td>
 
-                      <td className="whitespace-nowrap px-3 py-4 text-slate-600">
+                      <td className="whitespace-nowrap text-muted">
                         {new Date(
                           document.created_at
                         ).toLocaleDateString()}
                       </td>
 
-                      <td className="px-3 py-4">
+                      <td>
                         <div className="flex flex-wrap gap-2">
                           <button
                             type="button"
                             onClick={() =>
                               openDocument(document.storage_path)
                             }
-                            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                            className="btn btn-secondary btn-sm"
                           >
                             View
                           </button>
@@ -706,7 +715,7 @@ export default function PatientDocumentsPage({
                                 document.document_name
                               )
                             }
-                            className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+                            className="btn btn-secondary btn-sm"
                           >
                             Download
                           </button>
@@ -720,7 +729,7 @@ export default function PatientDocumentsPage({
                                 document.storage_path
                               )
                             }
-                            className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                            className="btn btn-danger btn-sm"
                           >
                             {deletingId === document.id
                               ? "Deleting..."

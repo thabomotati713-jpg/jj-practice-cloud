@@ -242,6 +242,49 @@ export default function InvoiceDetailPage() {
     });
   };
 
+  const statusBadgeClass = (status: string | null) => {
+    const normalized = (status || "unpaid")
+      .replace("_", " ")
+      .toLowerCase();
+
+    if (
+      ["paid", "completed", "active", "in stock"].includes(
+        normalized
+      )
+    ) {
+      return "badge badge-green";
+    }
+
+    if (
+      [
+        "pending",
+        "submitted",
+        "partially paid",
+        "scheduled",
+        "confirmed",
+      ].includes(normalized)
+    ) {
+      return "badge badge-blue";
+    }
+
+    if (["low stock", "no show"].includes(normalized)) {
+      return "badge badge-amber";
+    }
+
+    if (
+      [
+        "cancelled",
+        "rejected",
+        "overdue",
+        "out of stock",
+      ].includes(normalized)
+    ) {
+      return "badge badge-red";
+    }
+
+    return "badge badge-gray";
+  };
+
   const patientName = patient
     ? [
         patient.title,
@@ -379,9 +422,13 @@ export default function InvoiceDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
-        <div className="mx-auto max-w-5xl rounded-xl bg-white p-8 text-center">
-          Loading invoice...
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card">
+            <div className="empty-state">
+              Loading invoice...
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -389,14 +436,23 @@ export default function InvoiceDetailPage() {
 
   if (!invoice) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
-        <div className="mx-auto max-w-5xl rounded-xl bg-white p-8">
-          <p className="text-red-600">
-            {error || "Invoice not found."}
-          </p>
+      <main className="page-shell">
+        <div className="page-inner">
+          {error && (
+            <div className="alert-error">
+              {error}
+            </div>
+          )}
+
+          {!error && (
+            <div className="alert-error">
+              Invoice not found.
+            </div>
+          )}
+
           <Link
             href="/invoices"
-            className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-white"
+            className="btn btn-secondary btn-sm"
           >
             Back to Invoices
           </Link>
@@ -446,29 +502,31 @@ export default function InvoiceDetailPage() {
 
   return (
     <>
-      <main className="screen-only min-h-screen bg-slate-100">
-        <header className="border-b bg-white">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">
-                J&J PRACTICE CLOUD
-              </h1>
-              <p className="text-sm text-slate-500">
-                Invoice Details
-              </p>
-            </div>
+      <main className="page-shell screen-only">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">
+                J&J Practice Cloud
+              </span>
+            </a>
 
-            <div className="flex gap-2">
+            <div className="page-actions">
               <Link
                 href="/invoices"
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                className="btn btn-secondary btn-sm"
               >
                 ← Invoices
               </Link>
 
               <Link
                 href={`/patients/${invoice.patient_id}`}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                className="btn btn-secondary btn-sm"
               >
                 Patient
               </Link>
@@ -476,7 +534,7 @@ export default function InvoiceDetailPage() {
               <button
                 type="button"
                 onClick={printInvoice}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+                className="btn btn-primary btn-sm"
               >
                 🖨 Print Invoice
               </button>
@@ -484,154 +542,177 @@ export default function InvoiceDetailPage() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-6xl space-y-6 p-6">
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">
+                Invoice{" "}
+                {invoice.invoice_number || ""}
+              </h1>
+              <p className="page-subtitle">
+                Invoice details and payment history
+              </p>
             </div>
+            <div className="page-actions" />
+          </div>
+
+          {error && (
+            <div className="alert-error">{error}</div>
           )}
 
           {success && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+            <div className="alert-success">
               {success}
             </div>
           )}
 
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <div className="grid gap-6 md:grid-cols-3">
-              <div>
-                <p className="text-sm text-slate-500">
-                  Invoice Number
-                </p>
-                <p className="text-xl font-bold text-slate-900">
-                  {invoice.invoice_number || "-"}
-                </p>
-              </div>
+          <section className="card">
+            <div className="card-body">
+              <div className="grid gap-6 md:grid-cols-3">
+                <div>
+                  <p className="stat-label">
+                    Invoice Number
+                  </p>
+                  <p className="stat-value">
+                    {invoice.invoice_number || "-"}
+                  </p>
+                </div>
 
-              <div>
-                <p className="text-sm text-slate-500">
-                  Invoice Date
-                </p>
-                <p className="font-semibold">
-                  {formatDate(invoice.invoice_date)}
-                </p>
-              </div>
+                <div>
+                  <p className="stat-label">
+                    Invoice Date
+                  </p>
+                  <p className="stat-value">
+                    {formatDate(invoice.invoice_date)}
+                  </p>
+                </div>
 
-              <div>
-                <p className="text-sm text-slate-500">
-                  Status
-                </p>
-                <span className="mt-1 inline-block rounded-full bg-slate-100 px-3 py-1 text-sm font-medium">
-                  {invoice.status || "unpaid"}
-                </span>
+                <div>
+                  <p className="stat-label">Status</p>
+                  <p className="mt-2">
+                    <span
+                      className={statusBadgeClass(
+                        invoice.status
+                      )}
+                    >
+                      {invoice.status || "unpaid"}
+                    </span>
+                  </p>
+                </div>
               </div>
             </div>
           </section>
 
           {patient && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Patient Information
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Patient Information
+                </h2>
+              </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <Info
-                  label="Patient"
-                  value={patientName}
-                />
-                <Info
-                  label="Patient ID"
-                  value={patient.patient_id}
-                />
-                <Info
-                  label="Date of Birth"
-                  value={formatDate(patient.date_of_birth)}
-                />
-                <Info
-                  label="ID Number"
-                  value={
-                    patient.id_number ||
-                    patient.passport_number ||
-                    "-"
-                  }
-                />
-                <Info
-                  label="Phone"
-                  value={patient.phone || "-"}
-                />
-                <Info
-                  label="Email"
-                  value={patient.email || "-"}
-                />
+              <div className="card-body">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Info
+                    label="Patient"
+                    value={patientName}
+                  />
+                  <Info
+                    label="Patient ID"
+                    value={patient.patient_id}
+                  />
+                  <Info
+                    label="Date of Birth"
+                    value={formatDate(patient.date_of_birth)}
+                  />
+                  <Info
+                    label="ID Number"
+                    value={
+                      patient.id_number ||
+                      patient.passport_number ||
+                      "-"
+                    }
+                  />
+                  <Info
+                    label="Phone"
+                    value={patient.phone || "-"}
+                  />
+                  <Info
+                    label="Email"
+                    value={patient.email || "-"}
+                  />
+                </div>
               </div>
             </section>
           )}
 
           {patient && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Medical Aid Information
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Medical Aid Information
+                </h2>
+              </div>
 
-              <div className="grid gap-4 md:grid-cols-4">
-                <Info
-                  label="Medical Aid"
-                  value={
-                    patient.medical_aid_provider || "-"
-                  }
-                />
-                <Info
-                  label="Membership Number"
-                  value={
-                    patient.medical_aid_number || "-"
-                  }
-                />
-                <Info
-                  label="Plan"
-                  value={
-                    patient.medical_aid_plan || "-"
-                  }
-                />
-                <Info
-                  label="Dependent Code"
-                  value={
-                    patient.medical_aid_dependent_code ||
-                    "-"
-                  }
-                />
-                <Info
-                  label="Main Member"
-                  value={
-                    patient.medical_aid_main_member ||
-                    "-"
-                  }
-                />
+              <div className="card-body">
+                <div className="grid gap-4 md:grid-cols-4">
+                  <Info
+                    label="Medical Aid"
+                    value={
+                      patient.medical_aid_provider || "-"
+                    }
+                  />
+                  <Info
+                    label="Membership Number"
+                    value={
+                      patient.medical_aid_number || "-"
+                    }
+                  />
+                  <Info
+                    label="Plan"
+                    value={
+                      patient.medical_aid_plan || "-"
+                    }
+                  />
+                  <Info
+                    label="Dependent Code"
+                    value={
+                      patient.medical_aid_dependent_code ||
+                      "-"
+                    }
+                  />
+                  <Info
+                    label="Main Member"
+                    value={
+                      patient.medical_aid_main_member ||
+                      "-"
+                    }
+                  />
+                </div>
               </div>
             </section>
           )}
 
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold">
-              Invoice Items
-            </h2>
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">
+                Invoice Items
+              </h2>
+            </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="table-wrap border-0 shadow-none">
+              <table className="table">
                 <thead>
-                  <tr className="border-b text-left">
-                    <th className="px-3 py-3">
-                      Description
-                    </th>
-                    <th className="px-3 py-3">
-                      Service Code
-                    </th>
-                    <th className="px-3 py-3 text-right">
+                  <tr>
+                    <th>Description</th>
+                    <th>Service Code</th>
+                    <th className="text-right">
                       Qty
                     </th>
-                    <th className="px-3 py-3 text-right">
+                    <th className="text-right">
                       Unit Price
                     </th>
-                    <th className="px-3 py-3 text-right">
+                    <th className="text-right">
                       Total
                     </th>
                   </tr>
@@ -640,32 +721,28 @@ export default function InvoiceDetailPage() {
                 <tbody>
                   {items.length === 0 ? (
                     <tr>
-                      <td
-                        colSpan={5}
-                        className="px-3 py-8 text-center text-slate-500"
-                      >
-                        No invoice items found.
+                      <td colSpan={5}>
+                        <div className="empty-state">
+                          No invoice items found.
+                        </div>
                       </td>
                     </tr>
                   ) : (
                     items.map((item) => (
-                      <tr
-                        key={item.id}
-                        className="border-b"
-                      >
-                        <td className="px-3 py-3">
+                      <tr key={item.id}>
+                        <td>
                           {item.description || "-"}
                         </td>
-                        <td className="px-3 py-3">
+                        <td>
                           {item.service_code || "-"}
                         </td>
-                        <td className="px-3 py-3 text-right">
+                        <td className="text-right">
                           {item.quantity ?? 0}
                         </td>
-                        <td className="px-3 py-3 text-right">
+                        <td className="text-right">
                           {currency(item.unit_price)}
                         </td>
-                        <td className="px-3 py-3 text-right font-medium">
+                        <td className="text-right font-medium">
                           {currency(item.line_total)}
                         </td>
                       </tr>
@@ -676,160 +753,159 @@ export default function InvoiceDetailPage() {
             </div>
           </section>
 
-          <section className="grid gap-6 md:grid-cols-2">
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Invoice Summary
-              </h2>
+          <section className="grid gap-5 md:grid-cols-2">
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Invoice Summary
+                </h2>
+              </div>
 
-              <div className="space-y-3 text-sm">
-                <SummaryRow
-                  label="Subtotal"
-                  value={currency(invoice.subtotal)}
-                />
-                <SummaryRow
-                  label="Discount"
-                  value={currency(invoice.discount)}
-                />
-                <SummaryRow
-                  label="Tax"
-                  value={currency(invoice.tax)}
-                />
-                <SummaryRow
-                  label="Total"
-                  value={currency(invoice.total)}
-                  strong
-                />
-                <SummaryRow
-                  label="Payments Received"
-                  value={currency(paymentTotal)}
-                />
-                <SummaryRow
-                  label="Outstanding"
-                  value={currency(calculatedBalance)}
-                  strong
-                />
+              <div className="card-body">
+                <div className="space-y-3 text-sm">
+                  <SummaryRow
+                    label="Subtotal"
+                    value={currency(invoice.subtotal)}
+                  />
+                  <SummaryRow
+                    label="Discount"
+                    value={currency(invoice.discount)}
+                  />
+                  <SummaryRow
+                    label="Tax"
+                    value={currency(invoice.tax)}
+                  />
+                  <SummaryRow
+                    label="Total"
+                    value={currency(invoice.total)}
+                    strong
+                  />
+                  <SummaryRow
+                    label="Payments Received"
+                    value={currency(paymentTotal)}
+                  />
+                  <SummaryRow
+                    label="Outstanding"
+                    value={currency(calculatedBalance)}
+                    strong
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Record Payment
-              </h2>
+            <div className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Record Payment
+                </h2>
+              </div>
 
-              <div className="space-y-4">
-                <Field
-                  label="Amount"
-                  value={paymentAmount}
-                  onChange={setPaymentAmount}
-                  type="number"
-                  placeholder="0.00"
-                />
+              <div className="card-body">
+                <div className="space-y-4">
+                  <Field
+                    label="Amount"
+                    value={paymentAmount}
+                    onChange={setPaymentAmount}
+                    type="number"
+                    placeholder="0.00"
+                  />
 
-                <div>
-                  <label className="mb-1 block text-sm font-medium">
-                    Payment Method
-                  </label>
-                  <select
-                    value={paymentMethod}
-                    onChange={(event) =>
-                      setPaymentMethod(event.target.value)
+                  <div className="field">
+                    <label className="label">
+                      Payment Method
+                    </label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(event) =>
+                        setPaymentMethod(event.target.value)
+                      }
+                      className="input"
+                    >
+                      <option value="cash">Cash</option>
+                      <option value="card">Card</option>
+                      <option value="eft">EFT</option>
+                      <option value="medical_aid">
+                        Medical Aid
+                      </option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <Field
+                    label="Reference"
+                    value={paymentReference}
+                    onChange={setPaymentReference}
+                    placeholder="Receipt/reference number"
+                  />
+
+                  <Field
+                    label="Notes"
+                    value={paymentNotes}
+                    onChange={setPaymentNotes}
+                    placeholder="Payment notes"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={addPayment}
+                    disabled={
+                      savingPayment ||
+                      calculatedBalance <= 0.01
                     }
-                    className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                    className="btn btn-primary w-full"
                   >
-                    <option value="cash">Cash</option>
-                    <option value="card">Card</option>
-                    <option value="eft">EFT</option>
-                    <option value="medical_aid">
-                      Medical Aid
-                    </option>
-                    <option value="other">Other</option>
-                  </select>
+                    {savingPayment
+                      ? "Saving..."
+                      : calculatedBalance <= 0.01
+                      ? "Invoice Fully Paid"
+                      : "Record Payment"}
+                  </button>
                 </div>
-
-                <Field
-                  label="Reference"
-                  value={paymentReference}
-                  onChange={setPaymentReference}
-                  placeholder="Receipt/reference number"
-                />
-
-                <Field
-                  label="Notes"
-                  value={paymentNotes}
-                  onChange={setPaymentNotes}
-                  placeholder="Payment notes"
-                />
-
-                <button
-                  type="button"
-                  onClick={addPayment}
-                  disabled={
-                    savingPayment ||
-                    calculatedBalance <= 0.01
-                  }
-                  className="w-full rounded-lg bg-slate-900 px-4 py-3 font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {savingPayment
-                    ? "Saving..."
-                    : calculatedBalance <= 0.01
-                    ? "Invoice Fully Paid"
-                    : "Record Payment"}
-                </button>
               </div>
             </div>
           </section>
 
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold">
-              Payment History
-            </h2>
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">
+                Payment History
+              </h2>
+            </div>
 
             {payments.length === 0 ? (
-              <p className="text-sm text-slate-500">
+              <div className="empty-state">
                 No payments recorded.
-              </p>
+              </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="table-wrap border-0 shadow-none">
+                <table className="table">
                   <thead>
-                    <tr className="border-b text-left">
-                      <th className="px-3 py-3">
-                        Payment Number
-                      </th>
-                      <th className="px-3 py-3">
-                        Date
-                      </th>
-                      <th className="px-3 py-3">
-                        Method
-                      </th>
-                      <th className="px-3 py-3">
-                        Reference
-                      </th>
-                      <th className="px-3 py-3 text-right">
+                    <tr>
+                      <th>Payment Number</th>
+                      <th>Date</th>
+                      <th>Method</th>
+                      <th>Reference</th>
+                      <th className="text-right">
                         Amount
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     {payments.map((payment) => (
-                      <tr
-                        key={payment.id}
-                        className="border-b"
-                      >
-                        <td className="px-3 py-3">
+                      <tr key={payment.id}>
+                        <td>
                           {payment.payment_number || "-"}
                         </td>
-                        <td className="px-3 py-3">
+                        <td>
                           {formatDate(payment.payment_date)}
                         </td>
-                        <td className="px-3 py-3">
+                        <td>
                           {payment.payment_method || "-"}
                         </td>
-                        <td className="px-3 py-3">
+                        <td>
                           {payment.reference || "-"}
                         </td>
-                        <td className="px-3 py-3 text-right font-medium">
+                        <td className="text-right font-medium">
                           {currency(payment.amount)}
                         </td>
                       </tr>
@@ -841,13 +917,16 @@ export default function InvoiceDetailPage() {
           </section>
 
           {invoice.notes && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-2 text-lg font-bold">
-                Notes
-              </h2>
-              <p className="whitespace-pre-wrap text-sm text-slate-700">
-                {invoice.notes}
-              </p>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">Notes</h2>
+              </div>
+
+              <div className="card-body">
+                <p className="whitespace-pre-wrap text-sm text-slate-700">
+                  {invoice.notes}
+                </p>
+              </div>
             </section>
           )}
         </div>
@@ -1381,10 +1460,8 @@ function Info({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-medium text-slate-800">
+      <p className="stat-label">{label}</p>
+      <p className="mt-1 text-sm font-medium">
         {value}
       </p>
     </div>
@@ -1426,10 +1503,8 @@ function Field({
   placeholder?: string;
 }) {
   return (
-    <div>
-      <label className="mb-1 block text-sm font-medium">
-        {label}
-      </label>
+    <div className="field">
+      <label className="label">{label}</label>
       <input
         type={type}
         value={value}
@@ -1437,7 +1512,7 @@ function Field({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2"
+        className="input"
       />
     </div>
   );

@@ -87,158 +87,67 @@ export default function StaffPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f8fafc",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "30px",
-            gap: "15px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                fontSize: "14px",
-                fontWeight: 700,
-                color: "#2563eb",
-                marginBottom: "5px",
-              }}
-            >
-              J&J PRACTICE CLOUD
-            </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-            <h1
-              style={{
-                margin: 0,
-                fontSize: "32px",
-                color: "#1f2937",
-              }}
-            >
-              Staff Management
-            </h1>
-
-            <p
-              style={{
-                marginTop: "8px",
-                color: "#6b7280",
-              }}
-            >
-              Manage doctors, nurses, reception staff and other practice staff.
-            </p>
-          </div>
-
-          <div style={{ display: "flex", gap: "10px" }}>
+          <div className="page-actions">
             <button
               onClick={() => {
                 window.location.href = "/dashboard";
               }}
-              style={{
-                padding: "11px 16px",
-                borderRadius: "8px",
-                border: "1px solid #d1d5db",
-                background: "white",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
+              className="btn btn-secondary btn-sm"
             >
               ← Dashboard
             </button>
+          </div>
+        </div>
+      </header>
 
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Staff Management</h1>
+            <p className="page-subtitle">
+              Manage doctors, nurses, reception staff and other practice
+              staff.
+            </p>
+          </div>
+
+          <div className="page-actions">
             <button
               onClick={() => {
                 window.location.href = "/staff/new";
               }}
-              style={{
-                padding: "11px 16px",
-                borderRadius: "8px",
-                border: "none",
-                background: "#2563eb",
-                color: "white",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
+              className="btn btn-primary"
             >
               + Add Staff
             </button>
           </div>
         </div>
 
-        {error && (
-          <div
-            style={{
-              background: "#fee2e2",
-              color: "#991b1b",
-              padding: "14px",
-              borderRadius: "8px",
-              marginBottom: "20px",
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
 
-        <div
-          style={{
-            background: "white",
-            borderRadius: "12px",
-            border: "1px solid #e5e7eb",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "20px",
-              borderBottom: "1px solid #e5e7eb",
-              fontWeight: 700,
-              color: "#1f2937",
-            }}
-          >
-            Practice Staff ({staff.length})
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">
+              Practice Staff ({staff.length})
+            </span>
           </div>
 
           {loading ? (
-            <div
-              style={{
-                padding: "40px",
-                textAlign: "center",
-                color: "#6b7280",
-              }}
-            >
-              Loading staff...
-            </div>
+            <div className="empty-state">Loading staff...</div>
           ) : staff.length === 0 ? (
-            <div
-              style={{
-                padding: "50px",
-                textAlign: "center",
-                color: "#6b7280",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "18px",
-                  fontWeight: 700,
-                  color: "#374151",
-                  marginBottom: "8px",
-                }}
-              >
-                No staff members yet
-              </div>
+            <div className="empty-state">
+              <div className="card-title">No staff members yet</div>
 
               <div>
                 Add your first staff member to start managing your practice
@@ -246,90 +155,49 @@ export default function StaffPage() {
               </div>
             </div>
           ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                }}
-              >
+            <div className="table-wrap rounded-none border-0 shadow-none">
+              <table className="table">
                 <thead>
-                  <tr
-                    style={{
-                      background: "#f8fafc",
-                      textAlign: "left",
-                    }}
-                  >
-                    <th style={{ padding: "14px 18px" }}>Name</th>
-                    <th style={{ padding: "14px 18px" }}>Role</th>
-                    <th style={{ padding: "14px 18px" }}>Email</th>
-                    <th style={{ padding: "14px 18px" }}>Phone</th>
-                    <th style={{ padding: "14px 18px" }}>Status</th>
-                    <th style={{ padding: "14px 18px" }}>Actions</th>
+                  <tr>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {staff.map((member) => (
-                    <tr
-                      key={member.id}
-                      style={{
-                        borderTop: "1px solid #e5e7eb",
-                      }}
-                    >
-                      <td
-                        style={{
-                          padding: "16px 18px",
-                          fontWeight: 600,
-                          color: "#1f2937",
-                        }}
-                      >
+                    <tr key={member.id}>
+                      <td className="font-semibold">
                         {staffName(member)}
                       </td>
 
-                      <td style={{ padding: "16px 18px", color: "#4b5563" }}>
-                        {member.role || "—"}
-                      </td>
+                      <td>{member.role || "—"}</td>
 
-                      <td style={{ padding: "16px 18px", color: "#4b5563" }}>
-                        {member.email || "—"}
-                      </td>
+                      <td>{member.email || "—"}</td>
 
-                      <td style={{ padding: "16px 18px", color: "#4b5563" }}>
-                        {member.phone || "—"}
-                      </td>
+                      <td>{member.phone || "—"}</td>
 
-                      <td style={{ padding: "16px 18px" }}>
+                      <td>
                         <span
-                          style={{
-                            display: "inline-block",
-                            padding: "5px 10px",
-                            borderRadius: "999px",
-                            fontSize: "13px",
-                            fontWeight: 700,
-                            background: member.active ? "#dcfce7" : "#fee2e2",
-                            color: member.active ? "#166534" : "#991b1b",
-                          }}
+                          className={
+                            member.active ? "badge badge-green" : "badge badge-gray"
+                          }
                         >
                           {member.active ? "Active" : "Inactive"}
                         </span>
                       </td>
 
-                      <td style={{ padding: "16px 18px" }}>
+                      <td>
                         <button
                           type="button"
                           onClick={() => {
                             window.location.href = `/staff/${member.id}/edit`;
                           }}
-                          style={{
-                            padding: "8px 14px",
-                            borderRadius: "8px",
-                            border: "1px solid #d1d5db",
-                            background: "#ffffff",
-                            color: "#111827",
-                            fontWeight: 600,
-                            cursor: "pointer",
-                          }}
+                          className="btn btn-secondary btn-sm"
                         >
                           Edit
                         </button>

@@ -388,22 +388,77 @@ export default function NewPrescriptionPage() {
 
   if (loading) {
     return (
-      <main style={{ padding: 24 }}>
-        <h1>New Prescription</h1>
-        <p>Loading patient information...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">New Prescription</h1>
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="empty-state">
+              Loading patient information...
+            </div>
+          </div>
+        </div>
       </main>
     );
   }
 
   if (!patient) {
     return (
-      <main style={{ padding: 24 }}>
-        <h1>New Prescription</h1>
-        <p>{message || "Patient not found."}</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
 
-        <button onClick={() => router.push("/patients")}>
-          Back to Patients
-        </button>
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">New Prescription</h1>
+            </div>
+
+            <div className="page-actions">
+              <button
+                onClick={() => router.push("/patients")}
+                className="btn btn-secondary btn-sm"
+              >
+                Back to Patients
+              </button>
+            </div>
+          </div>
+
+          {message && <div className="alert-error">{message}</div>}
+
+          {!message && (
+            <div className="card">
+              <div className="empty-state">Patient not found.</div>
+            </div>
+          )}
+        </div>
       </main>
     );
   }
@@ -414,470 +469,379 @@ export default function NewPrescriptionPage() {
       .trim();
 
   return (
-    <main
-      style={{
-        padding: 24,
-        maxWidth: 1100,
-        margin: "0 auto",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-          flexWrap: "wrap",
-          marginBottom: 24,
-        }}
-      >
-        <div>
-          <h1>New Prescription</h1>
-          <p style={{ margin: 0, color: "#666" }}>
-            {patientName} — {patient.patient_id}
-          </p>
-        </div>
-
-        <button
-          onClick={() =>
-            router.push(`/patients/${patientId}/prescriptions`)
-          }
-        >
-          Back to Prescriptions
-        </button>
-      </div>
-
-      <section
-        style={{
-          padding: 18,
-          marginBottom: 20,
-          border: "1px solid #ddd",
-          borderRadius: 10,
-          background: "#f8fafc",
-        }}
-      >
-        <strong>{patientName}</strong>
-        <div>Patient ID: {patient.patient_id}</div>
-        <div>Phone: {patient.phone || "Not provided"}</div>
-
-        {consultation && (
-          <div style={{ marginTop: 12 }}>
-            <strong>Linked Consultation</strong>
-
-            {consultation.chief_complaint && (
-              <div>
-                Complaint: {consultation.chief_complaint}
-              </div>
-            )}
-
-            {consultation.diagnosis && (
-              <div>
-                Diagnosis: {consultation.diagnosis}
-              </div>
-            )}
-
-            {consultation.treatment && (
-              <div>
-                Treatment: {consultation.treatment}
-              </div>
-            )}
-          </div>
-        )}
-      </section>
-
-      {message && (
-        <div
-          style={{
-            padding: 12,
-            marginBottom: 20,
-            borderRadius: 8,
-            background: "#f1f5f9",
-          }}
-        >
-          {message}
-        </div>
-      )}
-
-      <form onSubmit={savePrescription} style={{ display: "grid", gap: 20 }}>
-        <section className="card">
-          <h2>Prescription Details</h2>
-
-          <label>
-            Prescription Date *
-            <input
-              type="date"
-              value={prescriptionDate}
-              onChange={(e) => setPrescriptionDate(e.target.value)}
-              required
-              style={{
-                width: "100%",
-                padding: 10,
-                marginTop: 6,
-              }}
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
             />
-          </label>
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <label style={{ display: "block", marginTop: 16 }}>
-            Prescription Notes
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={4}
-              placeholder="General prescription notes..."
-              style={{
-                width: "100%",
-                padding: 10,
-                marginTop: 6,
-              }}
-            />
-          </label>
-        </section>
-
-        <section className="card">
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            <div>
-              <h2>Medicines</h2>
-              <p style={{ color: "#666" }}>
-                Select a stocked medicine when available, or enter a
-                medicine manually.
-              </p>
-            </div>
-
-            <button type="button" onClick={addItem}>
-              + Add Medicine
-            </button>
-          </div>
-
-          <div style={{ display: "grid", gap: 20 }}>
-            {items.map((item, index) => {
-              const selectedProduct = inventoryProducts.find(
-                (product) =>
-                  product.id === item.inventory_product_id
-              );
-
-              return (
-                <div
-                  key={index}
-                  style={{
-                    padding: 18,
-                    border: "1px solid #ddd",
-                    borderRadius: 10,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 16,
-                    }}
-                  >
-                    <h3 style={{ margin: 0 }}>
-                      Medicine {index + 1}
-                    </h3>
-
-                    {items.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeItem(index)}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-
-                  <label style={{ display: "block", marginBottom: 14 }}>
-                    Inventory Medicine
-                    <select
-                      value={item.inventory_product_id}
-                      onChange={(e) =>
-                        selectInventoryProduct(
-                          index,
-                          e.target.value
-                        )
-                      }
-                      style={{
-                        width: "100%",
-                        padding: 10,
-                        marginTop: 6,
-                      }}
-                    >
-                      <option value="">
-                        Not linked to inventory
-                      </option>
-
-                      {inventoryProducts.map((product) => (
-                        <option
-                          key={product.id}
-                          value={product.id}
-                        >
-                          {product.name}
-                          {product.strength
-                            ? ` — ${product.strength}`
-                            : ""}
-                          {` — Stock: ${product.current_stock ?? 0}`}
-                        </option>
-                      ))}
-                    </select>
-
-                    {selectedProduct && (
-                      <div
-                        style={{
-                          marginTop: 8,
-                          padding: 10,
-                          borderRadius: 8,
-                          background: "#f0fdf4",
-                          fontSize: 14,
-                        }}
-                      >
-                        <strong>Inventory linked</strong>
-                        <div>
-                          {selectedProduct.name}
-                          {selectedProduct.strength
-                            ? ` ${selectedProduct.strength}`
-                            : ""}
-                          {selectedProduct.dosage_form
-                            ? ` — ${selectedProduct.dosage_form}`
-                            : ""}
-                        </div>
-                        <div>
-                          Available stock:{" "}
-                          {selectedProduct.current_stock ?? 0}{" "}
-                          {selectedProduct.unit || ""}
-                        </div>
-                      </div>
-                    )}
-                  </label>
-
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "repeat(auto-fit, minmax(180px, 1fr))",
-                      gap: 14,
-                    }}
-                  >
-                    <label>
-                      Medicine Name *
-                      <input
-                        type="text"
-                        value={item.medicine_name}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "medicine_name",
-                            e.target.value
-                          )
-                        }
-                        placeholder="e.g. Amoxicillin"
-                        required
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      />
-                    </label>
-
-                    <label>
-                      Strength
-                      <input
-                        type="text"
-                        value={item.strength}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "strength",
-                            e.target.value
-                          )
-                        }
-                        placeholder="e.g. 500mg"
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      />
-                    </label>
-
-                    <label>
-                      Dosage *
-                      <input
-                        type="text"
-                        value={item.dosage}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "dosage",
-                            e.target.value
-                          )
-                        }
-                        placeholder="e.g. 1 capsule"
-                        required
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      />
-                    </label>
-
-                    <label>
-                      Frequency *
-                      <input
-                        type="text"
-                        value={item.frequency}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "frequency",
-                            e.target.value
-                          )
-                        }
-                        placeholder="e.g. 3 times daily"
-                        required
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      />
-                    </label>
-
-                    <label>
-                      Duration *
-                      <input
-                        type="text"
-                        value={item.duration}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "duration",
-                            e.target.value
-                          )
-                        }
-                        placeholder="e.g. 7 days"
-                        required
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      />
-                    </label>
-
-                    <label>
-                      Quantity *
-                      <input
-                        type="number"
-                        min="1"
-                        step="1"
-                        value={item.quantity}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "quantity",
-                            e.target.value
-                          )
-                        }
-                        placeholder="e.g. 21"
-                        required
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      />
-                    </label>
-
-                    <label>
-                      Route
-                      <select
-                        value={item.route}
-                        onChange={(e) =>
-                          updateItem(
-                            index,
-                            "route",
-                            e.target.value
-                          )
-                        }
-                        style={{
-                          width: "100%",
-                          padding: 10,
-                          marginTop: 6,
-                        }}
-                      >
-                        <option value="">Select route</option>
-
-                        {routes.map((route) => (
-                          <option key={route} value={route}>
-                            {route}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
-                  <label
-                    style={{
-                      display: "block",
-                      marginTop: 14,
-                    }}
-                  >
-                    Instructions
-                    <textarea
-                      value={item.instructions}
-                      onChange={(e) =>
-                        updateItem(
-                          index,
-                          "instructions",
-                          e.target.value
-                        )
-                      }
-                      rows={3}
-                      placeholder="Additional instructions for the patient..."
-                      style={{
-                        width: "100%",
-                        padding: 10,
-                        marginTop: 6,
-                      }}
-                    />
-                  </label>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 10,
-          }}
-        >
           <button
-            type="button"
             onClick={() =>
               router.push(`/patients/${patientId}/prescriptions`)
             }
+            className="btn btn-secondary btn-sm"
           >
-            Cancel
-          </button>
-
-          <button type="submit" disabled={saving}>
-            {saving ? "Saving Prescription..." : "Save Prescription"}
+            Back to Prescriptions
           </button>
         </div>
-      </form>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">New Prescription</h1>
+            <p className="page-subtitle">
+              {patientName} — {patient.patient_id}
+            </p>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-body">
+            <strong>{patientName}</strong>
+            <div>Patient ID: {patient.patient_id}</div>
+            <div>Phone: {patient.phone || "Not provided"}</div>
+
+            {consultation && (
+              <div className="alert-info mt-4 mb-0">
+                <strong>Linked Consultation</strong>
+
+                {consultation.chief_complaint && (
+                  <div>
+                    Complaint: {consultation.chief_complaint}
+                  </div>
+                )}
+
+                {consultation.diagnosis && (
+                  <div>
+                    Diagnosis: {consultation.diagnosis}
+                  </div>
+                )}
+
+                {consultation.treatment && (
+                  <div>
+                    Treatment: {consultation.treatment}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {message && <div className="alert-error">{message}</div>}
+
+        <form onSubmit={savePrescription} className="space-y-5">
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Prescription Details</h2>
+            </div>
+
+            <div className="card-body">
+              <label className="field">
+                <span className="label">Prescription Date *</span>
+                <input
+                  type="date"
+                  value={prescriptionDate}
+                  onChange={(e) => setPrescriptionDate(e.target.value)}
+                  required
+                  className="input"
+                />
+              </label>
+
+              <label className="field mb-0">
+                <span className="label">Prescription Notes</span>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={4}
+                  placeholder="General prescription notes..."
+                  className="input"
+                />
+              </label>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <div>
+                <h2 className="card-title">Medicines</h2>
+                <p className="page-subtitle">
+                  Select a stocked medicine when available, or enter a
+                  medicine manually.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addItem}
+                className="btn btn-primary btn-sm"
+              >
+                + Add Medicine
+              </button>
+            </div>
+
+            <div className="card-body space-y-5">
+              {items.map((item, index) => {
+                const selectedProduct = inventoryProducts.find(
+                  (product) =>
+                    product.id === item.inventory_product_id
+                );
+
+                return (
+                  <div
+                    key={index}
+                    className="rounded-xl border border-gray-200 p-4"
+                  >
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="font-bold">
+                        Medicine {index + 1}
+                      </h3>
+
+                      {items.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeItem(index)}
+                          className="btn btn-danger btn-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    <label className="field">
+                      <span className="label">Inventory Medicine</span>
+                      <select
+                        value={item.inventory_product_id}
+                        onChange={(e) =>
+                          selectInventoryProduct(
+                            index,
+                            e.target.value
+                          )
+                        }
+                        className="input"
+                      >
+                        <option value="">
+                          Not linked to inventory
+                        </option>
+
+                        {inventoryProducts.map((product) => (
+                          <option
+                            key={product.id}
+                            value={product.id}
+                          >
+                            {product.name}
+                            {product.strength
+                              ? ` — ${product.strength}`
+                              : ""}
+                            {` — Stock: ${product.current_stock ?? 0}`}
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedProduct && (
+                        <div className="mt-2 rounded-lg p-3 text-sm" style={{ background: "var(--brand-50)", color: "var(--brand-800)" }}>
+                          <strong>Inventory linked</strong>
+                          <div>
+                            {selectedProduct.name}
+                            {selectedProduct.strength
+                              ? ` ${selectedProduct.strength}`
+                              : ""}
+                            {selectedProduct.dosage_form
+                              ? ` — ${selectedProduct.dosage_form}`
+                              : ""}
+                          </div>
+                          <div>
+                            Available stock:{" "}
+                            {selectedProduct.current_stock ?? 0}{" "}
+                            {selectedProduct.unit || ""}
+                          </div>
+                        </div>
+                      )}
+                    </label>
+
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      <label className="field mb-0">
+                        <span className="label">Medicine Name *</span>
+                        <input
+                          type="text"
+                          value={item.medicine_name}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "medicine_name",
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. Amoxicillin"
+                          required
+                          className="input"
+                        />
+                      </label>
+
+                      <label className="field mb-0">
+                        <span className="label">Strength</span>
+                        <input
+                          type="text"
+                          value={item.strength}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "strength",
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. 500mg"
+                          className="input"
+                        />
+                      </label>
+
+                      <label className="field mb-0">
+                        <span className="label">Dosage *</span>
+                        <input
+                          type="text"
+                          value={item.dosage}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "dosage",
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. 1 capsule"
+                          required
+                          className="input"
+                        />
+                      </label>
+
+                      <label className="field mb-0">
+                        <span className="label">Frequency *</span>
+                        <input
+                          type="text"
+                          value={item.frequency}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "frequency",
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. 3 times daily"
+                          required
+                          className="input"
+                        />
+                      </label>
+
+                      <label className="field mb-0">
+                        <span className="label">Duration *</span>
+                        <input
+                          type="text"
+                          value={item.duration}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "duration",
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. 7 days"
+                          required
+                          className="input"
+                        />
+                      </label>
+
+                      <label className="field mb-0">
+                        <span className="label">Quantity *</span>
+                        <input
+                          type="number"
+                          min="1"
+                          step="1"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "quantity",
+                              e.target.value
+                            )
+                          }
+                          placeholder="e.g. 21"
+                          required
+                          className="input"
+                        />
+                      </label>
+
+                      <label className="field mb-0">
+                        <span className="label">Route</span>
+                        <select
+                          value={item.route}
+                          onChange={(e) =>
+                            updateItem(
+                              index,
+                              "route",
+                              e.target.value
+                            )
+                          }
+                          className="input"
+                        >
+                          <option value="">Select route</option>
+
+                          {routes.map((route) => (
+                            <option key={route} value={route}>
+                              {route}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <label className="field mt-4 mb-0">
+                      <span className="label">Instructions</span>
+                      <textarea
+                        value={item.instructions}
+                        onChange={(e) =>
+                          updateItem(
+                            index,
+                            "instructions",
+                            e.target.value
+                          )
+                        }
+                        rows={3}
+                        placeholder="Additional instructions for the patient..."
+                        className="input"
+                      />
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          <div className="page-actions justify-end">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(`/patients/${patientId}/prescriptions`)
+              }
+              className="btn btn-secondary"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="btn btn-primary"
+            >
+              {saving ? "Saving Prescription..." : "Save Prescription"}
+            </button>
+          </div>
+        </form>
+      </div>
     </main>
   );
 }

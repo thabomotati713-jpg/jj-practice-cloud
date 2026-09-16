@@ -93,27 +93,8 @@ export default function SetPasswordPage() {
 
   if (checking) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#f8fafc",
-          padding: "30px",
-        }}
-      >
-        <div
-          style={{
-            background: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            padding: "30px",
-            maxWidth: "500px",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
+      <main className="page-shell flex min-h-screen items-center justify-center p-[30px]">
+        <div className="card w-full max-w-[500px] p-[30px] text-center">
           Checking your invitation...
         </div>
       </main>
@@ -122,55 +103,17 @@ export default function SetPasswordPage() {
 
   if (success) {
     return (
-      <main
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#f8fafc",
-          padding: "30px",
-        }}
-      >
-        <div
-          style={{
-            background: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            padding: "30px",
-            maxWidth: "500px",
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 700,
-              color: "#2563eb",
-              marginBottom: "8px",
-            }}
-          >
+      <main className="page-shell flex min-h-screen items-center justify-center p-[30px]">
+        <div className="card w-full max-w-[500px] p-[30px] text-center">
+          <div className="stat-label mb-2">
             J&J PRACTICE CLOUD
           </div>
 
-          <h1
-            style={{
-              margin: "0 0 12px",
-              fontSize: "28px",
-              color: "#1f2937",
-            }}
-          >
+          <h1 className="page-title">
             Password Set Successfully
           </h1>
 
-          <p
-            style={{
-              color: "#6b7280",
-              lineHeight: 1.6,
-              marginBottom: "25px",
-            }}
-          >
+          <p className="page-subtitle mb-6 mt-3 text-left">
             Your staff account is ready. You can now sign in to J&J
             Practice Cloud using your email address and new password.
           </p>
@@ -180,16 +123,7 @@ export default function SetPasswordPage() {
             onClick={() => {
               window.location.href = "/";
             }}
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              border: "none",
-              background: "#2563eb",
-              color: "white",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
+            className="btn btn-primary w-full"
           >
             Go to Sign In
           </button>
@@ -199,83 +133,23 @@ export default function SetPasswordPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#f8fafc",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          background: "white",
-          border: "1px solid #e5e7eb",
-          borderRadius: "12px",
-          padding: "30px",
-          maxWidth: "500px",
-          width: "100%",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "14px",
-            fontWeight: 700,
-            color: "#2563eb",
-            marginBottom: "8px",
-          }}
-        >
+    <main className="page-shell flex min-h-screen items-center justify-center p-[30px]">
+      <div className="card w-full max-w-[500px] p-[30px]">
+        <div className="stat-label mb-2">
           J&J PRACTICE CLOUD
         </div>
 
-        <h1
-          style={{
-            margin: "0 0 10px",
-            fontSize: "28px",
-            color: "#1f2937",
-          }}
-        >
-          Set Your Password
-        </h1>
+        <h1 className="page-title">Set Your Password</h1>
 
-        <p
-          style={{
-            color: "#6b7280",
-            lineHeight: 1.6,
-            marginBottom: "25px",
-          }}
-        >
+        <p className="page-subtitle mb-6 mt-2">
           Create a password for your J&J Practice Cloud staff account.
         </p>
 
-        {error && (
-          <div
-            style={{
-              background: "#fee2e2",
-              color: "#991b1b",
-              padding: "14px",
-              borderRadius: "8px",
-              marginBottom: "20px",
-              lineHeight: 1.5,
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "18px" }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: "block",
-                marginBottom: "7px",
-                fontWeight: 600,
-                color: "#374151",
-              }}
-            >
+          <div className="field">
+            <label htmlFor="password" className="label">
               New Password
             </label>
 
@@ -287,20 +161,12 @@ export default function SetPasswordPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 8 characters"
-              style={inputStyle}
+              className="input"
             />
           </div>
 
-          <div style={{ marginBottom: "25px" }}>
-            <label
-              htmlFor="confirmPassword"
-              style={{
-                display: "block",
-                marginBottom: "7px",
-                fontWeight: 600,
-                color: "#374151",
-              }}
-            >
+          <div className="field">
+            <label htmlFor="confirmPassword" className="label">
               Confirm Password
             </label>
 
@@ -312,23 +178,14 @@ export default function SetPasswordPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Enter the password again"
-              style={inputStyle}
+              className="input"
             />
           </div>
 
           <button
             type="submit"
             disabled={saving}
-            style={{
-              width: "100%",
-              padding: "12px 16px",
-              borderRadius: "8px",
-              border: "none",
-              background: saving ? "#93c5fd" : "#2563eb",
-              color: "white",
-              fontWeight: 700,
-              cursor: saving ? "not-allowed" : "pointer",
-            }}
+            className="btn btn-primary w-full"
           >
             {saving ? "Saving Password..." : "Set Password"}
           </button>
@@ -337,12 +194,3 @@ export default function SetPasswordPage() {
     </main>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "11px 12px",
-  borderRadius: "8px",
-  border: "1px solid #d1d5db",
-  boxSizing: "border-box",
-  fontSize: "15px",
-};

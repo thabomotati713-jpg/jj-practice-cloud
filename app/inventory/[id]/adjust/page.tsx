@@ -194,10 +194,25 @@ export default function AdjustInventoryPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <div className="mx-auto max-w-3xl px-6 py-12">
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-slate-500">Loading inventory...</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body empty-state">
+              Loading inventory...
+            </div>
           </div>
         </div>
       </main>
@@ -206,22 +221,37 @@ export default function AdjustInventoryPage() {
 
   if (!product) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <div className="mx-auto max-w-3xl px-6 py-12">
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="font-semibold text-red-700">
-              {error || "Product could not be found."}
-            </p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
 
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href = "/inventory";
-              }}
-              className="mt-5 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
-            >
-              Back to Inventory
-            </button>
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body">
+              <div className="alert-error">
+                {error || "Product could not be found."}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/inventory";
+                }}
+                className="btn btn-secondary btn-sm"
+              >
+                Back to Inventory
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -229,194 +259,190 @@ export default function AdjustInventoryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              Inventory & Stock Management
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = `/inventory/${productId}`;
-            }}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Back to Product
-          </button>
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/inventory/${productId}`;
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              Back to Product
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl px-6 py-8">
-        <div className="mb-6">
-          <p className="text-sm font-medium text-slate-500">
-            Inventory Adjustment
-          </p>
-
-          <h2 className="mt-1 text-3xl font-bold text-slate-900">
-            Adjust {product.name}
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            Use this when the physical stock count differs from the system
-            quantity. Every adjustment is recorded in the stock movement
-            history.
-          </p>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Adjust {product.name}</h1>
+            <p className="page-subtitle">
+              Use this when the physical stock count differs from the system
+              quantity. Every adjustment is recorded in the stock movement
+              history.
+            </p>
+          </div>
         </div>
 
-        {error && (
-          <div className="mb-5 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        {error && <div className="alert-error">{error}</div>}
 
-        {success && (
-          <div className="mb-5 rounded-xl bg-green-50 p-4 text-sm text-green-700">
-            {success}
-          </div>
-        )}
+        {success && <div className="alert-success">{success}</div>}
 
-        <section className="mb-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">
-              Current Product Stock
-            </p>
-            <p className="mt-2 text-3xl font-bold text-slate-900">
+        <div className="stat-grid">
+          <div className="stat-card">
+            <p className="stat-label">Current Product Stock</p>
+            <p className="stat-value">
               {Number(product.current_stock || 0)}
               {product.unit ? ` ${product.unit}` : ""}
             </p>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">
-              Product Code
-            </p>
-            <p className="mt-2 text-xl font-bold text-slate-900">
-              {product.product_code || "—"}
-            </p>
+          <div className="stat-card">
+            <p className="stat-label">Product Code</p>
+            <p className="stat-value">{product.product_code || "—"}</p>
           </div>
-        </section>
+        </div>
 
-        <form
-          onSubmit={handleAdjust}
-          className="rounded-2xl bg-white p-6 shadow-sm"
-        >
-          <div className="space-y-5">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Select Batch
-              </label>
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">Inventory Adjustment</span>
+          </div>
 
-              <select
-                value={batchId}
-                onChange={(event) => {
-                  const id = event.target.value;
-                  setBatchId(id);
+          <div className="card-body">
+            <form onSubmit={handleAdjust}>
+              <div className="field">
+                <label
+                  className="label"
+                  htmlFor="select-batch"
+                >
+                  Select Batch
+                </label>
 
-                  const batch = batches.find((item) => item.id === id);
+                <select
+                  id="select-batch"
+                  value={batchId}
+                  onChange={(event) => {
+                    const id = event.target.value;
+                    setBatchId(id);
 
-                  if (batch) {
-                    setNewQuantity(
-                      String(Number(batch.quantity_remaining || 0))
-                    );
-                  } else {
-                    setNewQuantity("");
-                  }
-                }}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-500"
-              >
-                <option value="">Select a batch</option>
+                    const batch = batches.find((item) => item.id === id);
 
-                {batches.map((batch) => (
-                  <option key={batch.id} value={batch.id}>
-                    {batch.batch_number || "Unnamed batch"} —{" "}
-                    {Number(batch.quantity_remaining || 0)} remaining
-                    {batch.expiry_date
-                      ? ` — Exp ${batch.expiry_date}`
-                      : ""}
-                  </option>
-                ))}
-              </select>
-            </div>
+                    if (batch) {
+                      setNewQuantity(
+                        String(Number(batch.quantity_remaining || 0))
+                      );
+                    } else {
+                      setNewQuantity("");
+                    }
+                  }}
+                  className="input"
+                >
+                  <option value="">Select a batch</option>
 
-            {selectedBatch && (
-              <div className="rounded-xl bg-slate-50 p-4">
-                <p className="text-sm text-slate-500">
-                  Current batch quantity
-                </p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">
-                  {Number(selectedBatch.quantity_remaining || 0)}
+                  {batches.map((batch) => (
+                    <option key={batch.id} value={batch.id}>
+                      {batch.batch_number || "Unnamed batch"} —{" "}
+                      {Number(batch.quantity_remaining || 0)} remaining
+                      {batch.expiry_date
+                        ? ` — Exp ${batch.expiry_date}`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedBatch && (
+                <div className="stat-card">
+                  <p className="stat-label">Current batch quantity</p>
+                  <p className="stat-value">
+                    {Number(selectedBatch.quantity_remaining || 0)}
+                  </p>
+                </div>
+              )}
+
+              <div className="field">
+                <label
+                  className="label"
+                  htmlFor="new-quantity"
+                >
+                  New Physical Quantity
+                </label>
+
+                <input
+                  id="new-quantity"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={newQuantity}
+                  onChange={(event) => setNewQuantity(event.target.value)}
+                  placeholder="Enter the actual quantity counted"
+                  className="input"
+                />
+
+                <p className="page-subtitle">
+                  Enter the quantity you physically counted for this batch.
                 </p>
               </div>
-            )}
 
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                New Physical Quantity
-              </label>
+              <div className="field">
+                <label
+                  className="label"
+                  htmlFor="adjust-reason"
+                >
+                  Reason
+                </label>
 
-              <input
-                type="number"
-                min="0"
-                step="1"
-                value={newQuantity}
-                onChange={(event) => setNewQuantity(event.target.value)}
-                placeholder="Enter the actual quantity counted"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
-              />
+                <textarea
+                  id="adjust-reason"
+                  value={reason}
+                  onChange={(event) => setReason(event.target.value)}
+                  rows={4}
+                  placeholder="Example: Physical stock count found 122 units."
+                  className="input"
+                />
+              </div>
 
-              <p className="mt-2 text-xs text-slate-500">
-                Enter the quantity you physically counted for this batch.
-              </p>
-            </div>
+              <div className="alert-info">
+                <strong>Important:</strong> This changes both the selected
+                batch quantity and the overall product stock. The adjustment
+                will also be recorded in Stock Movement History.
+              </div>
 
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-slate-700">
-                Reason
-              </label>
+              <div className="page-actions sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.location.href = `/inventory/${productId}`;
+                  }}
+                  className="btn btn-secondary"
+                >
+                  Cancel
+                </button>
 
-              <textarea
-                value={reason}
-                onChange={(event) => setReason(event.target.value)}
-                rows={4}
-                placeholder="Example: Physical stock count found 122 units."
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-blue-500"
-              />
-            </div>
-
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              <strong>Important:</strong> This changes both the selected
-              batch quantity and the overall product stock. The adjustment
-              will also be recorded in Stock Movement History.
-            </div>
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `/inventory/${productId}`;
-                }}
-                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? "Saving Adjustment..." : "Save Adjustment"}
-              </button>
-            </div>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="btn btn-primary"
+                >
+                  {saving ? "Saving Adjustment..." : "Save Adjustment"}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </div>
     </main>
   );

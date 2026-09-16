@@ -309,21 +309,32 @@ export default function PatientFilePage() {
 
   if (loading) {
     return (
-      <main style={styles.page}>
-        <div style={styles.loading}>Loading patient file...</div>
+      <main className="page-shell">
+        <div className="page-inner">
+          <p className="empty-state">Loading patient file...</p>
+        </div>
       </main>
     );
   }
 
   if (error || !patient) {
     return (
-      <main style={styles.page}>
-        <div style={styles.errorBox}>
-          <h2>Unable to load patient</h2>
-          <p>{error || "Patient not found."}</p>
-          <button onClick={() => router.push("/patients")} style={styles.button}>
-            Back to Patients
-          </button>
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body">
+              <div className="alert-error">
+                <h2 className="text-xl font-bold">Unable to load patient</h2>
+                <p className="page-subtitle">{error || "Patient not found."}</p>
+              </div>
+              <button
+                onClick={() => router.push("/patients")}
+                className="btn btn-primary"
+              >
+                Back to Patients
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -335,49 +346,66 @@ export default function PatientFilePage() {
   );
 
   return (
-    <main style={styles.page}>
-      <div style={styles.container}>
-        {/* Header */}
-        <div style={styles.header}>
-          <div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+          <div className="page-actions">
             <button
               onClick={() => router.push("/patients")}
-              style={styles.backButton}
+              className="btn btn-secondary btn-sm"
             >
               ← Patients
             </button>
+          </div>
+        </div>
+      </header>
 
-            <h1 style={styles.title}>{patientName()}</h1>
+      <div className="page-inner">
+        {/* Header */}
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">{patientName()}</h1>
 
-            <div style={styles.patientMeta}>
+            <p className="page-subtitle">
               <span>
                 <strong>Patient ID:</strong> {patient.patient_id}
               </span>
 
               {patient.date_of_birth && (
                 <span>
-                  <strong>DOB:</strong> {formatDate(patient.date_of_birth)}
+                  {" "}
+                  · <strong>DOB:</strong> {formatDate(patient.date_of_birth)}
                 </span>
               )}
 
               {patient.gender && (
                 <span>
-                  <strong>Gender:</strong> {patient.gender}
+                  {" "}
+                  · <strong>Gender:</strong> {patient.gender}
                 </span>
               )}
 
               {patient.phone && (
                 <span>
-                  <strong>Phone:</strong> {patient.phone}
+                  {" "}
+                  · <strong>Phone:</strong> {patient.phone}
                 </span>
               )}
-            </div>
+            </p>
           </div>
 
-          <div style={styles.headerActions}>
+          <div className="page-actions">
             <button
               onClick={() => router.push(`/patients/${patient.id}/edit`)}
-              style={styles.secondaryButton}
+              className="btn btn-secondary"
             >
               Edit Patient
             </button>
@@ -386,7 +414,7 @@ export default function PatientFilePage() {
               onClick={() =>
                 router.push(`/appointments/new?patient_id=${patient.id}`)
               }
-              style={styles.primaryButton}
+              className="btn btn-primary"
             >
               + Appointment
             </button>
@@ -394,27 +422,23 @@ export default function PatientFilePage() {
         </div>
 
         {/* Quick Actions */}
-        <section style={styles.quickActions}>
+        <section className="page-actions mb-6">
           <button
             onClick={() =>
               router.push(`/patients/${patient.id}/consultations/new`)
             }
-            style={styles.actionCard}
+            className="btn btn-secondary"
           >
-            <span style={styles.actionIcon}>🩺</span>
-            <strong>New Consultation</strong>
-            <small>Record clinical visit</small>
+            🩺 <strong>New Consultation</strong> — Record clinical visit
           </button>
 
           <button
             onClick={() =>
               router.push(`/patients/${patient.id}/prescriptions/new`)
             }
-            style={styles.actionCard}
+            className="btn btn-secondary"
           >
-            <span style={styles.actionIcon}>💊</span>
-            <strong>Prescription</strong>
-            <small>Create prescription</small>
+            💊 <strong>Prescription</strong> — Create prescription
           </button>
 
           <button
@@ -423,38 +447,32 @@ export default function PatientFilePage() {
                 `/sick-notes?patient_id=${patient.id}`
               )
             }
-            style={styles.actionCard}
+            className="btn btn-secondary"
           >
-            <span style={styles.actionIcon}>📄</span>
-            <strong>Sick Note</strong>
-            <small>Create sick note</small>
+            📄 <strong>Sick Note</strong> — Create sick note
           </button>
 
           <button
             onClick={() =>
               router.push(`/patients/${patient.id}/billing/new`)
             }
-            style={styles.actionCard}
+            className="btn btn-secondary"
           >
-            <span style={styles.actionIcon}>💰</span>
-            <strong>New Invoice</strong>
-            <small>Create patient invoice</small>
+            💰 <strong>New Invoice</strong> — Create patient invoice
           </button>
 
           <button
             onClick={() =>
               router.push(`/patients/${patient.id}/documents`)
             }
-            style={styles.actionCard}
+            className="btn btn-secondary"
           >
-            <span style={styles.actionIcon}>📁</span>
-            <strong>Documents</strong>
-            <small>Patient documents</small>
+            📁 <strong>Documents</strong> — Patient documents
           </button>
         </section>
 
         {/* Summary */}
-        <section style={styles.summaryGrid}>
+        <section className="stat-grid">
           <SummaryCard
             label="Appointments"
             value={appointments.length}
@@ -518,19 +536,19 @@ export default function PatientFilePage() {
         </section>
 
         {/* Patient Details */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Patient Information</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Patient Information</h2>
 
             <button
               onClick={() => router.push(`/patients/${patient.id}/edit`)}
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               Edit
             </button>
           </div>
 
-          <div style={styles.detailsGrid}>
+          <div className="card-body grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <Info label="Full Name" value={patientName()} />
             <Info label="Patient ID" value={patient.patient_id} />
             <Info label="Date of Birth" value={formatDate(patient.date_of_birth)} />
@@ -547,10 +565,12 @@ export default function PatientFilePage() {
         </section>
 
         {/* Medical Information */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Medical Information</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Medical Information</h2>
+          </div>
 
-          <div style={styles.detailsGrid}>
+          <div className="card-body grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <Info label="Allergies" value={patient.allergies} wide />
             <Info
               label="Chronic Conditions"
@@ -562,10 +582,12 @@ export default function PatientFilePage() {
         </section>
 
         {/* Medical Aid */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Medical Aid</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Medical Aid</h2>
+          </div>
 
-          <div style={styles.detailsGrid}>
+          <div className="card-body grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <Info
               label="Medical Aid Provider"
               value={patient.medical_aid_provider}
@@ -587,10 +609,12 @@ export default function PatientFilePage() {
         </section>
 
         {/* Emergency Contact */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Emergency Contact</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Emergency Contact</h2>
+          </div>
 
-          <div style={styles.detailsGrid}>
+          <div className="card-body grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
             <Info
               label="Name"
               value={patient.emergency_contact_name}
@@ -607,61 +631,70 @@ export default function PatientFilePage() {
         </section>
 
         {/* Address */}
-        <section style={styles.section}>
-          <h2 style={styles.sectionTitle}>Address</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Address</h2>
+          </div>
 
-          <div style={styles.address}>
-            {[ 
-              patient.address_line_1,
-              patient.address_line_2,
-              patient.city,
-              patient.province,
-              patient.postal_code,
-              patient.country,
-            ]
-              .filter(Boolean)
-              .join(", ") || "No address recorded."}
+          <div className="card-body">
+            <p className="text-sm text-slate-700">
+              {[ 
+                patient.address_line_1,
+                patient.address_line_2,
+                patient.city,
+                patient.province,
+                patient.postal_code,
+                patient.country,
+              ]
+                .filter(Boolean)
+                .join(", ") || "No address recorded."}
+            </p>
           </div>
         </section>
 
         {/* Recent Consultations */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Recent Consultations</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Consultations</h2>
 
             <button
               onClick={() =>
                 router.push(`/patients/${patient.id}/consultations`)
               }
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {consultations.length === 0 ? (
-            <Empty text="No consultations recorded." />
+            <div className="card-body">
+              <Empty text="No consultations recorded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {consultations.map((consultation) => (
-                <div key={consultation.id} style={styles.listItem}>
+                <div
+                  key={consultation.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>
                       {formatDateTime(consultation.consultation_date)}
                     </strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       {consultation.chief_complaint || "No chief complaint"}
                     </div>
 
                     {consultation.diagnosis && (
-                      <div style={styles.detailText}>
+                      <div className="mt-1 text-sm text-slate-700">
                         <strong>Diagnosis:</strong> {consultation.diagnosis}
                       </div>
                     )}
 
                     {consultation.treatment && (
-                      <div style={styles.detailText}>
+                      <div className="mt-1 text-sm text-slate-700">
                         <strong>Treatment:</strong> {consultation.treatment}
                       </div>
                     )}
@@ -673,7 +706,7 @@ export default function PatientFilePage() {
                         `/patients/${patient.id}/consultations`
                       )
                     }
-                    style={styles.smallButton}
+                    className="btn btn-secondary btn-sm"
                   >
                     Open
                   </button>
@@ -684,46 +717,49 @@ export default function PatientFilePage() {
         </section>
 
         {/* Appointments */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Recent Appointments</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Appointments</h2>
 
             <button
               onClick={() =>
                 router.push(`/patients/${patient.id}/appointments`)
               }
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {appointments.length === 0 ? (
-            <Empty text="No appointments recorded." />
+            <div className="card-body">
+              <Empty text="No appointments recorded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {appointments.map((appointment) => (
-                <div key={appointment.id} style={styles.listItem}>
+                <div
+                  key={appointment.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>
                       {formatDate(appointment.appointment_date)}{" "}
                       {appointment.start_time?.slice(0, 5)}
                     </strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       {appointment.appointment_type || "Appointment"}
                     </div>
 
                     {appointment.reason && (
-                      <div style={styles.detailText}>
+                      <div className="mt-1 text-sm text-slate-700">
                         {appointment.reason}
                       </div>
                     )}
                   </div>
 
-                  <span style={styles.status}>
-                    {appointment.status || "scheduled"}
-                  </span>
+                  <StatusBadge status={appointment.status || "scheduled"} />
                 </div>
               ))}
             </div>
@@ -731,37 +767,40 @@ export default function PatientFilePage() {
         </section>
 
         {/* Prescriptions */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Recent Prescriptions</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Prescriptions</h2>
 
             <button
               onClick={() =>
                 router.push(`/patients/${patient.id}/prescriptions`)
               }
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {prescriptions.length === 0 ? (
-            <Empty text="No prescriptions recorded." />
+            <div className="card-body">
+              <Empty text="No prescriptions recorded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {prescriptions.map((prescription) => (
-                <div key={prescription.id} style={styles.listItem}>
+                <div
+                  key={prescription.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>{prescription.prescription_number}</strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       {formatDate(prescription.prescription_date)}
                     </div>
                   </div>
 
-                  <span style={styles.status}>
-                    {prescription.status || "active"}
-                  </span>
+                  <StatusBadge status={prescription.status || "active"} />
                 </div>
               ))}
             </div>
@@ -769,44 +808,48 @@ export default function PatientFilePage() {
         </section>
 
         {/* Billing */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Recent Billing</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Recent Billing</h2>
 
             <button
               onClick={() =>
                 router.push(`/patients/${patient.id}/billing`)
               }
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {invoices.length === 0 ? (
-            <Empty text="No invoices recorded." />
+            <div className="card-body">
+              <Empty text="No invoices recorded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {invoices.map((invoice) => (
-                <div key={invoice.id} style={styles.listItem}>
+                <div
+                  key={invoice.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>{invoice.invoice_number}</strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       {formatDate(invoice.invoice_date)}
                     </div>
                   </div>
 
-                  <div style={styles.amountBlock}>
+                  <div className="flex flex-col items-end gap-1 whitespace-nowrap">
                     <strong>R {Number(invoice.total || 0).toFixed(2)}</strong>
 
                     <span
-                      style={{
-                        color:
-                          Number(invoice.balance || 0) > 0
-                            ? "#b91c1c"
-                            : "#166534",
-                      }}
+                      className={
+                        Number(invoice.balance || 0) > 0
+                          ? "badge badge-red"
+                          : "badge badge-green"
+                      }
                     >
                       Balance: R {Number(invoice.balance || 0).toFixed(2)}
                     </span>
@@ -818,38 +861,43 @@ export default function PatientFilePage() {
         </section>
 
         {/* Claims */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Medical Aid Claims</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Medical Aid Claims</h2>
 
             <button
               onClick={() => router.push("/claims")}
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {claims.length === 0 ? (
-            <Empty text="No medical aid claims recorded." />
+            <div className="card-body">
+              <Empty text="No medical aid claims recorded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {claims.map((claim) => (
-                <div key={claim.id} style={styles.listItem}>
+                <div
+                  key={claim.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>{claim.claim_number}</strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       {formatDate(claim.claim_date)}
                     </div>
                   </div>
 
-                  <div style={styles.amountBlock}>
+                  <div className="flex flex-col items-end gap-1 whitespace-nowrap">
                     <strong>
                       R {Number(claim.claimed_amount || 0).toFixed(2)}
                     </strong>
 
-                    <span style={styles.status}>{claim.status || "submitted"}</span>
+                    <StatusBadge status={claim.status || "submitted"} />
                   </div>
                 </div>
               ))}
@@ -858,32 +906,37 @@ export default function PatientFilePage() {
         </section>
 
         {/* Sick Notes */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Sick Notes</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Sick Notes</h2>
 
             <button
               onClick={() => router.push("/sick-notes")}
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {sickNotes.length === 0 ? (
-            <Empty text="No sick notes recorded." />
+            <div className="card-body">
+              <Empty text="No sick notes recorded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {sickNotes.map((note) => (
-                <div key={note.id} style={styles.listItem}>
+                <div
+                  key={note.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>{note.note_number}</strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       Issued: {formatDate(note.issue_date)}
                     </div>
 
-                    <div style={styles.detailText}>
+                    <div className="mt-1 text-sm text-slate-700">
                       {formatDate(note.start_date)} →{" "}
                       {formatDate(note.end_date)}
                     </div>
@@ -895,26 +948,31 @@ export default function PatientFilePage() {
         </section>
 
         {/* Documents */}
-        <section style={styles.section}>
-          <div style={styles.sectionHeader}>
-            <h2 style={styles.sectionTitle}>Patient Documents</h2>
+        <section className="card">
+          <div className="card-header">
+            <h2 className="card-title">Patient Documents</h2>
 
             <button
               onClick={() =>
                 router.push(`/patients/${patient.id}/documents`)
               }
-              style={styles.linkButton}
+              className="btn btn-secondary btn-sm"
             >
               View All
             </button>
           </div>
 
           {documents.length === 0 ? (
-            <Empty text="No patient documents uploaded." />
+            <div className="card-body">
+              <Empty text="No patient documents uploaded." />
+            </div>
           ) : (
-            <div style={styles.list}>
+            <div className="card-body flex flex-col gap-3">
               {documents.map((document) => (
-                <div key={document.id} style={styles.listItem}>
+                <div
+                  key={document.id}
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4"
+                >
                   <div>
                     <strong>
                       {document.document_name ||
@@ -922,12 +980,12 @@ export default function PatientFilePage() {
                         "Document"}
                     </strong>
 
-                    <div style={styles.muted}>
+                    <div className="mt-1 text-sm text-slate-500">
                       {document.document_type || "Patient document"}
                     </div>
 
                     {document.created_at && (
-                      <div style={styles.detailText}>
+                      <div className="mt-1 text-sm text-slate-700">
                         {formatDateTime(document.created_at)}
                       </div>
                     )}
@@ -942,6 +1000,30 @@ export default function PatientFilePage() {
   );
 }
 
+function StatusBadge({ status }: { status: string | null | undefined }) {
+  const value = (status || "").toLowerCase();
+
+  let variant = "badge-gray";
+
+  if (["paid", "completed", "active", "in stock"].includes(value)) {
+    variant = "badge-green";
+  } else if (
+    ["pending", "submitted", "partially paid", "scheduled", "confirmed"].includes(
+      value
+    )
+  ) {
+    variant = "badge-blue";
+  } else if (["low stock", "no show"].includes(value)) {
+    variant = "badge-amber";
+  } else if (
+    ["cancelled", "rejected", "overdue", "out of stock"].includes(value)
+  ) {
+    variant = "badge-red";
+  }
+
+  return <span className={`badge ${variant}`}>{status || "—"}</span>;
+}
+
 function SummaryCard({
   label,
   value,
@@ -954,20 +1036,11 @@ function SummaryCard({
   danger?: boolean;
 }) {
   return (
-    <button
-      onClick={onClick}
-      style={{
-        ...styles.summaryCard,
-        borderColor: danger ? "#fecaca" : "#e5e7eb",
-      }}
-    >
-      <span style={styles.summaryLabel}>{label}</span>
+    <button onClick={onClick} className="stat-card text-left cursor-pointer">
+      <span className="stat-label">{label}</span>
 
       <strong
-        style={{
-          ...styles.summaryValue,
-          color: danger ? "#b91c1c" : "#111827",
-        }}
+        className={`stat-value block ${danger ? "text-red-700" : ""}`}
       >
         {value}
       </strong>
@@ -985,301 +1058,13 @@ function Info({
   wide?: boolean;
 }) {
   return (
-    <div
-      style={{
-        ...styles.info,
-        gridColumn: wide ? "1 / -1" : undefined,
-      }}
-    >
-      <div style={styles.infoLabel}>{label}</div>
-      <div style={styles.infoValue}>{value || "—"}</div>
+    <div className={wide ? "sm:col-span-2 lg:col-span-3" : ""}>
+      <div className="stat-label">{label}</div>
+      <div className="mt-1 whitespace-pre-wrap text-sm">{value || "—"}</div>
     </div>
   );
 }
 
 function Empty({ text }: { text: string }) {
-  return <div style={styles.empty}>{text}</div>;
+  return <div className="empty-state">{text}</div>;
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    background: "#f5f7fb",
-    padding: "24px",
-    color: "#111827",
-  },
-
-  container: {
-    maxWidth: "1400px",
-    margin: "0 auto",
-  },
-
-  loading: {
-    maxWidth: "1400px",
-    margin: "80px auto",
-    textAlign: "center",
-    fontSize: "18px",
-  },
-
-  errorBox: {
-    maxWidth: "600px",
-    margin: "80px auto",
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "14px",
-    padding: "30px",
-    textAlign: "center",
-  },
-
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "20px",
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "16px",
-    padding: "24px",
-    marginBottom: "18px",
-  },
-
-  backButton: {
-    border: "none",
-    background: "transparent",
-    padding: "0",
-    marginBottom: "10px",
-    color: "#2563eb",
-    cursor: "pointer",
-    fontSize: "14px",
-  },
-
-  title: {
-    margin: "0 0 10px",
-    fontSize: "30px",
-    fontWeight: 700,
-  },
-
-  patientMeta: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "12px 20px",
-    color: "#4b5563",
-    fontSize: "14px",
-  },
-
-  headerActions: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
-
-  primaryButton: {
-    border: "none",
-    background: "#2563eb",
-    color: "white",
-    borderRadius: "8px",
-    padding: "11px 16px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-
-  secondaryButton: {
-    border: "1px solid #d1d5db",
-    background: "white",
-    color: "#111827",
-    borderRadius: "8px",
-    padding: "11px 16px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-
-  button: {
-    border: "none",
-    background: "#2563eb",
-    color: "white",
-    borderRadius: "8px",
-    padding: "11px 16px",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-
-  quickActions: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-    gap: "12px",
-    marginBottom: "18px",
-  },
-
-  actionCard: {
-    border: "1px solid #e5e7eb",
-    background: "white",
-    borderRadius: "12px",
-    padding: "16px",
-    textAlign: "left",
-    cursor: "pointer",
-    display: "flex",
-    flexDirection: "column",
-    gap: "5px",
-  },
-
-  actionIcon: {
-    fontSize: "24px",
-    marginBottom: "4px",
-  },
-
-  summaryGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-    gap: "12px",
-    marginBottom: "18px",
-  },
-
-  summaryCard: {
-    border: "1px solid #e5e7eb",
-    background: "white",
-    borderRadius: "12px",
-    padding: "17px",
-    textAlign: "left",
-    cursor: "pointer",
-    minHeight: "95px",
-  },
-
-  summaryLabel: {
-    display: "block",
-    color: "#6b7280",
-    fontSize: "13px",
-    marginBottom: "8px",
-  },
-
-  summaryValue: {
-    fontSize: "24px",
-  },
-
-  section: {
-    background: "white",
-    border: "1px solid #e5e7eb",
-    borderRadius: "14px",
-    padding: "20px",
-    marginBottom: "18px",
-  },
-
-  sectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "15px",
-    marginBottom: "15px",
-  },
-
-  sectionTitle: {
-    margin: 0,
-    fontSize: "19px",
-  },
-
-  linkButton: {
-    border: "none",
-    background: "transparent",
-    color: "#2563eb",
-    cursor: "pointer",
-    fontWeight: 600,
-  },
-
-  detailsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: "1px",
-    background: "#e5e7eb",
-    border: "1px solid #e5e7eb",
-    borderRadius: "10px",
-    overflow: "hidden",
-  },
-
-  info: {
-    background: "white",
-    padding: "14px",
-    minHeight: "65px",
-  },
-
-  infoLabel: {
-    fontSize: "12px",
-    color: "#6b7280",
-    marginBottom: "5px",
-    fontWeight: 600,
-  },
-
-  infoValue: {
-    fontSize: "14px",
-    whiteSpace: "pre-wrap",
-  },
-
-  address: {
-    background: "#f9fafb",
-    borderRadius: "10px",
-    padding: "15px",
-    color: "#374151",
-  },
-
-  list: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-
-  listItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: "15px",
-    border: "1px solid #e5e7eb",
-    borderRadius: "10px",
-    padding: "14px",
-  },
-
-  muted: {
-    color: "#6b7280",
-    fontSize: "13px",
-    marginTop: "4px",
-  },
-
-  detailText: {
-    color: "#374151",
-    fontSize: "13px",
-    marginTop: "5px",
-  },
-
-  status: {
-    display: "inline-block",
-    background: "#eff6ff",
-    color: "#1d4ed8",
-    borderRadius: "999px",
-    padding: "5px 9px",
-    fontSize: "12px",
-    fontWeight: 600,
-    whiteSpace: "nowrap",
-  },
-
-  smallButton: {
-    border: "1px solid #d1d5db",
-    background: "white",
-    borderRadius: "7px",
-    padding: "7px 11px",
-    cursor: "pointer",
-  },
-
-  amountBlock: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
-    gap: "5px",
-    whiteSpace: "nowrap",
-  },
-
-  empty: {
-    border: "1px dashed #d1d5db",
-    borderRadius: "10px",
-    padding: "20px",
-    textAlign: "center",
-    color: "#6b7280",
-    background: "#f9fafb",
-  },
-};

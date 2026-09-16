@@ -123,6 +123,49 @@ export default function InvoicesPage() {
     );
   };
 
+  const statusBadgeClass = (status: string | null) => {
+    const normalized = (status || "unpaid")
+      .replace("_", " ")
+      .toLowerCase();
+
+    if (
+      ["paid", "completed", "active", "in stock"].includes(
+        normalized
+      )
+    ) {
+      return "badge badge-green";
+    }
+
+    if (
+      [
+        "pending",
+        "submitted",
+        "partially paid",
+        "scheduled",
+        "confirmed",
+      ].includes(normalized)
+    ) {
+      return "badge badge-blue";
+    }
+
+    if (["low stock", "no show"].includes(normalized)) {
+      return "badge badge-amber";
+    }
+
+    if (
+      [
+        "cancelled",
+        "rejected",
+        "overdue",
+        "out of stock",
+      ].includes(normalized)
+    ) {
+      return "badge badge-red";
+    }
+
+    return "badge badge-gray";
+  };
+
   const totalInvoiced = invoices.reduce(
     (sum, invoice) => sum + (invoice.total || 0),
     0
@@ -141,49 +184,38 @@ export default function InvoicesPage() {
   );
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-
-            <p className="text-sm text-slate-500">
-              Invoices
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/dashboard";
-            }}
-            className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-          >
-            Dashboard
-          </button>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">
+              J&J Practice Cloud
+            </span>
+          </a>
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900">
-            Invoices
-          </h2>
-
-          <p className="mt-1 text-slate-500">
-            Practice-wide billing and outstanding balances
-          </p>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Invoices</h1>
+            <p className="page-subtitle">
+              Practice-wide billing and outstanding balances
+            </p>
+          </div>
+          <div className="page-actions" />
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
+          <div className="alert-error">{error}</div>
         )}
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-3">
+        <div className="stat-grid">
           <SummaryCard
             label="Total Invoiced"
             value={currency(totalInvoiced)}
@@ -201,148 +233,135 @@ export default function InvoicesPage() {
         </div>
 
         {loading ? (
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-slate-500">
+          <div className="card">
+            <div className="empty-state">
               Loading invoices...
-            </p>
+            </div>
           </div>
         ) : invoices.length === 0 ? (
-          <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-            <p className="font-semibold text-slate-800">
-              No invoices found
-            </p>
+          <div className="card">
+            <div className="empty-state">
+              <p className="font-semibold">
+                No invoices found
+              </p>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Invoices created from patient billing will
-              appear here.
-            </p>
+              <p className="mt-1">
+                Invoices created from patient billing will
+                appear here.
+              </p>
+            </div>
           </div>
         ) : (
-          <section className="overflow-hidden rounded-2xl bg-white shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px]">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-400">
-                    <th className="px-5 py-4">
-                      Invoice
-                    </th>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Invoice</th>
 
-                    <th className="px-5 py-4">
-                      Patient
-                    </th>
+                  <th>Patient</th>
 
-                    <th className="px-5 py-4">
-                      Date
-                    </th>
+                  <th>Date</th>
 
-                    <th className="px-5 py-4">
-                      Total
-                    </th>
+                  <th>Total</th>
 
-                    <th className="px-5 py-4">
-                      Paid
-                    </th>
+                  <th>Paid</th>
 
-                    <th className="px-5 py-4">
-                      Balance
-                    </th>
+                  <th>Balance</th>
 
-                    <th className="px-5 py-4">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
+                  <th>Status</th>
+                </tr>
+              </thead>
 
-                <tbody className="divide-y divide-slate-100">
-                  {invoices.map((invoice) => {
-                    const patient = getPatient(
-                      invoice.patient_id
-                    );
+              <tbody>
+                {invoices.map((invoice) => {
+                  const patient = getPatient(
+                    invoice.patient_id
+                  );
 
-                    const patientName = patient
-                      ? [
-                          patient.first_name,
-                          patient.last_name,
-                        ]
-                          .filter(Boolean)
-                          .join(" ")
-                      : "Unknown patient";
+                  const patientName = patient
+                    ? [
+                        patient.first_name,
+                        patient.last_name,
+                      ]
+                        .filter(Boolean)
+                        .join(" ")
+                    : "Unknown patient";
 
-                    return (
-                      <tr
-                        key={invoice.id}
-                        className="hover:bg-slate-50"
-                      >
-                        <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              window.location.href =
-                                `/invoices/${invoice.id}`;
-                            }}
-                            className="font-semibold text-blue-700 hover:text-blue-800 hover:underline"
-                          >
-                            {invoice.invoice_number ||
-                              "Invoice"}
-                          </button>
-                        </td>
+                  return (
+                    <tr key={invoice.id}>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.href =
+                              `/invoices/${invoice.id}`;
+                          }}
+                          className="font-semibold hover:underline"
+                        >
+                          {invoice.invoice_number ||
+                            "Invoice"}
+                        </button>
+                      </td>
 
-                        <td className="px-5 py-4">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              window.location.href =
-                                `/patients/${invoice.patient_id}/billing`;
-                            }}
-                            className="text-left"
-                          >
-                            <p className="font-medium text-slate-800">
-                              {patientName}
-                            </p>
+                      <td>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.location.href =
+                              `/patients/${invoice.patient_id}/billing`;
+                          }}
+                          className="text-left"
+                        >
+                          <p className="font-medium">
+                            {patientName}
+                          </p>
 
-                            <p className="text-xs text-slate-400">
-                              {patient?.patient_id ||
-                                invoice.patient_id}
-                            </p>
-                          </button>
-                        </td>
+                          <p className="text-xs text-slate-400">
+                            {patient?.patient_id ||
+                              invoice.patient_id}
+                          </p>
+                        </button>
+                      </td>
 
-                        <td className="px-5 py-4 text-sm text-slate-600">
-                          {formatDate(
-                            invoice.invoice_date
+                      <td className="text-sm text-slate-600">
+                        {formatDate(
+                          invoice.invoice_date
+                        )}
+                      </td>
+
+                      <td className="font-medium">
+                        {currency(invoice.total)}
+                      </td>
+
+                      <td className="text-sm text-slate-600">
+                        {currency(
+                          invoice.amount_paid
+                        )}
+                      </td>
+
+                      <td className="font-semibold">
+                        {currency(invoice.balance)}
+                      </td>
+
+                      <td>
+                        <span
+                          className={statusBadgeClass(
+                            invoice.status
                           )}
-                        </td>
-
-                        <td className="px-5 py-4 font-medium text-slate-800">
-                          {currency(invoice.total)}
-                        </td>
-
-                        <td className="px-5 py-4 text-sm text-slate-600">
-                          {currency(
-                            invoice.amount_paid
+                        >
+                          {(invoice.status ||
+                            "unpaid").replace(
+                            "_",
+                            " "
                           )}
-                        </td>
-
-                        <td className="px-5 py-4 font-semibold text-slate-900">
-                          {currency(invoice.balance)}
-                        </td>
-
-                        <td className="px-5 py-4">
-                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold capitalize text-slate-700">
-                            {(invoice.status ||
-                              "unpaid").replace(
-                              "_",
-                              " "
-                            )}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </main>
@@ -357,14 +376,10 @@ function SummaryCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm">
-      <p className="text-sm text-slate-500">
-        {label}
-      </p>
+    <div className="stat-card">
+      <p className="stat-label">{label}</p>
 
-      <p className="mt-2 text-2xl font-bold text-slate-900">
-        {value}
-      </p>
+      <p className="stat-value">{value}</p>
     </div>
   );
 }

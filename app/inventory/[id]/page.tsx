@@ -147,23 +147,23 @@ export default function InventoryProductPage() {
     stock <= 0
       ? {
           label: "Out of stock",
-          className: "bg-red-100 text-red-700",
+          className: "badge badge-red",
         }
       : stock <= minimum
         ? {
             label: "Low stock",
-            className: "bg-amber-100 text-amber-700",
+            className: "badge badge-amber",
           }
         : {
             label: "In stock",
-            className: "bg-green-100 text-green-700",
+            className: "badge badge-green",
           };
 
   const getBatchStatus = (expiryDate: string | null) => {
     if (!expiryDate) {
       return {
         label: "No expiry date",
-        className: "bg-slate-100 text-slate-600",
+        className: "badge badge-gray",
       };
     }
 
@@ -175,7 +175,7 @@ export default function InventoryProductPage() {
     if (expiry < today) {
       return {
         label: "Expired",
-        className: "bg-red-100 text-red-700",
+        className: "badge badge-red",
       };
     }
 
@@ -187,22 +187,24 @@ export default function InventoryProductPage() {
     if (daysUntilExpiry <= 30) {
       return {
         label: "Expires Soon",
-        className: "bg-amber-100 text-amber-700",
+        className: "badge badge-amber",
       };
     }
 
     return {
       label: "Valid",
-      className: "bg-green-100 text-green-700",
+      className: "badge badge-green",
     };
   };
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-slate-500">Loading product...</p>
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card">
+            <div className="empty-state">
+              Loading product...
+            </div>
           </div>
         </div>
       </main>
@@ -211,22 +213,24 @@ export default function InventoryProductPage() {
 
   if (!product) {
     return (
-      <main className="min-h-screen bg-slate-100">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="font-semibold text-red-700">
-              {error || "Product could not be found."}
-            </p>
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card">
+            <div className="empty-state">
+              <p className="font-semibold text-red-700">
+                {error || "Product could not be found."}
+              </p>
 
-            <button
-              type="button"
-              onClick={() => {
-                window.location.href = "/inventory";
-              }}
-              className="mt-5 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
-            >
-              Back to Inventory
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/inventory";
+                }}
+                className="btn btn-secondary btn-sm mt-5"
+              >
+                Back to Inventory
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -234,110 +238,98 @@ export default function InventoryProductPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">
-              J&J PRACTICE CLOUD
-            </h1>
-            <p className="text-sm text-slate-500">
-              Inventory & Stock Management
-            </p>
-          </div>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/dashboard";
-            }}
-            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Dashboard
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              window.location.href = "/inventory";
-            }}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Back to Inventory
-          </button>
-        </div>
-      </header>
-
-      <div className="mx-auto max-w-7xl px-6 py-8">
-        {error && (
-          <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">
-              Inventory Product
-            </p>
-
-            <h2 className="mt-1 text-3xl font-bold text-slate-900">
-              {product.name}
-            </h2>
-
-            {product.generic_name && (
-              <p className="mt-1 text-slate-500">
-                {product.generic_name}
-              </p>
-            )}
-          </div>
-
-          <div className="flex gap-3">
+          <div className="page-actions">
             <button
               type="button"
               onClick={() => {
                 window.location.href = "/inventory";
               }}
-              className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700"
+              className="btn btn-secondary btn-sm"
+            >
+              Back to Inventory
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        {error && (
+          <div className="alert-error">{error}</div>
+        )}
+
+        <div className="page-header">
+          <div>
+            <p className="page-subtitle">
+              Inventory Product
+            </p>
+
+            <h1 className="page-title">
+              {product.name}
+            </h1>
+
+            {product.generic_name && (
+              <p className="page-subtitle">
+                {product.generic_name}
+              </p>
+            )}
+          </div>
+
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/inventory";
+              }}
+              className="btn btn-secondary btn-sm"
             >
               Inventory
             </button>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `/inventory/${productId}/dispense`;
-                }}
-                className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white"
-              >
-                Dispense Stock
-              </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/inventory/${productId}/dispense`;
+              }}
+              className="btn btn-primary"
+            >
+              Dispense Stock
+            </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `/inventory/${productId}/receive`;
-                }}
-                className="rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white"
-              >
-                + Receive Stock
-              </button>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/inventory/${productId}/receive`;
+              }}
+              className="btn btn-primary"
+            >
+              + Receive Stock
+            </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = `/inventory/${productId}/adjust`;
-                }}
-                className="rounded-xl bg-amber-600 px-5 py-3 text-sm font-semibold text-white"
-              >
-                Adjust Stock
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = `/inventory/${productId}/adjust`;
+              }}
+              className="btn btn-secondary"
+            >
+              Adjust Stock
+            </button>
           </div>
         </div>
 
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="stat-grid">
           <SummaryCard
             title="Current Stock"
             value={`${stock}${product.unit ? ` ${product.unit}` : ""}`}
@@ -353,151 +345,129 @@ export default function InventoryProductPage() {
             value={formatMoney(product.selling_price)}
           />
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
-            <p className="text-sm font-medium text-slate-500">
-              Stock Status
-            </p>
+          <div className="stat-card">
+            <p className="stat-label">Stock Status</p>
 
             <span
-              className={`mt-3 inline-block rounded-full px-3 py-1 text-sm font-semibold ${stockStatus.className}`}
+              className={`badge mt-2 inline-flex ${stockStatus.className}`}
             >
               {stockStatus.label}
             </span>
           </div>
         </div>
 
-        <section className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
-          <h3 className="mb-5 text-xl font-bold text-slate-900">
-            Product Information
-          </h3>
+        <section className="card">
+          <div className="card-header">
+            <h3 className="card-title">Product Information</h3>
+          </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            <Info label="Product Code" value={product.product_code} />
-            <Info label="Barcode" value={product.barcode} />
-            <Info label="Category" value={product.category} />
-            <Info label="Strength" value={product.strength} />
-            <Info label="Dosage Form" value={product.dosage_form} />
-            <Info label="Manufacturer" value={product.manufacturer} />
-            <Info label="Unit" value={product.unit} />
-            <Info
-              label="Purchase Price"
-              value={formatMoney(product.purchase_price)}
-            />
-            <Info
-              label="Selling Price"
-              value={formatMoney(product.selling_price)}
-            />
-            <Info
-              label="Prescription Required"
-              value={product.prescription_required ? "Yes" : "No"}
-            />
-            <Info
-              label="Product Status"
-              value={product.active ? "Active" : "Inactive"}
-            />
+          <div className="card-body">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              <Info label="Product Code" value={product.product_code} />
+              <Info label="Barcode" value={product.barcode} />
+              <Info label="Category" value={product.category} />
+              <Info label="Strength" value={product.strength} />
+              <Info label="Dosage Form" value={product.dosage_form} />
+              <Info label="Manufacturer" value={product.manufacturer} />
+              <Info label="Unit" value={product.unit} />
+              <Info
+                label="Purchase Price"
+                value={formatMoney(product.purchase_price)}
+              />
+              <Info
+                label="Selling Price"
+                value={formatMoney(product.selling_price)}
+              />
+              <Info
+                label="Prescription Required"
+                value={product.prescription_required ? "Yes" : "No"}
+              />
+              <Info
+                label="Product Status"
+                value={product.active ? "Active" : "Inactive"}
+              />
+            </div>
           </div>
         </section>
 
-        <section className="mb-8 rounded-2xl bg-white shadow-sm">
-          <div className="border-b px-6 py-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-bold text-slate-900">
-                  Stock Batches
-                </h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Track batches, expiry dates and remaining quantities.
-                </p>
-              </div>
-
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                {batches.length} batch{batches.length === 1 ? "" : "es"}
-              </span>
+        <section className="card">
+          <div className="card-header">
+            <div>
+              <h3 className="card-title">Stock Batches</h3>
+              <p className="page-subtitle">
+                Track batches, expiry dates and remaining quantities.
+              </p>
             </div>
+
+            <span className="badge badge-gray">
+              {batches.length} batch{batches.length === 1 ? "" : "es"}
+            </span>
           </div>
 
           {batches.length === 0 ? (
-            <div className="p-8 text-center">
+            <div className="empty-state">
               <p className="font-semibold text-slate-900">
                 No stock batches recorded
               </p>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2">
                 Use Receive Stock to add the first batch.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="border-b bg-slate-50">
+            <div className="table-wrap rounded-none border-0 shadow-none">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Batch Number
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Expiry Date
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Received
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Remaining
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Purchase Price
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Received Date
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Supplier
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Status
-                    </th>
+                    <th>Batch Number</th>
+                    <th>Expiry Date</th>
+                    <th>Received</th>
+                    <th>Remaining</th>
+                    <th>Purchase Price</th>
+                    <th>Received Date</th>
+                    <th>Supplier</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y">
+                <tbody>
                   {batches.map((batch) => {
                     const status = getBatchStatus(batch.expiry_date);
 
                     return (
                       <tr key={batch.id}>
-                        <td className="px-5 py-4 font-semibold text-slate-900">
+                        <td className="font-semibold text-slate-900">
                           {batch.batch_number || "—"}
                         </td>
 
-                        <td className="px-5 py-4 text-slate-600">
+                        <td className="text-slate-600">
                           {formatDate(batch.expiry_date)}
                         </td>
 
-                        <td className="px-5 py-4 text-slate-600">
+                        <td className="text-slate-600">
                           {Number(batch.quantity_received || 0)}
                         </td>
 
-                        <td className="px-5 py-4 font-semibold text-slate-900">
+                        <td className="font-semibold text-slate-900">
                           {Number(batch.quantity_remaining || 0)}
                         </td>
 
-                        <td className="px-5 py-4 text-slate-600">
-                          R{Number(batch.purchase_price || 0).toFixed(2)}
+                        <td className="text-slate-600">
+                          {formatMoney(batch.purchase_price)}
                         </td>
 
-                        <td className="px-5 py-4 text-slate-600">
+                        <td className="text-slate-600">
                           {batch.received_date
                             ? formatDate(batch.received_date)
                             : "—"}
                         </td>
 
-                        <td className="px-5 py-4 text-slate-600">
+                        <td className="text-slate-600">
                           {batch.supplier || "—"}
                         </td>
 
-                        <td className="px-5 py-4">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${status.className}`}
-                          >
+                        <td>
+                          <span className={status.className}>
                             {status.label}
                           </span>
                         </td>
@@ -510,73 +480,62 @@ export default function InventoryProductPage() {
           )}
         </section>
 
-        <section className="rounded-2xl bg-white shadow-sm">
-          <div className="border-b px-6 py-5">
-            <h3 className="text-xl font-bold text-slate-900">
-              Stock Movement History
-            </h3>
-
-            <p className="mt-1 text-sm text-slate-500">
-              The latest stock movements for this product.
-            </p>
+        <section className="card">
+          <div className="card-header">
+            <div>
+              <h3 className="card-title">Stock Movement History</h3>
+              <p className="page-subtitle">
+                The latest stock movements for this product.
+              </p>
+            </div>
           </div>
 
           {movements.length === 0 ? (
-            <div className="p-8 text-center">
+            <div className="empty-state">
               <p className="font-semibold text-slate-900">
                 No stock movements recorded
               </p>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-2">
                 Stock movements will appear here when inventory is received,
                 issued or adjusted.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead className="border-b bg-slate-50">
+            <div className="table-wrap rounded-none border-0 shadow-none">
+              <table className="table">
+                <thead>
                   <tr>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Date
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Movement
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Quantity
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Reference
-                    </th>
-                    <th className="px-5 py-4 text-left font-semibold text-slate-600">
-                      Reason
-                    </th>
+                    <th>Date</th>
+                    <th>Movement</th>
+                    <th>Quantity</th>
+                    <th>Reference</th>
+                    <th>Reason</th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y">
+                <tbody>
                   {movements.map((movement) => (
                     <tr key={movement.id}>
-                      <td className="px-5 py-4 text-slate-600">
+                      <td className="text-slate-600">
                         {formatDate(movement.created_at)}
                       </td>
 
-                      <td className="px-5 py-4">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                      <td>
+                        <span className="badge badge-gray">
                           {movement.movement_type || "—"}
                         </span>
                       </td>
 
-                      <td className="px-5 py-4 font-semibold text-slate-900">
+                      <td className="font-semibold text-slate-900">
                         {Number(movement.quantity || 0)}
                       </td>
 
-                      <td className="px-5 py-4 text-slate-600">
+                      <td className="text-slate-600">
                         {movement.reference_type || "—"}
                       </td>
 
-                      <td className="px-5 py-4 text-slate-600">
+                      <td className="text-slate-600">
                         {movement.reason || "—"}
                       </td>
                     </tr>
@@ -599,14 +558,10 @@ function SummaryCard({
   value: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white p-6 shadow-sm">
-      <p className="text-sm font-medium text-slate-500">
-        {title}
-      </p>
+    <div className="stat-card">
+      <p className="stat-label">{title}</p>
 
-      <p className="mt-2 text-2xl font-bold text-slate-900">
-        {value}
-      </p>
+      <p className="stat-value">{value}</p>
     </div>
   );
 }
@@ -620,9 +575,7 @@ function Info({
 }) {
   return (
     <div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {label}
-      </p>
+      <p className="stat-label">{label}</p>
 
       <p className="mt-1 text-sm font-medium text-slate-800">
         {value || "—"}

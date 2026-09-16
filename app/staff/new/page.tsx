@@ -82,140 +82,91 @@ export default function NewStaffPage() {
   }
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f8fafc",
-        padding: "30px",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "800px",
-          margin: "0 auto",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => {
-            window.location.href = "/staff";
-          }}
-          style={{
-            padding: "10px 15px",
-            borderRadius: "8px",
-            border: "1px solid #d1d5db",
-            background: "white",
-            cursor: "pointer",
-            fontWeight: 600,
-            marginBottom: "25px",
-          }}
-        >
-          ← Back to Staff
-        </button>
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
 
-        <div
-          style={{
-            background: "white",
-            border: "1px solid #e5e7eb",
-            borderRadius: "12px",
-            padding: "30px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "14px",
-              fontWeight: 700,
-              color: "#2563eb",
-              marginBottom: "5px",
-            }}
-          >
-            J&J PRACTICE CLOUD
+          <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/staff";
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              ← Back to Staff
+            </button>
           </div>
+        </div>
+      </header>
 
-          <h1
-            style={{
-              margin: "0 0 8px",
-              fontSize: "30px",
-              color: "#1f2937",
-            }}
-          >
-            Add Staff Member
-          </h1>
+      <div className="page-inner">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">Add Staff Member</h1>
+            <p className="page-subtitle">
+              Add a doctor, nurse, receptionist or other practice staff
+              member.
+            </p>
+          </div>
+        </div>
 
-          <p
-            style={{
-              color: "#6b7280",
-              marginBottom: "30px",
-            }}
-          >
-            Add a doctor, nurse, receptionist or other practice staff member.
-          </p>
+        <form onSubmit={handleSubmit} className="card mx-auto max-w-[800px]">
+          <div className="card-body">
+            {error && <div className="alert-error">{error}</div>}
 
-          {error && (
-            <div
-              style={{
-                background: "#fee2e2",
-                color: "#991b1b",
-                padding: "14px",
-                borderRadius: "8px",
-                marginBottom: "20px",
-              }}
-            >
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "20px",
-              }}
-            >
-              <div>
-                <label>First Name</label>
+            <div className="grid grid-cols-1 gap-x-5 sm:grid-cols-2">
+              <label className="field">
+                <span className="label">First Name</span>
                 <input
                   required
                   value={form.first_name}
                   onChange={(e) =>
                     updateField("first_name", e.target.value)
                   }
-                  style={inputStyle}
+                  className="input"
                 />
-              </div>
+              </label>
 
-              <div>
-                <label>Last Name</label>
+              <label className="field">
+                <span className="label">Last Name</span>
                 <input
                   required
                   value={form.last_name}
                   onChange={(e) =>
                     updateField("last_name", e.target.value)
                   }
-                  style={inputStyle}
+                  className="input"
                 />
-              </div>
+              </label>
 
-              <div>
-                <label>Display Name</label>
+              <label className="field">
+                <span className="label">Display Name</span>
                 <input
                   value={form.display_name}
                   onChange={(e) =>
                     updateField("display_name", e.target.value)
                   }
                   placeholder="Optional"
-                  style={inputStyle}
+                  className="input"
                 />
-              </div>
+              </label>
 
-              <div>
-                <label>Role</label>
+              <label className="field">
+                <span className="label">Role</span>
                 <select
                   required
                   value={form.role}
                   onChange={(e) => updateField("role", e.target.value)}
-                  style={inputStyle}
+                  className="input"
                 >
                   <option value="">Select a role</option>
                   <option value="ADMIN">Practice Administrator</option>
@@ -225,46 +176,32 @@ export default function NewStaffPage() {
                   <option value="NURSE">Nurse</option>
                   <option value="INVENTORY">Inventory Manager</option>
                 </select>
-              </div>
+              </label>
 
-              <div>
-                <label>Email</label>
+              <label className="field">
+                <span className="label">Email</span>
                 <input
                   required
                   type="email"
                   value={form.email}
                   onChange={(e) => updateField("email", e.target.value)}
                   placeholder="Staff member's login email"
-                  style={inputStyle}
+                  className="input"
                 />
-              </div>
+              </label>
 
-              <div>
-                <label>Phone</label>
+              <label className="field">
+                <span className="label">Phone</span>
                 <input
                   value={form.phone}
                   onChange={(e) => updateField("phone", e.target.value)}
-                  style={inputStyle}
+                  className="input"
                 />
-              </div>
+              </label>
             </div>
 
-            <div
-              style={{
-                marginTop: "25px",
-                padding: "15px",
-                background: "#f8fafc",
-                borderRadius: "8px",
-              }}
-            >
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  cursor: "pointer",
-                }}
-              >
+            <div className="alert-info">
+              <label className="flex cursor-pointer items-center gap-2.5">
                 <input
                   type="checkbox"
                   checked={form.active}
@@ -272,30 +209,17 @@ export default function NewStaffPage() {
                     updateField("active", e.target.checked)
                   }
                 />
-                <span style={{ fontWeight: 600 }}>Staff member is active</span>
+                <span className="font-semibold">Staff member is active</span>
               </label>
             </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                marginTop: "30px",
-              }}
-            >
+            <div className="page-actions mt-2.5">
               <button
                 type="button"
                 onClick={() => {
                   window.location.href = "/staff";
                 }}
-                style={{
-                  padding: "12px 20px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  background: "white",
-                  cursor: "pointer",
-                  fontWeight: 600,
-                }}
+                className="btn btn-secondary"
               >
                 Cancel
               </button>
@@ -303,33 +227,14 @@ export default function NewStaffPage() {
               <button
                 type="submit"
                 disabled={saving}
-                style={{
-                  padding: "12px 20px",
-                  borderRadius: "8px",
-                  border: "none",
-                  background: "#2563eb",
-                  color: "white",
-                  cursor: saving ? "not-allowed" : "pointer",
-                  fontWeight: 700,
-                  opacity: saving ? 0.7 : 1,
-                }}
+                className="btn btn-primary"
               >
                 {saving ? "Saving..." : "Add Staff Member"}
               </button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </main>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  marginTop: "7px",
-  padding: "12px",
-  borderRadius: "8px",
-  border: "1px solid #d1d5db",
-  fontSize: "15px",
-};

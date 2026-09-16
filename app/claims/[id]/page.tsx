@@ -254,6 +254,52 @@ export default function ClaimDetailPage() {
     });
   };
 
+  const statusBadgeClass = (
+    value: string | null | undefined
+  ) => {
+    const text = (value || "pending")
+      .toLowerCase()
+      .replace(/_/g, " ");
+
+    if (
+      text === "paid" ||
+      text === "completed" ||
+      text === "active" ||
+      text === "in stock"
+    ) {
+      return "badge badge-green";
+    }
+
+    if (
+      text === "pending" ||
+      text === "submitted" ||
+      text === "partially paid" ||
+      text === "partially approved" ||
+      text === "scheduled" ||
+      text === "confirmed"
+    ) {
+      return "badge badge-blue";
+    }
+
+    if (
+      text === "low stock" ||
+      text === "no show"
+    ) {
+      return "badge badge-amber";
+    }
+
+    if (
+      text === "cancelled" ||
+      text === "rejected" ||
+      text === "overdue" ||
+      text === "out of stock"
+    ) {
+      return "badge badge-red";
+    }
+
+    return "badge badge-gray";
+  };
+
   const patientName = patient
     ? [
         patient.title,
@@ -368,9 +414,13 @@ export default function ClaimDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
-        <div className="mx-auto max-w-5xl rounded-xl bg-white p-8 text-center">
-          Loading claim...
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="card">
+            <div className="card-body empty-state">
+              Loading claim...
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -378,15 +428,15 @@ export default function ClaimDetailPage() {
 
   if (!claim) {
     return (
-      <main className="min-h-screen bg-slate-100 p-8">
-        <div className="mx-auto max-w-5xl rounded-xl bg-white p-8">
-          <p className="text-red-600">
+      <main className="page-shell">
+        <div className="page-inner">
+          <div className="alert-error">
             {error || "Claim not found."}
-          </p>
+          </div>
 
           <Link
             href="/claims"
-            className="mt-4 inline-block rounded-lg bg-slate-900 px-4 py-2 text-white"
+            className="btn btn-secondary btn-sm"
           >
             Back to Claims
           </Link>
@@ -436,29 +486,34 @@ export default function ClaimDetailPage() {
 
   return (
     <>
-      <main className="screen-only min-h-screen bg-slate-100">
-        <header className="border-b bg-white">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-            <div>
-              <h1 className="text-xl font-bold text-slate-900">
-                J&J PRACTICE CLOUD
-              </h1>
-              <p className="text-sm text-slate-500">
-                Medical Aid Claim
-              </p>
-            </div>
+      <main className="page-shell screen-only">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a
+              href="/dashboard"
+              className="app-brand"
+            >
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">
+                J&J Practice Cloud
+              </span>
+            </a>
 
-            <div className="flex gap-2">
+            <div className="page-actions">
               <Link
                 href="/claims"
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                className="btn btn-secondary btn-sm"
               >
                 ← Claims
               </Link>
 
               <Link
                 href={`/patients/${claim.patient_id}`}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                className="btn btn-secondary btn-sm"
               >
                 Patient
               </Link>
@@ -466,7 +521,7 @@ export default function ClaimDetailPage() {
               {claim.invoice_id && (
                 <Link
                   href={`/invoices/${claim.invoice_id}`}
-                  className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700"
+                  className="btn btn-secondary btn-sm"
                 >
                   Invoice
                 </Link>
@@ -475,7 +530,7 @@ export default function ClaimDetailPage() {
               <button
                 type="button"
                 onClick={printClaim}
-                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+                className="btn btn-primary btn-sm"
               >
                 🖨 Print Claim Form
               </button>
@@ -483,20 +538,36 @@ export default function ClaimDetailPage() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-6xl space-y-6 p-6">
+        <div className="page-inner">
+          <div className="page-header">
+            <div>
+              <h1 className="page-title">
+                Medical Aid Claim
+              </h1>
+              <p className="page-subtitle">
+                Claim {claim.claim_number || "-"} —{" "}
+                {patientName}
+              </p>
+            </div>
+
+            <span className={statusBadgeClass(claim.status)}>
+              {claim.status || "pending"}
+            </span>
+          </div>
+
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            <div className="alert-error">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+            <div className="alert-success">
               {success}
             </div>
           )}
 
-          <section className="grid gap-4 md:grid-cols-4">
+          <section className="stat-grid">
             <Stat
               label="Claimed"
               value={currency(claim.claimed_amount)}
@@ -515,335 +586,369 @@ export default function ClaimDetailPage() {
             />
           </section>
 
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-              <div>
-                <p className="text-sm text-slate-500">
-                  Claim Number
-                </p>
-                <h2 className="text-2xl font-bold">
-                  {claim.claim_number || "-"}
-                </h2>
-              </div>
+          <section className="card">
+            <div className="card-body">
+              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                <div>
+                  <p className="stat-label">
+                    Claim Number
+                  </p>
+                  <h2 className="stat-value">
+                    {claim.claim_number || "-"}
+                  </h2>
+                </div>
 
-              <span className="rounded-full bg-slate-100 px-4 py-2 text-sm font-medium">
-                {claim.status || "pending"}
-              </span>
+                <span className={statusBadgeClass(claim.status)}>
+                  {claim.status || "pending"}
+                </span>
+              </div>
             </div>
           </section>
 
           {patient && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Patient Information
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Patient Information
+                </h2>
+              </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <Info
-                  label="Patient Name"
-                  value={patientName}
-                />
-                <Info
-                  label="Patient ID"
-                  value={patient.patient_id}
-                />
-                <Info
-                  label="Date of Birth"
-                  value={formatDate(
-                    patient.date_of_birth
-                  )}
-                />
-                <Info
-                  label="ID / Passport"
-                  value={
-                    patient.id_number ||
-                    patient.passport_number ||
-                    "-"
-                  }
-                />
-                <Info
-                  label="Phone"
-                  value={patient.phone || "-"}
-                />
-                <Info
-                  label="Email"
-                  value={patient.email || "-"}
-                />
+              <div className="card-body">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Info
+                    label="Patient Name"
+                    value={patientName}
+                  />
+                  <Info
+                    label="Patient ID"
+                    value={patient.patient_id}
+                  />
+                  <Info
+                    label="Date of Birth"
+                    value={formatDate(
+                      patient.date_of_birth
+                    )}
+                  />
+                  <Info
+                    label="ID / Passport"
+                    value={
+                      patient.id_number ||
+                      patient.passport_number ||
+                      "-"
+                    }
+                  />
+                  <Info
+                    label="Phone"
+                    value={patient.phone || "-"}
+                  />
+                  <Info
+                    label="Email"
+                    value={patient.email || "-"}
+                  />
+                </div>
               </div>
             </section>
           )}
 
           {patient && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Medical Aid Information
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Medical Aid Information
+                </h2>
+              </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
-                <Info
-                  label="Medical Aid Provider"
-                  value={
-                    claim.medical_aid_provider ||
-                    patient.medical_aid_provider ||
-                    "-"
-                  }
-                />
+              <div className="card-body">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <Info
+                    label="Medical Aid Provider"
+                    value={
+                      claim.medical_aid_provider ||
+                      patient.medical_aid_provider ||
+                      "-"
+                    }
+                  />
 
-                <Info
-                  label="Membership Number"
-                  value={
-                    claim.membership_number ||
-                    patient.medical_aid_number ||
-                    "-"
-                  }
-                />
+                  <Info
+                    label="Membership Number"
+                    value={
+                      claim.membership_number ||
+                      patient.medical_aid_number ||
+                      "-"
+                    }
+                  />
 
-                <Info
-                  label="Plan"
-                  value={
-                    patient.medical_aid_plan || "-"
-                  }
-                />
+                  <Info
+                    label="Plan"
+                    value={
+                      patient.medical_aid_plan || "-"
+                    }
+                  />
 
-                <Info
-                  label="Dependent Code"
-                  value={
-                    claim.dependent_code ||
-                    patient.medical_aid_dependent_code ||
-                    "-"
-                  }
-                />
+                  <Info
+                    label="Dependent Code"
+                    value={
+                      claim.dependent_code ||
+                      patient.medical_aid_dependent_code ||
+                      "-"
+                    }
+                  />
 
-                <Info
-                  label="Main Member"
-                  value={
-                    claim.main_member_name ||
-                    patient.medical_aid_main_member ||
-                    "-"
-                  }
-                />
+                  <Info
+                    label="Main Member"
+                    value={
+                      claim.main_member_name ||
+                      patient.medical_aid_main_member ||
+                      "-"
+                    }
+                  />
+                </div>
               </div>
             </section>
           )}
 
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold">
-              Claim Information
-            </h2>
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">
+                Claim Information
+              </h2>
+            </div>
 
-            <div className="grid gap-4 md:grid-cols-4">
-              <Info
-                label="Claim Number"
-                value={
-                  claim.claim_number || "-"
-                }
-              />
+            <div className="card-body">
+              <div className="grid gap-4 md:grid-cols-4">
+                <Info
+                  label="Claim Number"
+                  value={
+                    claim.claim_number || "-"
+                  }
+                />
 
-              <Info
-                label="Claim Date"
-                value={formatDate(claim.claim_date)}
-              />
+                <Info
+                  label="Claim Date"
+                  value={formatDate(claim.claim_date)}
+                />
 
-              <Info
-                label="Submission Date"
-                value={formatDate(
-                  claim.submission_date
-                )}
-              />
+                <Info
+                  label="Submission Date"
+                  value={formatDate(
+                    claim.submission_date
+                  )}
+                />
 
-              <Info
-                label="Response Date"
-                value={formatDate(
-                  claim.response_date
-                )}
-              />
+                <Info
+                  label="Response Date"
+                  value={formatDate(
+                    claim.response_date
+                  )}
+                />
+              </div>
             </div>
           </section>
 
           {invoice && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold">
-                Linked Invoice
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Linked Invoice
+                </h2>
+              </div>
 
-              <div className="grid gap-4 md:grid-cols-5">
-                <Info
-                  label="Invoice Number"
-                  value={
-                    invoice.invoice_number || "-"
-                  }
-                />
+              <div className="card-body">
+                <div className="grid gap-4 md:grid-cols-5">
+                  <Info
+                    label="Invoice Number"
+                    value={
+                      invoice.invoice_number || "-"
+                    }
+                  />
 
-                <Info
-                  label="Invoice Date"
-                  value={formatDate(
-                    invoice.invoice_date
-                  )}
-                />
+                  <Info
+                    label="Invoice Date"
+                    value={formatDate(
+                      invoice.invoice_date
+                    )}
+                  />
 
-                <Info
-                  label="Invoice Total"
-                  value={currency(invoice.total)}
-                />
+                  <Info
+                    label="Invoice Total"
+                    value={currency(invoice.total)}
+                  />
 
-                <Info
-                  label="Amount Paid"
-                  value={currency(
-                    invoice.amount_paid
-                  )}
-                />
+                  <Info
+                    label="Amount Paid"
+                    value={currency(
+                      invoice.amount_paid
+                    )}
+                  />
 
-                <Info
-                  label="Balance"
-                  value={currency(invoice.balance)}
-                />
+                  <Info
+                    label="Balance"
+                    value={currency(invoice.balance)}
+                  />
+                </div>
               </div>
             </section>
           )}
 
-          <section className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-lg font-bold">
-              Update Claim
-            </h2>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Status
-                </label>
-
-                <select
-                  value={status}
-                  onChange={(event) =>
-                    setStatus(event.target.value)
-                  }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                >
-                  <option value="pending">
-                    Pending
-                  </option>
-                  <option value="submitted">
-                    Submitted
-                  </option>
-                  <option value="approved">
-                    Approved
-                  </option>
-                  <option value="partially_approved">
-                    Partially Approved
-                  </option>
-                  <option value="rejected">
-                    Rejected
-                  </option>
-                  <option value="paid">
-                    Paid
-                  </option>
-                  <option value="cancelled">
-                    Cancelled
-                  </option>
-                </select>
-              </div>
-
-              <Field
-                label="Approved Amount"
-                type="number"
-                value={approvedAmount}
-                onChange={setApprovedAmount}
-              />
-
-              <Field
-                label="Rejected Amount"
-                type="number"
-                value={rejectedAmount}
-                onChange={setRejectedAmount}
-              />
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Submission Date
-                </label>
-                <input
-                  type="date"
-                  value={submissionDate}
-                  onChange={(event) =>
-                    setSubmissionDate(
-                      event.target.value
-                    )
-                  }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-sm font-medium">
-                  Response Date
-                </label>
-                <input
-                  type="date"
-                  value={responseDate}
-                  onChange={(event) =>
-                    setResponseDate(
-                      event.target.value
-                    )
-                  }
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                />
-              </div>
-
-              <Field
-                label="Rejection Reason"
-                value={rejectionReason}
-                onChange={setRejectionReason}
-              />
-
-              <div className="md:col-span-2">
-                <label className="mb-1 block text-sm font-medium">
-                  Notes
-                </label>
-
-                <textarea
-                  value={notes}
-                  onChange={(event) =>
-                    setNotes(event.target.value)
-                  }
-                  rows={4}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2"
-                />
-              </div>
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">
+                Update Claim
+              </h2>
             </div>
 
-            <button
-              type="button"
-              onClick={saveClaim}
-              disabled={saving}
-              className="mt-5 rounded-lg bg-slate-900 px-5 py-3 font-medium text-white disabled:opacity-50"
-            >
-              {saving
-                ? "Saving..."
-                : "Save Changes"}
-            </button>
+            <div className="card-body">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="field">
+                  <label className="label" htmlFor="claim-status">
+                    Status
+                  </label>
+
+                  <select
+                    id="claim-status"
+                    value={status}
+                    onChange={(event) =>
+                      setStatus(event.target.value)
+                    }
+                    className="input"
+                  >
+                    <option value="pending">
+                      Pending
+                    </option>
+                    <option value="submitted">
+                      Submitted
+                    </option>
+                    <option value="approved">
+                      Approved
+                    </option>
+                    <option value="partially_approved">
+                      Partially Approved
+                    </option>
+                    <option value="rejected">
+                      Rejected
+                    </option>
+                    <option value="paid">
+                      Paid
+                    </option>
+                    <option value="cancelled">
+                      Cancelled
+                    </option>
+                  </select>
+                </div>
+
+                <Field
+                  label="Approved Amount"
+                  type="number"
+                  value={approvedAmount}
+                  onChange={setApprovedAmount}
+                />
+
+                <Field
+                  label="Rejected Amount"
+                  type="number"
+                  value={rejectedAmount}
+                  onChange={setRejectedAmount}
+                />
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-submission-date">
+                    Submission Date
+                  </label>
+                  <input
+                    id="claim-submission-date"
+                    type="date"
+                    value={submissionDate}
+                    onChange={(event) =>
+                      setSubmissionDate(
+                        event.target.value
+                      )
+                    }
+                    className="input"
+                  />
+                </div>
+
+                <div className="field">
+                  <label className="label" htmlFor="claim-response-date">
+                    Response Date
+                  </label>
+                  <input
+                    id="claim-response-date"
+                    type="date"
+                    value={responseDate}
+                    onChange={(event) =>
+                      setResponseDate(
+                        event.target.value
+                      )
+                    }
+                    className="input"
+                  />
+                </div>
+
+                <Field
+                  label="Rejection Reason"
+                  value={rejectionReason}
+                  onChange={setRejectionReason}
+                />
+
+                <div className="field md:col-span-2">
+                  <label className="label" htmlFor="claim-notes">
+                    Notes
+                  </label>
+
+                  <textarea
+                    id="claim-notes"
+                    value={notes}
+                    onChange={(event) =>
+                      setNotes(event.target.value)
+                    }
+                    rows={4}
+                    className="input"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={saveClaim}
+                disabled={saving}
+                className="btn btn-primary"
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save Changes"}
+              </button>
+            </div>
           </section>
 
           {claim.rejection_reason && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-2 text-lg font-bold">
-                Rejection Reason
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Rejection Reason
+                </h2>
+              </div>
 
-              <p className="whitespace-pre-wrap text-sm text-slate-700">
-                {claim.rejection_reason}
-              </p>
+              <div className="card-body">
+                <p className="whitespace-pre-wrap text-sm text-slate-700">
+                  {claim.rejection_reason}
+                </p>
+              </div>
             </section>
           )}
 
           {claim.notes && (
-            <section className="rounded-xl bg-white p-6 shadow-sm">
-              <h2 className="mb-2 text-lg font-bold">
-                Notes
-              </h2>
+            <section className="card">
+              <div className="card-header">
+                <h2 className="card-title">
+                  Notes
+                </h2>
+              </div>
 
-              <p className="whitespace-pre-wrap text-sm text-slate-700">
-                {claim.notes}
-              </p>
+              <div className="card-body">
+                <p className="whitespace-pre-wrap text-sm text-slate-700">
+                  {claim.notes}
+                </p>
+              </div>
             </section>
           )}
         </div>
@@ -1378,7 +1483,7 @@ function Info({
 }) {
   return (
     <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+      <p className="stat-label">
         {label}
       </p>
       <p className="mt-1 text-sm font-medium text-slate-800">
@@ -1396,11 +1501,11 @@ function Stat({
   value: string;
 }) {
   return (
-    <div className="rounded-xl bg-white p-5 shadow-sm">
-      <p className="text-sm text-slate-500">
+    <div className="stat-card">
+      <p className="stat-label">
         {label}
       </p>
-      <p className="mt-1 text-xl font-bold text-slate-900">
+      <p className="stat-value">
         {value}
       </p>
     </div>
@@ -1419,8 +1524,8 @@ function Field({
   type?: string;
 }) {
   return (
-    <div>
-      <label className="mb-1 block text-sm font-medium">
+    <div className="field">
+      <label className="label">
         {label}
       </label>
 
@@ -1430,7 +1535,7 @@ function Field({
         onChange={(event) =>
           onChange(event.target.value)
         }
-        className="w-full rounded-lg border border-slate-300 px-3 py-2"
+        className="input"
       />
     </div>
   );

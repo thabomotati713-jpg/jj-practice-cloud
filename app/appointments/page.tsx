@@ -65,42 +65,18 @@ function getStatusLabel(status: string | null) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function getStatusStyle(status: string) {
+function getStatusBadgeClass(status: string) {
   switch (status) {
     case "confirmed":
-      return {
-        background: "#ecfdf5",
-        color: "#047857",
-        border: "1px solid #a7f3d0",
-      };
-
+      return "badge badge-blue";
     case "completed":
-      return {
-        background: "#eff6ff",
-        color: "#1d4ed8",
-        border: "1px solid #bfdbfe",
-      };
-
+      return "badge badge-green";
     case "cancelled":
-      return {
-        background: "#fef2f2",
-        color: "#b91c1c",
-        border: "1px solid #fecaca",
-      };
-
+      return "badge badge-red";
     case "no_show":
-      return {
-        background: "#fff7ed",
-        color: "#c2410c",
-        border: "1px solid #fed7aa",
-      };
-
+      return "badge badge-amber";
     default:
-      return {
-        background: "#f8fafc",
-        color: "#475569",
-        border: "1px solid #cbd5e1",
-      };
+      return "badge badge-gray";
   }
 }
 
@@ -365,77 +341,69 @@ export default function AppointmentsPage() {
 
   if (loading) {
     return (
-      <main className="pageShell">
-        <div className="loadingCard">
-          <div className="loadingIcon">📅</div>
-          <h2>Loading appointments</h2>
-          <p>Please wait while your appointment schedule loads.</p>
+      <main className="page-shell">
+        <header className="app-header">
+          <div className="app-header-inner">
+            <a href="/dashboard" className="app-brand">
+              <img
+                src="/logo.jpg"
+                alt="J&J Practice Cloud"
+                className="app-brand-logo"
+              />
+              <span className="app-brand-name">J&J Practice Cloud</span>
+            </a>
+          </div>
+        </header>
+
+        <div className="page-inner">
+          <div className="card">
+            <div className="empty-state">
+              <p>Loading appointments…</p>
+              <p>Please wait while your appointment schedule loads.</p>
+            </div>
+          </div>
         </div>
-
-        <style jsx>{`
-          .pageShell {
-            min-height: 100vh;
-            padding: 28px 20px;
-            background:
-              radial-gradient(circle at top right, rgba(99, 102, 241, 0.1), transparent 35%),
-              linear-gradient(135deg, #f8fafc, #eff6ff 55%, #eef2ff);
-          }
-
-          .loadingCard {
-            max-width: 520px;
-            margin: 100px auto;
-            padding: 42px 30px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.88);
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-          }
-
-          .loadingIcon {
-            font-size: 42px;
-            margin-bottom: 12px;
-          }
-
-          h2 {
-            margin: 0 0 8px;
-            color: #0f172a;
-          }
-
-          p {
-            margin: 0;
-            color: #64748b;
-          }
-        `}</style>
       </main>
     );
   }
 
   return (
-    <main className="pageShell">
-      <div className="content">
-        <section className="hero">
+    <main className="page-shell">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <a href="/dashboard" className="app-brand">
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
+            <span className="app-brand-name">J&J Practice Cloud</span>
+          </a>
+
+          <div className="page-actions">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => router.push("/dashboard")}
+            >
+              ← Dashboard
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="page-inner">
+        <div className="page-header">
           <div>
-            <div className="eyebrow">J&J PRACTICE CLOUD</div>
-
-            <h1>Appointments</h1>
-
-            <p>
+            <h1 className="page-title">Appointments</h1>
+            <p className="page-subtitle">
               Manage your patient schedule, confirmations and consultation
               flow from one place.
             </p>
           </div>
 
-          <div className="heroActions">
+          <div className="page-actions">
             <button
-              className="secondaryButton"
-              onClick={() => router.push("/dashboard")}
-            >
-              ← Dashboard
-            </button>
-
-            <button
-              className="secondaryButton"
+              className="btn btn-secondary"
               onClick={() => loadData(true)}
               disabled={refreshing}
             >
@@ -443,99 +411,84 @@ export default function AppointmentsPage() {
             </button>
 
             <button
-              className="primaryButton"
+              className="btn btn-primary"
               onClick={() => router.push("/appointments/new")}
             >
               + New Appointment
             </button>
           </div>
-        </section>
+        </div>
 
-        {message && (
-          <div className="message">
-            <span>✓</span>
-            <span>{message}</span>
-          </div>
-        )}
+        {message && <div className="alert-info">{message}</div>}
 
-        <section className="statsGrid">
-          <div className="statCard">
-            <div className="statTop">
-              <span className="statIcon">📋</span>
-              <span className="statLabel">TOTAL</span>
-            </div>
-            <div className="statNumber">{totalCount}</div>
-            <div className="statDescription">All appointments</div>
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="stat-label">Total</div>
+            <div className="stat-value">{totalCount}</div>
+            <p className="page-subtitle">All appointments</p>
           </div>
 
-          <div className="statCard todayCard">
-            <div className="statTop">
-              <span className="statIcon">📅</span>
-              <span className="statLabel">TODAY</span>
-            </div>
-            <div className="statNumber">{todayCount}</div>
-            <div className="statDescription">Scheduled for today</div>
+          <div className="stat-card">
+            <div className="stat-label">Today</div>
+            <div className="stat-value">{todayCount}</div>
+            <p className="page-subtitle">Scheduled for today</p>
           </div>
 
-          <div className="statCard upcomingCard">
-            <div className="statTop">
-              <span className="statIcon">⏰</span>
-              <span className="statLabel">UPCOMING</span>
-            </div>
-            <div className="statNumber">{upcomingCount}</div>
-            <div className="statDescription">Active future visits</div>
+          <div className="stat-card">
+            <div className="stat-label">Upcoming</div>
+            <div className="stat-value">{upcomingCount}</div>
+            <p className="page-subtitle">Active future visits</p>
           </div>
 
-          <div className="statCard completedCard">
-            <div className="statTop">
-              <span className="statIcon">✓</span>
-              <span className="statLabel">COMPLETED</span>
-            </div>
-            <div className="statNumber">{completedCount}</div>
-            <div className="statDescription">Completed visits</div>
+          <div className="stat-card">
+            <div className="stat-label">Completed</div>
+            <div className="stat-value">{completedCount}</div>
+            <p className="page-subtitle">Completed visits</p>
           </div>
 
-          <div className="statCard cancelledCard">
-            <div className="statTop">
-              <span className="statIcon">×</span>
-              <span className="statLabel">CANCELLED</span>
-            </div>
-            <div className="statNumber">{cancelledCount}</div>
-            <div className="statDescription">Cancelled visits</div>
+          <div className="stat-card">
+            <div className="stat-label">Cancelled</div>
+            <div className="stat-value">{cancelledCount}</div>
+            <p className="page-subtitle">Cancelled visits</p>
           </div>
-        </section>
+        </div>
 
-        <section className="filterCard">
-          <div className="filterHeader">
+        <section className="card">
+          <div className="card-header">
             <div>
-              <h2>Appointment Schedule</h2>
-              <p>
+              <h2 className="card-title">Appointment Schedule</h2>
+              <p className="page-subtitle">
                 Search and filter appointments by patient, date or status.
               </p>
             </div>
 
-            <div className="resultCount">
+            <span className="badge badge-gray">
               {filteredAppointments.length} of {appointments.length}
-            </div>
+            </span>
           </div>
 
-          <div className="filters">
-            <div className="searchWrapper">
-              <label>Search</label>
-              <div className="searchBox">
-                <span>⌕</span>
-                <input
-                  type="text"
-                  placeholder="Patient, ID, phone, email, type or reason..."
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-              </div>
+          <div className="card-body">
+            <div className="field">
+              <label className="label" htmlFor="appointment-search">
+                Search
+              </label>
+              <input
+                id="appointment-search"
+                className="input"
+                type="text"
+                placeholder="Patient, ID, phone, email, type or reason..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
             </div>
 
-            <div>
-              <label>Date</label>
+            <div className="field">
+              <label className="label" htmlFor="date-filter">
+                Date
+              </label>
               <select
+                id="date-filter"
+                className="input"
                 value={dateFilter}
                 onChange={(event) => setDateFilter(event.target.value)}
               >
@@ -546,9 +499,13 @@ export default function AppointmentsPage() {
               </select>
             </div>
 
-            <div>
-              <label>Status</label>
+            <div className="field">
+              <label className="label" htmlFor="status-filter">
+                Status
+              </label>
               <select
+                id="status-filter"
+                className="input"
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value)}
               >
@@ -562,60 +519,56 @@ export default function AppointmentsPage() {
               </select>
             </div>
 
-            <div className="clearContainer">
-              <label>&nbsp;</label>
-              <button className="clearButton" onClick={clearFilters}>
-                Clear filters
-              </button>
-            </div>
+            <button className="btn btn-secondary" onClick={clearFilters}>
+              Clear filters
+            </button>
           </div>
         </section>
 
         {filteredAppointments.length === 0 ? (
-          <section className="emptyCard">
-            <div className="emptyIcon">📅</div>
-            <h2>No appointments found</h2>
-            <p>
-              Try changing your filters or create a new appointment.
-            </p>
+          <section className="card">
+            <div className="empty-state">
+              <p>No appointments found</p>
+              <p>Try changing your filters or create a new appointment.</p>
 
-            <div className="emptyActions">
-              <button className="secondaryButton" onClick={clearFilters}>
-                Clear filters
-              </button>
+              <div className="page-actions justify-center mt-4">
+                <button className="btn btn-secondary" onClick={clearFilters}>
+                  Clear filters
+                </button>
 
-              <button
-                className="primaryButton"
-                onClick={() => router.push("/appointments/new")}
-              >
-                + New Appointment
-              </button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => router.push("/appointments/new")}
+                >
+                  + New Appointment
+                </button>
+              </div>
             </div>
           </section>
         ) : (
-          <section className="tableCard">
-            <div className="tableHeader">
+          <section className="card">
+            <div className="card-header">
               <div>
-                <h2>Scheduled Visits</h2>
-                <p>
+                <h2 className="card-title">Scheduled Visits</h2>
+                <p className="page-subtitle">
                   Showing {filteredAppointments.length} appointment
                   {filteredAppointments.length === 1 ? "" : "s"}.
                 </p>
               </div>
             </div>
 
-            <div className="tableScroll">
-              <table>
+            <div className="table-wrap border-0 rounded-none shadow-none">
+              <table className="table">
                 <thead>
                   <tr>
-                    <th>DATE</th>
-                    <th>TIME</th>
-                    <th>PATIENT</th>
-                    <th>CONTACT</th>
-                    <th>TYPE</th>
-                    <th>REASON</th>
-                    <th>STATUS</th>
-                    <th>ACTIONS</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Contact</th>
+                    <th>Type</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
 
@@ -635,70 +588,59 @@ export default function AppointmentsPage() {
                     return (
                       <tr key={appointment.id}>
                         <td>
-                          <div className="dateCell">
-                            <strong>
-                              {formatDate(appointment.appointment_date)}
-                            </strong>
+                          <strong>{formatDate(appointment.appointment_date)}</strong>
 
-                            {isToday && (
-                              <span className="todayPill">TODAY</span>
-                            )}
-                          </div>
+                          {isToday && (
+                            <>
+                              <br />
+                              <span className="badge badge-blue">TODAY</span>
+                            </>
+                          )}
                         </td>
 
                         <td>
-                          <div className="timeCell">
-                            <span>◷</span>
-                            <strong>
-                              {formatTime(appointment.start_time)} –{" "}
-                              {formatTime(appointment.end_time)}
-                            </strong>
-                          </div>
+                          {formatTime(appointment.start_time)} –{" "}
+                          {formatTime(appointment.end_time)}
                         </td>
 
                         <td>
-                          <div className="patientCell">
-                            <div className="patientAvatar">
-                              {patient?.first_name?.charAt(0) || "?"}
-                            </div>
-
-                            <div>
-                              <strong>{patientName}</strong>
-                              <small>
-                                {patient?.patient_id || "No Patient ID"}
-                              </small>
-                            </div>
-                          </div>
+                          <strong>{patientName}</strong>
+                          <br />
+                          <small className="text-muted">
+                            {patient?.patient_id || "No Patient ID"}
+                          </small>
                         </td>
 
                         <td>
-                          <div className="contactCell">
-                            <span>{patient?.phone || "No phone"}</span>
-                            <small>
-                              {patient?.email || "No email"}
-                            </small>
-                          </div>
+                          {patient?.phone || "No phone"}
+                          <br />
+                          <small className="text-muted">
+                            {patient?.email || "No email"}
+                          </small>
                         </td>
 
                         <td>
-                          <span className="typePill">
+                          <span className="badge badge-gray">
                             {appointment.appointment_type || "General"}
                           </span>
                         </td>
 
                         <td>
-                          <div className="reasonCell">
-                            <span>{appointment.reason || "—"}</span>
+                          {appointment.reason || "—"}
 
-                            {appointment.notes && (
-                              <small>Notes: {appointment.notes}</small>
-                            )}
-                          </div>
+                          {appointment.notes && (
+                            <>
+                              <br />
+                              <small className="text-muted">
+                                Notes: {appointment.notes}
+                              </small>
+                            </>
+                          )}
                         </td>
 
                         <td>
                           <select
-                            className="statusSelect"
+                            className={`${getStatusBadgeClass(status)} cursor-pointer`}
                             value={status}
                             onChange={(event) =>
                               updateStatus(
@@ -706,7 +648,6 @@ export default function AppointmentsPage() {
                                 event.target.value
                               )
                             }
-                            style={getStatusStyle(status)}
                           >
                             {statuses.map((statusOption) => (
                               <option
@@ -720,9 +661,9 @@ export default function AppointmentsPage() {
                         </td>
 
                         <td>
-                          <div className="actions">
+                          <div className="page-actions">
                             <button
-                              className="actionButton"
+                              className="btn btn-secondary btn-sm"
                               onClick={() =>
                                 router.push(
                                   `/appointments/${appointment.id}/edit`
@@ -733,7 +674,7 @@ export default function AppointmentsPage() {
                             </button>
 
                             <button
-                              className="actionButton"
+                              className="btn btn-secondary btn-sm"
                               onClick={() =>
                                 router.push(
                                   `/patients/${appointment.patient_id}`
@@ -744,7 +685,7 @@ export default function AppointmentsPage() {
                             </button>
 
                             <button
-                              className="emailButton"
+                              className="btn btn-secondary btn-sm"
                               onClick={() =>
                                 sendConfirmation(appointment.id)
                               }
@@ -759,7 +700,7 @@ export default function AppointmentsPage() {
 
                             {canStartConsultation && (
                               <button
-                                className="consultButton"
+                                className="btn btn-primary btn-sm"
                                 onClick={() =>
                                   router.push(
                                     `/consult/${appointment.id}`
@@ -772,7 +713,7 @@ export default function AppointmentsPage() {
 
                             {canStartConsultation && (
                               <button
-                                className="consultButton"
+                                className="btn btn-primary btn-sm"
                                 onClick={() =>
                                   router.push(
                                     `/patients/${appointment.patient_id}/consultations/new?appointment_id=${appointment.id}`
@@ -786,7 +727,7 @@ export default function AppointmentsPage() {
                             {status !== "cancelled" &&
                               status !== "completed" && (
                                 <button
-                                  className="cancelButton"
+                                  className="btn btn-danger btn-sm"
                                   onClick={() =>
                                     cancelAppointment(appointment.id)
                                   }
@@ -805,664 +746,6 @@ export default function AppointmentsPage() {
           </section>
         )}
       </div>
-
-      <style jsx>{`
-        .pageShell {
-          min-height: 100vh;
-          padding: 28px 20px 50px;
-          background:
-            radial-gradient(circle at 85% 0%, rgba(99, 102, 241, 0.1), transparent 30%),
-            radial-gradient(circle at 0% 30%, rgba(59, 130, 246, 0.07), transparent 28%),
-            linear-gradient(135deg, #f8fafc 0%, #eff6ff 52%, #eef2ff 100%);
-        }
-
-        .content {
-          width: 100%;
-          max-width: 1500px;
-          margin: 0 auto;
-        }
-
-        .hero {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 24px;
-          padding: 28px;
-          margin-bottom: 20px;
-          border: 1px solid rgba(226, 232, 240, 0.9);
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.86);
-          box-shadow: 0 16px 45px rgba(15, 23, 42, 0.07);
-          backdrop-filter: blur(18px);
-        }
-
-        .eyebrow {
-          margin-bottom: 8px;
-          color: #4f46e5;
-          font-size: 12px;
-          font-weight: 800;
-          letter-spacing: 0.14em;
-        }
-
-        h1 {
-          margin: 0 0 7px;
-          color: #0f172a;
-          font-size: clamp(30px, 4vw, 42px);
-          line-height: 1.05;
-          letter-spacing: -0.03em;
-        }
-
-        .hero p {
-          margin: 0;
-          color: #64748b;
-          font-size: 15px;
-        }
-
-        .heroActions,
-        .emptyActions {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
-        button {
-          font: inherit;
-        }
-
-        .primaryButton,
-        .secondaryButton,
-        .clearButton {
-          border-radius: 12px;
-          padding: 11px 15px;
-          font-size: 14px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: 0.18s ease;
-        }
-
-        .primaryButton {
-          border: 1px solid #4f46e5;
-          background: #4f46e5;
-          color: white;
-          box-shadow: 0 5px 14px rgba(79, 70, 229, 0.2);
-        }
-
-        .primaryButton:hover {
-          background: #4338ca;
-          transform: translateY(-1px);
-        }
-
-        .secondaryButton {
-          border: 1px solid #dbe2ea;
-          background: white;
-          color: #334155;
-        }
-
-        .secondaryButton:hover {
-          background: #f8fafc;
-          border-color: #cbd5e1;
-        }
-
-        .secondaryButton:disabled {
-          cursor: not-allowed;
-          opacity: 0.6;
-        }
-
-        .message {
-          display: flex;
-          gap: 10px;
-          align-items: center;
-          margin-bottom: 20px;
-          padding: 13px 16px;
-          border: 1px solid #bfdbfe;
-          border-radius: 14px;
-          background: #eff6ff;
-          color: #1e40af;
-          font-size: 14px;
-          font-weight: 600;
-        }
-
-        .statsGrid {
-          display: grid;
-          grid-template-columns: repeat(5, minmax(0, 1fr));
-          gap: 14px;
-          margin-bottom: 20px;
-        }
-
-        .statCard {
-          position: relative;
-          overflow: hidden;
-          min-height: 145px;
-          padding: 20px;
-          border: 1px solid #e2e8f0;
-          border-radius: 20px;
-          background: rgba(255, 255, 255, 0.9);
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.055);
-        }
-
-        .statCard::after {
-          content: "";
-          position: absolute;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          height: 3px;
-          background: #6366f1;
-        }
-
-        .todayCard::after {
-          background: #2563eb;
-        }
-
-        .upcomingCard::after {
-          background: #f59e0b;
-        }
-
-        .completedCard::after {
-          background: #059669;
-        }
-
-        .cancelledCard::after {
-          background: #dc2626;
-        }
-
-        .statTop {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .statIcon {
-          display: grid;
-          place-items: center;
-          width: 34px;
-          height: 34px;
-          border-radius: 10px;
-          background: #eef2ff;
-          font-size: 17px;
-        }
-
-        .statLabel {
-          color: #64748b;
-          font-size: 11px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-        }
-
-        .statNumber {
-          margin-top: 16px;
-          color: #0f172a;
-          font-size: 32px;
-          font-weight: 800;
-          line-height: 1;
-        }
-
-        .statDescription {
-          margin-top: 8px;
-          color: #94a3b8;
-          font-size: 13px;
-        }
-
-        .filterCard,
-        .tableCard,
-        .emptyCard {
-          overflow: hidden;
-          border: 1px solid #e2e8f0;
-          border-radius: 22px;
-          background: rgba(255, 255, 255, 0.92);
-          box-shadow: 0 12px 35px rgba(15, 23, 42, 0.06);
-        }
-
-        .filterCard {
-          margin-bottom: 20px;
-          padding: 22px;
-        }
-
-        .filterHeader,
-        .tableHeader {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 15px;
-          margin-bottom: 18px;
-        }
-
-        .filterHeader h2,
-        .tableHeader h2,
-        .emptyCard h2 {
-          margin: 0 0 5px;
-          color: #0f172a;
-          font-size: 18px;
-        }
-
-        .filterHeader p,
-        .tableHeader p,
-        .emptyCard p {
-          margin: 0;
-          color: #64748b;
-          font-size: 13px;
-        }
-
-        .resultCount {
-          padding: 8px 11px;
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          background: #f8fafc;
-          color: #475569;
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        .filters {
-          display: grid;
-          grid-template-columns: minmax(260px, 1fr) 190px 190px auto;
-          gap: 12px;
-          align-items: end;
-        }
-
-        label {
-          display: block;
-          margin-bottom: 7px;
-          color: #475569;
-          font-size: 12px;
-          font-weight: 700;
-        }
-
-        input,
-        select {
-          width: 100%;
-          box-sizing: border-box;
-          border: 1px solid #dbe2ea;
-          border-radius: 11px;
-          background: white;
-          color: #1e293b;
-          font: inherit;
-          font-size: 14px;
-          outline: none;
-          transition: 0.18s ease;
-        }
-
-        input {
-          padding: 11px 12px;
-        }
-
-        select {
-          padding: 11px 12px;
-          cursor: pointer;
-        }
-
-        input:focus,
-        select:focus {
-          border-color: #818cf8;
-          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .searchBox {
-          position: relative;
-        }
-
-        .searchBox > span {
-          position: absolute;
-          left: 12px;
-          top: 50%;
-          transform: translateY(-51%);
-          color: #94a3b8;
-          font-size: 20px;
-          pointer-events: none;
-        }
-
-        .searchBox input {
-          padding-left: 36px;
-        }
-
-        .clearButton {
-          border: 1px solid #dbe2ea;
-          background: #f8fafc;
-          color: #475569;
-        }
-
-        .clearButton:hover {
-          background: #f1f5f9;
-        }
-
-        .emptyCard {
-          padding: 55px 25px;
-          text-align: center;
-        }
-
-        .emptyIcon {
-          margin-bottom: 14px;
-          font-size: 46px;
-          opacity: 0.8;
-        }
-
-        .emptyActions {
-          justify-content: center;
-          margin-top: 22px;
-        }
-
-        .tableHeader {
-          padding: 20px 22px 0;
-          margin-bottom: 18px;
-        }
-
-        .tableScroll {
-          overflow-x: auto;
-        }
-
-        table {
-          width: 100%;
-          min-width: 1450px;
-          border-collapse: separate;
-          border-spacing: 0;
-        }
-
-        th {
-          padding: 13px 15px;
-          border-top: 1px solid #e2e8f0;
-          border-bottom: 1px solid #e2e8f0;
-          background: #f8fafc;
-          color: #64748b;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          text-align: left;
-          white-space: nowrap;
-        }
-
-        td {
-          padding: 16px 15px;
-          border-bottom: 1px solid #eef2f7;
-          color: #334155;
-          font-size: 13px;
-          vertical-align: middle;
-        }
-
-        tbody tr {
-          transition: background 0.15s ease;
-        }
-
-        tbody tr:hover {
-          background: #f8fbff;
-        }
-
-        tbody tr:last-child td {
-          border-bottom: none;
-        }
-
-        td strong {
-          color: #0f172a;
-        }
-
-        small {
-          display: block;
-          margin-top: 4px;
-          color: #94a3b8;
-          font-size: 11px;
-        }
-
-        .dateCell {
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          min-width: 100px;
-        }
-
-        .todayPill {
-          width: fit-content;
-          padding: 3px 7px;
-          border-radius: 999px;
-          background: #eef2ff;
-          color: #4f46e5;
-          font-size: 9px;
-          font-weight: 800;
-          letter-spacing: 0.06em;
-        }
-
-        .timeCell {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          min-width: 135px;
-          color: #334155;
-        }
-
-        .timeCell > span {
-          color: #6366f1;
-          font-size: 17px;
-        }
-
-        .patientCell {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          min-width: 190px;
-        }
-
-        .patientAvatar {
-          display: grid;
-          place-items: center;
-          flex: 0 0 auto;
-          width: 38px;
-          height: 38px;
-          border-radius: 12px;
-          background: #eef2ff;
-          color: #4f46e5;
-          font-size: 14px;
-          font-weight: 800;
-        }
-
-        .patientCell strong {
-          display: block;
-          font-size: 13px;
-        }
-
-        .contactCell {
-          min-width: 175px;
-        }
-
-        .contactCell span,
-        .contactCell small {
-          white-space: nowrap;
-        }
-
-        .typePill {
-          display: inline-block;
-          max-width: 140px;
-          padding: 6px 9px;
-          border: 1px solid #e2e8f0;
-          border-radius: 8px;
-          background: #f8fafc;
-          color: #475569;
-          font-size: 11px;
-          font-weight: 700;
-        }
-
-        .reasonCell {
-          min-width: 170px;
-          max-width: 230px;
-        }
-
-        .reasonCell > span,
-        .reasonCell small {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-        .statusSelect {
-          width: auto;
-          min-width: 120px;
-          padding: 7px 28px 7px 9px;
-          border-radius: 999px;
-          font-size: 11px;
-          font-weight: 800;
-        }
-
-        .actions {
-          display: flex;
-          flex-wrap: wrap;
-          align-items: center;
-          gap: 7px;
-          min-width: 310px;
-        }
-
-        .actionButton,
-        .emailButton,
-        .consultButton,
-        .cancelButton {
-          border-radius: 8px;
-          padding: 7px 9px;
-          font-size: 11px;
-          font-weight: 700;
-          cursor: pointer;
-          transition: 0.16s ease;
-          white-space: nowrap;
-        }
-
-        .actionButton {
-          border: 1px solid #dbe2ea;
-          background: white;
-          color: #475569;
-        }
-
-        .actionButton:hover {
-          background: #f8fafc;
-        }
-
-        .emailButton {
-          border: 1px solid #bfdbfe;
-          background: #eff6ff;
-          color: #1d4ed8;
-        }
-
-        .emailButton:hover:not(:disabled) {
-          background: #dbeafe;
-        }
-
-        .emailButton:disabled {
-          border-color: #e2e8f0;
-          background: #f1f5f9;
-          color: #94a3b8;
-          cursor: not-allowed;
-        }
-
-        .consultButton {
-          border: 1px solid #059669;
-          background: #059669;
-          color: white;
-        }
-
-        .consultButton:hover {
-          background: #047857;
-        }
-
-        .cancelButton {
-          border: 1px solid #fecaca;
-          background: #fff1f2;
-          color: #dc2626;
-        }
-
-        .cancelButton:hover {
-          background: #ffe4e6;
-        }
-
-        @media (max-width: 1100px) {
-          .statsGrid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-          }
-
-          .filters {
-            grid-template-columns: 1fr 1fr;
-          }
-
-          .searchWrapper {
-            grid-column: 1 / -1;
-          }
-        }
-
-        @media (max-width: 760px) {
-          .pageShell {
-            padding: 15px 10px 35px;
-          }
-
-          .hero {
-            align-items: flex-start;
-            flex-direction: column;
-            padding: 21px;
-          }
-
-          .heroActions {
-            width: 100%;
-          }
-
-          .heroActions button {
-            flex: 1;
-          }
-
-          .statsGrid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
-
-          .filterCard {
-            padding: 17px;
-          }
-
-          .filters {
-            grid-template-columns: 1fr;
-          }
-
-          .searchWrapper {
-            grid-column: auto;
-          }
-
-          .clearContainer {
-            width: 100%;
-          }
-
-          .clearButton {
-            width: 100%;
-          }
-
-          .filterHeader {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-
-          .tableCard {
-            border-radius: 18px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .statsGrid {
-            grid-template-columns: 1fr 1fr;
-            gap: 9px;
-          }
-
-          .statCard {
-            min-height: 125px;
-            padding: 15px;
-          }
-
-          .statNumber {
-            font-size: 27px;
-          }
-
-          .statDescription {
-            font-size: 11px;
-          }
-
-          .heroActions {
-            flex-direction: column;
-          }
-
-          .heroActions button {
-            width: 100%;
-          }
-        }
-      `}</style>
     </main>
   );
 }
