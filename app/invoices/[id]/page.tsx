@@ -105,7 +105,56 @@ export default function InvoiceDetailPage() {
   const [paymentReference, setPaymentReference] = useState("");
   const [paymentNotes, setPaymentNotes] = useState("");
   const [generatingClaim, setGeneratingClaim] = useState(false);
+  const [payLink, setPayLink] = useState("");
+  const [payLinkLoading, setPayLinkLoading] = useState(false);
+  const [payLinkError, setPayLinkError] = useState("");
+  const [payLinkCopied, setPayLinkCopied] = useState(false);
   const [claimMessage, setClaimMessage] = useState("");
+
+  const createPayLink = async () => {
+    if (!invoice || !payLinkLoading) return;
+
+    setPayLinkLoading(true);
+    setPayLinkError("");
+    setPayLink("");
+    setPayLinkCopied(false);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setPayLinkError("Your session has expired. Please sign in again.");
+        setPayLinkLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        `/api/invoices/${invoice.id}/pay-link`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok || !result.url) {
+        setPayLinkError(result.error || "Could not create the payment link.");
+        setPayLinkLoading(false);
+        return;
+      }
+
+      setPayLink(result.url);
+    } catch (payLinkCreateError) {
+      console.error(payLinkCreateError);
+      setPayLinkError("Something went wrong while creating the payment link.");
+    }
+
+    setPayLinkLoading(false);
+  };
 
   const generateClaim = async () => {
     if (!invoice || !patient) return;
@@ -663,6 +712,17 @@ export default function InvoiceDetailPage() {
               >
                 🖨 Print Invoice
               </button>
+
+              <button
+                type="button"
+                onClick={createPayLink}
+                disabled={payLinkLoading}
+                className="btn btn-primary btn-sm"
+              >
+                {payLinkLoading
+                  ? "Creating link..."
+                  : "Pay Online"}
+              </button>
             </div>
           </div>
         </header>
@@ -670,6 +730,77 @@ export default function InvoiceDetailPage() {
         {claimMessage && (
           <div className="page-inner" style={{ paddingTop: 0 }}>
             <div className="alert-info">{claimMessage}</div>
+          </div>
+        )}
+
+        {payLinkError && (
+          <div className="page-inner" style={{ paddingTop: 0 }}>
+            <div className="alert-error">{payLinkError}</div>
+          </div>
+        )}
+
+        {payLink && (
+          <div className="page-inner" style={{ paddingTop: 0 }}>
+            <div
+              className="card"
+              style={{ padding: "18px 20px" }}
+            >
+              <p
+                className="text-sm font-semibold text-slate-700"
+                style={{ marginBottom: 8 }}
+              >
+                Patient payment link (PayFast — card, SnapScan and more)
+              </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
+                <input
+                  readOnly
+                  value={payLink}
+                  className="input"
+                  style={{ flex: 1, minWidth: 220 }}
+                  onFocus={(event) => event.currentTarget.select()}
+                />
+
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(payLink);
+                      setPayLinkCopied(true);
+                    } catch {
+                      setPayLinkCopied(false);
+                    }
+                  }}
+                >
+                  {payLinkCopied ? "Copied" : "Copy link"}
+                </button>
+
+                <a
+                  href={payLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-sm"
+                >
+                  Open
+                </a>
+              </div>
+
+              <p
+                className="text-xs text-slate-500"
+                style={{ marginTop: 8 }}
+              >
+                Send this link to the patient on WhatsApp or email. When
+                they pay, the invoice is updated automatically.
+              </p>
+            </div>
           </div>
         )}
 
