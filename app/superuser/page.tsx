@@ -52,7 +52,7 @@ export default function SuperuserPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        window.location.href = "/";
+        window.location.href = "/login";
         return;
       }
 
@@ -65,7 +65,7 @@ export default function SuperuserPage() {
 
       if (sessionError || !accessToken) {
         await supabase.auth.signOut();
-        window.location.href = "/";
+        window.location.href = "/login";
         return;
       }
 
@@ -91,7 +91,7 @@ export default function SuperuserPage() {
           response.status === 403
         ) {
           await supabase.auth.signOut();
-          window.location.href = "/";
+          window.location.href = "/login";
         }
 
         return;
@@ -205,7 +205,7 @@ export default function SuperuserPage() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   if (loading) {

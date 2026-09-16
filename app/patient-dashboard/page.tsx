@@ -68,7 +68,7 @@ export default function PatientDashboardPage() {
         await supabase.auth.getUser();
 
       if (userError || !userData.user) {
-        window.location.href = "/";
+        window.location.href = "/login";
         return;
       }
 
@@ -272,7 +272,7 @@ export default function PatientDashboardPage() {
               <button
                 type="button"
                 onClick={() => {
-                  window.location.href = "/";
+                  window.location.href = "/login";
                 }}
                 className="btn btn-primary"
               >
@@ -352,7 +352,7 @@ export default function PatientDashboardPage() {
               type="button"
               onClick={async () => {
                 await supabase.auth.signOut();
-                window.location.href = "/";
+                window.location.href = "/login";
               }}
               className="btn btn-secondary btn-sm"
             >

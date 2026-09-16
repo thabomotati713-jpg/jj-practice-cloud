@@ -36,7 +36,7 @@ export default function NewPracticePage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 

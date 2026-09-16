@@ -50,7 +50,7 @@ export default function NewPatientPage() {
     const { data } = await supabase.auth.getUser();
 
     if (!data.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
     }
   };
 
@@ -77,7 +77,7 @@ export default function NewPatientPage() {
       await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 

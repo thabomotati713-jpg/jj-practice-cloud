@@ -48,7 +48,7 @@ export default function DispenseStockPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 
@@ -146,7 +146,7 @@ export default function DispenseStockPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 

@@ -88,7 +88,7 @@ export default function PrescriptionsPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -236,7 +236,7 @@ export default function PrescriptionsPage() {
               type="button"
               onClick={async () => {
                 await supabase.auth.signOut();
-                window.location.href = "/";
+                window.location.href = "/login";
               }}
               className="btn btn-secondary btn-sm"
             >

@@ -133,7 +133,7 @@ export default function NewConsultationPage() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 
@@ -282,7 +282,7 @@ export default function NewConsultationPage() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        router.push("/");
+        router.push("/login");
         return;
       }
 

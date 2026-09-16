@@ -50,7 +50,7 @@ export default function Dashboard() {
       await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -75,14 +75,14 @@ export default function Dashboard() {
       );
 
       setLoading(false);
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
     if (!profile.active) {
       await supabase.auth.signOut();
 
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -91,7 +91,7 @@ export default function Dashboard() {
     if (!practiceId) {
       await supabase.auth.signOut();
 
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -107,14 +107,14 @@ export default function Dashboard() {
     if (practiceError || !practice) {
       await supabase.auth.signOut();
 
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
     if (!practice.active) {
       await supabase.auth.signOut();
 
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -441,7 +441,7 @@ export default function Dashboard() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
   return (

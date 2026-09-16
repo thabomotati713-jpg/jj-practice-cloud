@@ -80,7 +80,7 @@ export default function AppointmentsPage({
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -150,7 +150,7 @@ export default function AppointmentsPage({
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -262,7 +262,7 @@ export default function AppointmentsPage({
           <button
             onClick={async () => {
               await supabase.auth.signOut();
-              window.location.href = "/";
+              window.location.href = "/login";
             }}
             className="btn btn-secondary btn-sm"
           >

@@ -109,7 +109,7 @@ export default function ClaimDetailPage() {
       await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 

@@ -121,7 +121,7 @@ export default function SetPasswordPage() {
           <button
             type="button"
             onClick={() => {
-              window.location.href = "/";
+              window.location.href = "/login";
             }}
             className="btn btn-primary w-full"
           >

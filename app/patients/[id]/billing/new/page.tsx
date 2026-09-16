@@ -61,7 +61,7 @@ export default function NewInvoicePage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -190,7 +190,7 @@ export default function NewInvoicePage() {
       await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 

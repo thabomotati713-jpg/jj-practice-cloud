@@ -280,7 +280,7 @@ export default function InvoiceDetailPage() {
       await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 

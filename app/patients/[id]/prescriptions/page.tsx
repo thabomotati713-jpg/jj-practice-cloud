@@ -133,7 +133,7 @@ export default function PatientPrescriptionsPage() {
       } = await supabase.auth.getUser();
 
       if (userError || !user) {
-        router.push("/");
+        router.push("/login");
         return;
       }
 

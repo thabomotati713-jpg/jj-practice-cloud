@@ -40,7 +40,7 @@ export default function InvoicesPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 

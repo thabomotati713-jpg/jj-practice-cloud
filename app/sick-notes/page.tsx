@@ -116,7 +116,7 @@ export default function SickNotesPage() {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/";
+      window.location.href = "/login";
       return;
     }
 
@@ -262,7 +262,7 @@ export default function SickNotesPage() {
 
       if (!userData.user) {
         alert("Your session has expired. Please log in again.");
-        window.location.href = "/";
+        window.location.href = "/login";
         return;
       }
 

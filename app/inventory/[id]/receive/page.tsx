@@ -50,7 +50,7 @@ export default function ReceiveStockPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 
@@ -143,7 +143,7 @@ export default function ReceiveStockPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      router.push("/");
+      router.push("/login");
       return;
     }
 

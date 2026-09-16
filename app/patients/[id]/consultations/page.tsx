@@ -87,7 +87,7 @@ export default function ConsultationHistoryPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push("/");
+        router.push("/login");
         return;
       }
 
