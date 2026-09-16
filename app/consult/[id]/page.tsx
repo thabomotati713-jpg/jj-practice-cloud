@@ -28,7 +28,7 @@ export default function ConsultRoomPage() {
     ? `https://meet.jit.si/${roomName}`
     : "";
   const patientLink = appointmentId
-    ? `${window.location.origin}/consult/${appointmentId}`
+    ? `/consult/${appointmentId}`
     : "";
 
   useEffect(() => {
@@ -62,7 +62,9 @@ export default function ConsultRoomPage() {
         <button
           type="button"
           onClick={() => {
-            navigator.clipboard?.writeText(patientLink);
+            navigator.clipboard?.writeText(
+              `${window.location.origin}${patientLink}`
+            );
             setCopied(true);
           }}
           className="rounded-xl bg-white/10 px-4 py-2 text-xs font-semibold text-white ring-1 ring-white/20 transition hover:bg-white/20"
