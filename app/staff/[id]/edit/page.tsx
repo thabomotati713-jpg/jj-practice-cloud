@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SPECIALTIES } from "../../../../lib/specialties";
 import { supabase } from "../../../../lib/supabase";
 
@@ -9,6 +10,7 @@ export default function EditStaff({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
   const [id, setId] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -84,6 +86,53 @@ export default function EditStaff({
     }
 
     setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    const staffName =
+      [firstName, lastName].filter(Boolean).join(" ") || "this staff member";
+
+    const confirmed = window.confirm(
+      `Delete ${staffName} permanently? Their login will be removed and this cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setError("Your session has expired. Please sign in again.");
+        setSaving(false);
+        return;
+      }
+
+      const response = await fetch(`/api/staff/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setError(result.error || "Could not delete the staff member.");
+        setSaving(false);
+        return;
+      }
+
+      router.push("/staff");
+    } catch (deleteError) {
+      console.error(deleteError);
+      setError("Something went wrong while deleting the staff member.");
+      setSaving(false);
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -274,6 +323,15 @@ export default function EditStaff({
                 className="btn btn-primary w-full"
               >
                 {saving ? "Saving..." : "Save Changes"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={saving}
+                className="btn btn-danger w-full"
+              >
+                {saving ? "Working..." : "Delete Staff Member"}
               </button>
             </div>
           </div>

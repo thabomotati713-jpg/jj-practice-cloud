@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
 
 export async function POST(request: Request) {
   let createdAuthUserId: string | null = null;
@@ -266,11 +267,109 @@ export async function POST(request: Request) {
       );
     }
 
+    // Email the owner a set-your-own-password link on top of the
+    // temporary password. If the email fails, the temporary password
+    // still works — report a warning instead of rolling everything back.
+    let passwordLinkSent = false;
+
+    try {
+      const resendApiKey = process.env.RESEND_API_KEY;
+      const resendFromEmail = process.env.RESEND_FROM_EMAIL;
+
+      if (resendApiKey && resendFromEmail) {
+        const siteUrl =
+          process.env.NEXT_PUBLIC_SITE_URL ||
+          new URL(request.url).origin;
+
+        const { data: linkData } = await adminClient.auth.admin
+          .generateLink({
+            type: "recovery",
+            email: adminEmail,
+            options: {
+              redirectTo: `${siteUrl}/set-password`,
+            },
+          });
+
+        const actionLink = linkData?.properties?.action_link;
+
+        if (actionLink) {
+          const resend = new Resend(resendApiKey);
+
+          const { error: emailError } = await resend.emails.send({
+            from: resendFromEmail,
+            to: adminEmail,
+            subject:
+              "Your J&J Practice Cloud practice is ready — set your password",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; color: #1f2937;">
+                <div style="font-size: 14px; font-weight: 700; color: #1f7c7a; margin-bottom: 12px;">
+                  J&amp;J PRACTICE CLOUD
+                </div>
+
+                <h1 style="font-size: 28px; margin: 0 0 16px;">
+                  Welcome, ${adminFirstName}
+                </h1>
+
+                <p style="font-size: 16px; line-height: 1.6;">
+                  Your practice <strong>${practice.name}</strong> has been set
+                  up on J&amp;J Practice Cloud.
+                </p>
+
+                <p style="font-size: 16px; line-height: 1.6;">
+                  A temporary password has been given to you separately. You
+                  can use it to sign in right away — or set your own password
+                  now using the button below.
+                </p>
+
+                <div style="margin: 30px 0;">
+                  <a
+                    href="${actionLink}"
+                    style="
+                      display: inline-block;
+                      padding: 13px 22px;
+                      background: #1f7c7a;
+                      color: white;
+                      text-decoration: none;
+                      border-radius: 8px;
+                      font-weight: 700;
+                    "
+                  >
+                    Set My Password
+                  </a>
+                </div>
+
+                <p style="font-size: 14px; line-height: 1.6; color: #6b7280;">
+                  If you did not expect this email, you can safely ignore it.
+                </p>
+
+                <p style="font-size: 14px; line-height: 1.6; color: #6b7280;">
+                  J&amp;J Practice Cloud
+                </p>
+              </div>
+            `,
+          });
+
+          if (!emailError) {
+            passwordLinkSent = true;
+          }
+        }
+      }
+    } catch (passwordLinkError) {
+      console.error(
+        "Owner password-setup email failed:",
+        passwordLinkError
+      );
+    }
+
     return NextResponse.json(
       {
         success: true,
         message:
-          "Practice and administrator login created successfully.",
+          "Practice and administrator login created successfully." +
+          (passwordLinkSent
+            ? " A set-your-own-password link was emailed to the owner."
+            : " Note: the password-setup email could not be sent — share the temporary password directly."),
+        passwordLinkSent,
         practice: {
           id: practice.id,
           name: practice.name,
