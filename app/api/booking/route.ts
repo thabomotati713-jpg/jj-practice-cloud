@@ -183,10 +183,24 @@ export async function POST(request: Request) {
       );
     }
 
+    const { data: practiceCodeSetting } = await supabase
+      .from("practice_settings")
+      .select("practice_id")
+      .eq("setting_key", "practice_code")
+      .eq("setting_value", practiceCode)
+      .maybeSingle();
+
+    if (!practiceCodeSetting?.practice_id) {
+      return NextResponse.json(
+        { error: "The practice or patient details could not be verified." },
+        { status: 401 }
+      );
+    }
+
     const { data: practice } = await supabase
       .from("practices")
-      .select("id, active")
-      .eq("practice_code", practiceCode)
+      .select("id")
+      .eq("id", practiceCodeSetting.practice_id)
       .eq("active", true)
       .maybeSingle();
 
