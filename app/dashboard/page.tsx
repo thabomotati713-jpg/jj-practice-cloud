@@ -856,12 +856,11 @@ export default function Dashboard() {
 
         <footer className="mt-10 border-t border-slate-200/70 pt-5 pb-8">
           <p className="mx-auto max-w-3xl text-center text-[11px] leading-5 text-slate-400">
-            J&amp;J Practice Cloud protects personal and health information in
-            accordance with South Africa&apos;s Protection of Personal
-            Information Act (POPIA, Act 4 of 2013), with administrative and
-            technical safeguards aligned to international healthcare privacy
-            standards, including HIPAA. Patient records are encrypted in
-            transit and at rest, and all record access is logged for audit.
+            J&amp;J Practice Cloud supports POPIA-minded practice workflows
+            through role-based access, secure HTTPS transport and audit logging
+            on selected sensitive record views. Each practice remains
+            responsible for its own access controls, policies and lawful use of
+            patient information.
           </p>
         </footer>
       </div>
@@ -886,10 +885,10 @@ function DashboardCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl bg-white p-5 text-left border border-white/70 backdrop-blur-xl shadow-[0_1px_2px_rgb(15,31,45,0.04)] hover:shadow-md hover:border-[#7dd1c8] transition-all duration-200"
+      className="group relative overflow-hidden rounded-2xl bg-white p-4 text-left border border-white/70 backdrop-blur-xl shadow-[0_1px_2px_rgb(15,31,45,0.04)] hover:shadow-md hover:border-[#7dd1c8] transition-all duration-200"
     >
       <div className="flex items-start justify-between">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#effaf8] text-[13px] font-bold text-[#1f7c7a]">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#effaf8] text-[12px] font-bold text-[#1f7c7a]">
           {icon}
         </div>
 
@@ -898,12 +897,12 @@ function DashboardCard({
         </span>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-3">
         <p className="text-sm font-semibold text-slate-500">
           {title}
         </p>
 
-        <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
+        <p className="mt-0.5 text-2xl font-bold tracking-tight text-slate-900">
           {count}
         </p>
 
@@ -912,7 +911,7 @@ function DashboardCard({
         </p>
       </div>
 
-      <div className="mt-5 flex items-center text-xs font-semibold text-[#1f7c7a] group-hover:opacity-100 opacity-0 transition-opacity duration-200">
+      <div className="mt-3 flex items-center text-xs font-semibold text-[#1f7c7a]">
         Open {title.toLowerCase()} →
       </div>
     </button>

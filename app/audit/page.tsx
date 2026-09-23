@@ -128,9 +128,8 @@ export default function AuditTrailPage() {
           <div>
             <h1 className="page-title">Audit Trail</h1>
             <p className="page-subtitle">
-              Every access to sensitive patient records — POPIA access log.
-              Entries are permanent and cannot be edited or deleted from the
-              app.
+              Logged access to selected sensitive records. Entries are
+              permanent and cannot be edited or deleted from the app.
             </p>
           </div>
         </div>

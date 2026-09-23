@@ -146,7 +146,7 @@ export async function POST(request: Request) {
         phone,
         city,
         province,
-        active: true,
+        active: false,
       })
       .select("id")
       .single();
@@ -244,7 +244,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "The owner account could not be completed." }, { status: 500 });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || new URL(request.url).origin;
     const resendKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.RESEND_FROM_EMAIL;
     const specialtyLabel = SPECIALTIES.find((item) => item.id === specialty)?.label || "Healthcare Practice";
@@ -261,8 +260,8 @@ export async function POST(request: Request) {
           from: fromEmail,
           to: email,
           replyTo: "jjpracticecloud@gmail.com",
-          subject: "Your J&J Practice Cloud practice is ready",
-          html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;padding:32px;color:#0f1f2d"><p style="font-weight:800;color:#1f7c7a">J&amp;J PRACTICE CLOUD</p><h1>Welcome, ${safeName}</h1><p>Your workspace for <strong>${safePractice}</strong> has been created on the <strong>${safePlan}</strong> plan.</p><p>You can sign in immediately with the password you created during registration.</p><p style="margin:28px 0"><a href="${siteUrl}/login" style="background:#1f7c7a;color:white;padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:700">Sign in to your practice</a></p><p>The once-off R1 999 activation fee is only invoiced after guided onboarding is confirmed.</p><p>Questions? Reply to this email or WhatsApp 060 112 8855.</p></div>`,
+          subject: "J&J Practice Cloud registration received",
+          html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;padding:32px;color:#0f1f2d"><p style="font-weight:800;color:#1f7c7a">J&amp;J PRACTICE CLOUD</p><h1>Registration received, ${safeName}</h1><p>We created the owner account for <strong>${safePractice}</strong> on the <strong>${safePlan}</strong> plan.</p><p>Your practice is pending guided onboarding and activation. We will contact you before access is enabled and the once-off R1 999 activation fee is invoiced.</p><p style="margin:28px 0"><a href="https://wa.me/27601128855" style="background:#1f7c7a;color:white;padding:13px 22px;border-radius:10px;text-decoration:none;font-weight:700">Contact J&amp;J Practice Cloud</a></p><p>Questions? Reply to this email or WhatsApp 060 112 8855.</p></div>`,
         });
         emailSent = !ownerResult.error;
 

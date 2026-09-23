@@ -19,7 +19,7 @@ export default function SetPasswordPage() {
 
       if (!session) {
         setError(
-          "This invitation link is invalid or has expired. Please ask your practice administrator to send a new invitation."
+          "This password link is invalid or has expired. Request a new reset link or ask your practice administrator for help."
         );
       }
 
@@ -65,7 +65,7 @@ export default function SetPasswordPage() {
 
       if (!session) {
         setError(
-          "Your invitation session is invalid or has expired."
+          "Your password session is invalid or has expired."
         );
         setSaving(false);
         return;
@@ -114,7 +114,7 @@ export default function SetPasswordPage() {
           </h1>
 
           <p className="page-subtitle mb-6 mt-3 text-left">
-            Your staff account is ready. You can now sign in to J&J
+            Your password has been saved. You can now sign in to J&J
             Practice Cloud using your email address and new password.
           </p>
 
@@ -142,7 +142,7 @@ export default function SetPasswordPage() {
         <h1 className="page-title">Set Your Password</h1>
 
         <p className="page-subtitle mb-6 mt-2">
-          Create a password for your J&J Practice Cloud staff account.
+          Create a new password for your J&J Practice Cloud account.
         </p>
 
         {error && <div className="alert-error">{error}</div>}

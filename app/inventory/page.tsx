@@ -167,11 +167,12 @@ export default function InventoryPage() {
 
   const totalProducts = products.length;
 
-  const lowStockProducts = products.filter(
-    (product) =>
-      Number(product.current_stock || 0) <=
-      Number(product.minimum_stock || 0)
-  ).length;
+  const lowStockProducts = products.filter((product) => {
+    const stock = Number(product.current_stock || 0);
+    const minimum = Number(product.minimum_stock || 0);
+
+    return stock > 0 && stock <= minimum;
+  }).length;
 
   const outOfStockProducts = products.filter(
     (product) => Number(product.current_stock || 0) <= 0

@@ -695,7 +695,7 @@ export default function AppointmentsPage() {
                                 status === "completed"
                               }
                             >
-                              ✉ Confirmation
+                              Email confirmation
                             </button>
 
                             {canStartConsultation && (
@@ -707,7 +707,7 @@ export default function AppointmentsPage() {
                                   )
                                 }
                               >
-                                🎥 Video
+                                Video consult
                               </button>
                             )}
 

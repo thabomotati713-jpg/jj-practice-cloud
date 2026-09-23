@@ -8,7 +8,9 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const logoUrl = "/logo.jpg";
 
@@ -112,7 +114,7 @@ export default function Home() {
       await supabase.auth.signOut();
 
       setError(
-        "This practice is currently disabled. Please contact J&J Practice Cloud."
+        "This practice is awaiting activation or has been disabled. Please contact J&J Practice Cloud."
       );
 
       setLoading(false);
@@ -121,6 +123,36 @@ export default function Home() {
 
     setLoading(false);
     window.location.href = "/dashboard";
+  };
+
+  const handlePasswordRecovery = async () => {
+    setError("");
+    setNotice("");
+
+    const recoveryEmail = email.trim().toLowerCase();
+
+    if (!recoveryEmail) {
+      setError("Enter your email address first.");
+      return;
+    }
+
+    setRecovering(true);
+
+    const { error: recoveryError } =
+      await supabase.auth.resetPasswordForEmail(recoveryEmail, {
+        redirectTo: `${window.location.origin}/set-password`,
+      });
+
+    setRecovering(false);
+
+    if (recoveryError) {
+      setError(recoveryError.message);
+      return;
+    }
+
+    setNotice(
+      "If that email belongs to an account, a password reset link has been sent."
+    );
   };
 
   return (
@@ -265,20 +297,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center gap-2 text-slate-600">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-slate-300 accent-[#1f7c7a]"
-                  />
-                  Remember me
-                </label>
-
+              <div className="flex justify-end text-sm">
                 <button
                   type="button"
-                  className="font-medium text-[#1f7c7a] hover:text-[#123335]"
+                  onClick={handlePasswordRecovery}
+                  disabled={recovering}
+                  className="font-medium text-[#1f7c7a] hover:text-[#123335] disabled:opacity-60"
                 >
-                  Forgot password?
+                  {recovering ? "Sending reset link..." : "Forgot password?"}
                 </button>
               </div>
 
@@ -291,6 +317,15 @@ export default function Home() {
                   ? "Signing in..."
                   : "Sign in"}
               </button>
+
+              {notice && (
+                <p
+                  className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+                  role="status"
+                >
+                  {notice}
+                </p>
+              )}
 
               {error && (
                 <p

@@ -15,6 +15,38 @@ import {
 const OPEN_HOUR = 8;
 const CLOSE_HOUR = 17;
 const SLOT_MINUTES = 30;
+const BOOKING_WINDOW_MS = 10 * 60 * 1000;
+const MAX_BOOKING_ATTEMPTS = 20;
+
+const bookingAttempts = new Map<
+  string,
+  { count: number; resetAt: number }
+>();
+
+function clientIp(request: Request) {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+function isRateLimited(ip: string) {
+  const now = Date.now();
+  const current = bookingAttempts.get(ip);
+
+  if (!current || current.resetAt <= now) {
+    bookingAttempts.set(ip, {
+      count: 1,
+      resetAt: now + BOOKING_WINDOW_MS,
+    });
+    return false;
+  }
+
+  current.count += 1;
+  bookingAttempts.set(ip, current);
+  return current.count > MAX_BOOKING_ATTEMPTS;
+}
 
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -69,14 +101,16 @@ type VerifyResult = {
 
 async function verifyPatient(
   supabase: SupabaseClient,
+  practiceId: string,
   patientNumber: string,
   phone: string
 ): Promise<VerifyResult> {
   const { data: patient, error } = await supabase
     .from("patients")
     .select("id, practice_id, phone, first_name, status")
+    .eq("practice_id", practiceId)
     .eq("patient_id", patientNumber.trim())
-    .single();
+    .maybeSingle();
 
   if (error || !patient) {
     return {
@@ -115,8 +149,16 @@ function isBookableDate(date: string) {
 
 export async function POST(request: Request) {
   try {
+    if (isRateLimited(clientIp(request))) {
+      return NextResponse.json(
+        { error: "Too many booking attempts. Wait 10 minutes and try again." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
 
+    const practiceCode = String(body.practiceCode || "").trim();
     const patientNumber = String(body.patientId || "");
     const phone = String(body.phone || "");
     const date = String(body.date || "");
@@ -131,18 +173,33 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!patientNumber || !phone || !isValidDate(date)) {
+    if (!practiceCode || !patientNumber || !phone || !isValidDate(date)) {
       return NextResponse.json(
         {
           error:
-            "Patient number, phone number and a valid date are required.",
+            "Practice code, patient number, phone number and a valid date are required.",
         },
         { status: 400 }
       );
     }
 
+    const { data: practice } = await supabase
+      .from("practices")
+      .select("id, active")
+      .eq("practice_code", practiceCode)
+      .eq("active", true)
+      .maybeSingle();
+
+    if (!practice) {
+      return NextResponse.json(
+        { error: "The practice or patient details could not be verified." },
+        { status: 401 }
+      );
+    }
+
     const verified = await verifyPatient(
       supabase,
+      practice.id,
       patientNumber,
       phone
     );
@@ -154,7 +211,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const practiceId = verified.patient.practice_id;
+    const practiceId = practice.id;
 
     const { data: booked } = await supabase
       .from("appointments")
@@ -194,6 +251,22 @@ export async function POST(request: Request) {
 
     // Booking request (final step): create the appointment.
     if (time) {
+      const allowedSlots = new Set(buildSlots());
+
+      if (!isBookableDate(date)) {
+        return NextResponse.json(
+          { error: "Online bookings must be for a date from tomorrow onwards." },
+          { status: 400 }
+        );
+      }
+
+      if (!allowedSlots.has(time)) {
+        return NextResponse.json(
+          { error: "Select a valid appointment time." },
+          { status: 400 }
+        );
+      }
+
       if (bookedSlots.has(time)) {
         return NextResponse.json(
           { error: "That time slot is already booked." },

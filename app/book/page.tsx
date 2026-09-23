@@ -7,6 +7,7 @@ type Step = "identify" | "choose" | "done";
 export default function BookPage() {
   const [step, setStep] = useState<Step>("identify");
 
+  const [practiceCode, setPracticeCode] = useState("");
   const [patientId, setPatientId] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
@@ -41,6 +42,7 @@ export default function BookPage() {
     setLoading(true);
 
     const data = await post({
+      practiceCode,
       patientId,
       phone,
       date,
@@ -68,6 +70,7 @@ export default function BookPage() {
     setLoading(true);
 
     const data = await post({
+      practiceCode,
       patientId,
       phone,
       date,
@@ -179,8 +182,8 @@ export default function BookPage() {
             </h1>
 
             <p className="mt-1.5 text-sm text-slate-500">
-              For registered patients. Verify with your patient
-              number and the phone number on file.
+              For registered patients. Verify with your practice code,
+              patient number and the phone number on file.
             </p>
 
             <form
@@ -190,6 +193,26 @@ export default function BookPage() {
                 loadAvailability();
               }}
             >
+              <div>
+                <label
+                  htmlFor="practiceCode"
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  Practice code
+                </label>
+
+                <input
+                  id="practiceCode"
+                  placeholder="e.g. 773"
+                  value={practiceCode}
+                  onChange={(event) =>
+                    setPracticeCode(event.target.value)
+                  }
+                  className={inputClasses}
+                  required
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor="patientId"

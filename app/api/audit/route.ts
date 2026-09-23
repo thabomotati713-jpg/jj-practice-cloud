@@ -97,6 +97,37 @@ export async function POST(request: Request) {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
+    if (action === "view") {
+      const cutoff = new Date(Date.now() - 30_000).toISOString();
+      let duplicateQuery = adminClient
+        .from("audit_log")
+        .select("id")
+        .eq("practice_id", profile.practice_id)
+        .eq("user_id", user.id)
+        .eq("action", action)
+        .eq("entity", entity)
+        .gte("created_at", cutoff)
+        .limit(1);
+
+      duplicateQuery = entityId
+        ? duplicateQuery.eq("entity_id", entityId)
+        : duplicateQuery.is("entity_id", null);
+
+      duplicateQuery = details
+        ? duplicateQuery.eq("details", details)
+        : duplicateQuery.is("details", null);
+
+      const { data: duplicate } = await duplicateQuery.maybeSingle();
+
+      if (duplicate) {
+        return NextResponse.json({
+          ok: true,
+          recorded: false,
+          duplicate: true,
+        });
+      }
+    }
+
     const { error: insertError } = await adminClient
       .from("audit_log")
       .insert({

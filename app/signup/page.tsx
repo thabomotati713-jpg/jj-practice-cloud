@@ -103,12 +103,12 @@ export default function SignupPage() {
         </header>
         <section className="signup-success">
           <span className="success-mark">✓</span>
-          <span className="marketing-eyebrow">REGISTRATION COMPLETE</span>
-          <h1 className="display-font">Your practice workspace is ready.</h1>
-          <p>We created the owner login for <strong>{form.practiceName}</strong>. You can sign in now while our team contacts you to complete onboarding and activation.</p>
+          <span className="marketing-eyebrow">REGISTRATION RECEIVED</span>
+          <h1 className="display-font">Your practice is pending activation.</h1>
+          <p>We created the owner account for <strong>{form.practiceName}</strong>. Our team will contact you to complete guided onboarding before access is enabled.</p>
           <div className="signup-success-actions">
-            <a href="/login" className="marketing-button">Sign in to your practice →</a>
-            <a href="https://wa.me/27601128855?text=Hello%20Thabo%2C%20I%20have%20registered%20my%20practice%20on%20J%26J%20Practice%20Cloud." className="marketing-button-ghost">Message Thabo</a>
+            <a href="https://wa.me/27601128855?text=Hello%20Thabo%2C%20I%20have%20registered%20my%20practice%20on%20J%26J%20Practice%20Cloud." className="marketing-button">Message Thabo →</a>
+            <a href="/" className="marketing-button-ghost">Return to website</a>
           </div>
           <small>Check {form.email} for your welcome message. Delivery can take a few minutes.</small>
         </section>
