@@ -42,13 +42,6 @@ export async function GET(request: Request) {
           first_name,
           middle_name,
           last_name
-        ),
-        practice:practices (
-          active
-        ),
-        practice_settings (
-          setting_key,
-          setting_value
         )
       `
       )
@@ -62,9 +55,16 @@ export async function GET(request: Request) {
       );
     }
 
+    // practice_settings has no FK to sick_notes, so it cannot be embedded
+    // above — fetch it separately by practice_id.
+    const { data: settingsRows } = await supabase
+      .from("practice_settings")
+      .select("setting_key, setting_value")
+      .eq("practice_id", note.practice_id);
+
     const settings: Record<string, string> = {};
 
-    for (const row of note.practice_settings || []) {
+    for (const row of settingsRows || []) {
       settings[row.setting_key] = row.setting_value || "";
     }
 
