@@ -508,6 +508,13 @@ export default function Dashboard() {
             </a>
 
             <a
+              href="/ai/no-show"
+              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
+            >
+              J&J AI
+            </a>
+
+            <a
               href="/prescriptions"
               className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
             >
@@ -828,6 +835,15 @@ export default function Dashboard() {
                     chipClass="bg-sky-50 text-sky-600"
                     onClick={() => {
                       window.location.href = "/appointments/new";
+                    }}
+                  />
+
+                  <QuickAction
+                    label="AI appointment follow-up"
+                    chip="AI"
+                    chipClass="bg-[#effaf8] text-[#1f7c7a]"
+                    onClick={() => {
+                      window.location.href = "/ai/no-show";
                     }}
                   />
 

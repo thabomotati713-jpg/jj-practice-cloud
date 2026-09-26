@@ -404,6 +404,13 @@ export default function AppointmentsPage() {
           <div className="page-actions">
             <button
               className="btn btn-secondary"
+              onClick={() => router.push("/ai/no-show")}
+            >
+              J&J AI Follow-up
+            </button>
+
+            <button
+              className="btn btn-secondary"
               onClick={() => loadData(true)}
               disabled={refreshing}
             >
