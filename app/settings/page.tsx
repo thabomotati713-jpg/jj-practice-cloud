@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import QRCode from "qrcode";
 import { supabase } from "../../lib/supabase";
 
 type Settings = {
@@ -14,6 +15,7 @@ type Settings = {
   country: string;
   postal_code: string;
   logo_url: string;
+  queue_checkin_token: string;
 };
 
 const emptySettings: Settings = {
@@ -27,6 +29,7 @@ const emptySettings: Settings = {
   country: "",
   postal_code: "",
   logo_url: "",
+  queue_checkin_token: "",
 };
 
 export default function SettingsPage() {
@@ -37,10 +40,29 @@ export default function SettingsPage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
+  const [qrBusy, setQrBusy] = useState(false);
 
   useEffect(() => {
     loadSettings();
   }, []);
+
+  useEffect(() => {
+    if (!settings.queue_checkin_token || typeof window === "undefined") {
+      setQrDataUrl("");
+      return;
+    }
+
+    const checkInUrl = `${window.location.origin}/check-in/${settings.queue_checkin_token}`;
+
+    QRCode.toDataURL(checkInUrl, {
+      width: 480,
+      margin: 2,
+      errorCorrectionLevel: "H",
+    })
+      .then(setQrDataUrl)
+      .catch(() => setError("Could not generate the reception QR preview."));
+  }, [settings.queue_checkin_token]);
 
   const loadSettings = async () => {
     const { data: userData } = await supabase.auth.getUser();
@@ -85,6 +107,94 @@ export default function SettingsPage() {
 
     setSettings(loaded);
     setLoading(false);
+  };
+
+  const generateReceptionQr = async () => {
+    if (!practiceId) return;
+
+    setQrBusy(true);
+    setError("");
+    setMessage("");
+
+    const token = crypto.randomUUID();
+
+    const { error: qrError } = await supabase
+      .from("practice_settings")
+      .upsert(
+        {
+          practice_id: practiceId,
+          setting_key: "queue_checkin_token",
+          setting_value: token,
+        },
+        { onConflict: "practice_id,setting_key" }
+      );
+
+    if (qrError) {
+      setError(`Could not generate reception QR: ${qrError.message}`);
+      setQrBusy(false);
+      return;
+    }
+
+    setSettings((current) => ({
+      ...current,
+      queue_checkin_token: token,
+    }));
+    setMessage("Reception QR code generated and saved.");
+    setQrBusy(false);
+  };
+
+  const printReceptionQr = () => {
+    if (!qrDataUrl || !settings.queue_checkin_token) return;
+
+    const checkInUrl = `${window.location.origin}/check-in/${settings.queue_checkin_token}`;
+    const safeName = (settings.practice_name || "Medical Practice").replace(
+      /[&<>"']/g,
+      (character) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        })[character] || character
+    );
+
+    const printWindow = window.open("", "_blank", "width=720,height=900");
+
+    if (!printWindow) {
+      setError("Pop-ups are blocked. Allow pop-ups once, then press Print QR again.");
+      return;
+    }
+
+    printWindow.document.write(`<!doctype html>
+      <html>
+        <head>
+          <title>${safeName} Reception QR</title>
+          <style>
+            body{font-family:Arial,sans-serif;margin:0;padding:48px;text-align:center;color:#0f172a}
+            .sheet{max-width:560px;margin:auto;border:2px solid #0f766e;border-radius:28px;padding:38px}
+            h1{font-size:30px;margin:0 0 8px} p{font-size:16px;line-height:1.5;color:#475569}
+            img{width:360px;max-width:90%;margin:24px auto;display:block}
+            .label{font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#0f766e}
+            .url{font-size:11px;word-break:break-all;color:#64748b;margin-top:24px}
+            .brand{margin-top:30px;font-size:12px;color:#64748b}
+            @media print{body{padding:0}.sheet{border:none}}
+          </style>
+        </head>
+        <body>
+          <div class="sheet">
+            <div class="label">Patient self check-in</div>
+            <h1>${safeName}</h1>
+            <p>Scan this QR code when you arrive, verify your patient details, and join the consultation queue.</p>
+            <img src="${qrDataUrl}" alt="Reception check-in QR code" />
+            <p><strong>Scan with your phone camera</strong></p>
+            <div class="url">${checkInUrl}</div>
+            <div class="brand">Powered by J&amp;J PracticeCloud</div>
+          </div>
+          <script>window.onload=()=>{window.print();}</script>
+        </body>
+      </html>`);
+    printWindow.document.close();
   };
 
   const updateField = (key: keyof Settings, value: string) => {
@@ -371,6 +481,97 @@ export default function SettingsPage() {
                   />
                 </div>
               )}
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-header">
+              <h2 className="card-title">Patient Arrival & Queue QR</h2>
+            </div>
+
+            <div className="card-body">
+              <p className="mb-5 text-sm leading-6 text-slate-600">
+                Print this QR code and place it at reception. Existing patients can scan it,
+                verify their patient number and mobile number, and automatically join your
+                live Patients in Line queue.
+              </p>
+
+              <div className="grid gap-6 md:grid-cols-[260px_1fr] md:items-center">
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-center">
+                  {qrDataUrl ? (
+                    <img
+                      src={qrDataUrl}
+                      alt="Patient reception check-in QR code"
+                      className="mx-auto w-full max-w-[230px] rounded-2xl bg-white p-2"
+                    />
+                  ) : (
+                    <div className="grid aspect-square place-items-center rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
+                      Generate your practice QR code
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <p className="label">Reception check-in link</p>
+                  <input
+                    readOnly
+                    value={
+                      settings.queue_checkin_token && typeof window !== "undefined"
+                        ? `${window.location.origin}/check-in/${settings.queue_checkin_token}`
+                        : ""
+                    }
+                    placeholder="Generate a QR code first"
+                    className="input"
+                  />
+
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void generateReceptionQr()}
+                      disabled={qrBusy}
+                      className="btn btn-secondary"
+                    >
+                      {qrBusy
+                        ? "Generating..."
+                        : settings.queue_checkin_token
+                          ? "Regenerate QR"
+                          : "Generate QR"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={printReceptionQr}
+                      disabled={!qrDataUrl}
+                      className="btn btn-primary"
+                    >
+                      Print Reception QR
+                    </button>
+
+                    {settings.queue_checkin_token ? (
+                      <a
+                        href={`/check-in/${settings.queue_checkin_token}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-secondary"
+                      >
+                        Test Check-In Page
+                      </a>
+                    ) : null}
+
+                    <a href="/queue" className="btn btn-secondary">
+                      Open Patients in Line
+                    </a>
+                  </div>
+
+                  {settings.queue_checkin_token ? (
+                    <p className="mt-4 text-xs leading-5 text-slate-500">
+                      Regenerating the QR immediately disables the old printed code. Only
+                      regenerate it if the old code has been lost or shared somewhere it
+                      should not be.
+                    </p>
+                  ) : null}
+                </div>
+              </div>
             </div>
           </section>
 
