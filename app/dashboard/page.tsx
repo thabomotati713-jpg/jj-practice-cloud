@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import { fetchMySpecialty } from "../../lib/specialties";
-import PracticeAccessGuard from "../../components/PracticeAccessGuard";
+import styles from "./dashboard.module.css";
 
 type Counts = {
   patients: number;
@@ -17,7 +18,8 @@ type Counts = {
 };
 
 export default function Dashboard() {
-  const [email, setEmail] = useState("");
+  const [, setEmail] = useState("");
+  const [moduleSearch, setModuleSearch] = useState("");
   const [userName, setUserName] = useState("");
   const [specialtyLabel, setSpecialtyLabel] = useState("General Practice");
   const [practiceName, setPracticeName] = useState("");
@@ -42,10 +44,7 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  const loadDashboard = async () => {
+    const loadDashboard = async () => {
     const { data: userData } =
       await supabase.auth.getUser();
 
@@ -437,533 +436,143 @@ export default function Dashboard() {
     }
 
     setLoading(false);
-  };
+    };
+    void loadDashboard();
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.href = "/login";
   };
 
+  const modules = [
+    { title: "Patients", key: "patients", href: "/patients", icon: "people", description: "Records & clinical history", group: "Care" },
+    { title: "Appointments", key: "appointments", href: "/appointments", icon: "calendar", description: "Visits & scheduling", group: "Care" },
+    { title: "Prescriptions", key: "prescriptions", href: "/prescriptions", icon: "prescription", description: "Medication & treatment", group: "Care" },
+    { title: "Sick notes", key: "sick_notes", href: "/sick-notes", icon: "document", description: "Medical leave certificates", group: "Care" },
+    { title: "Invoices", key: "invoices", href: "/invoices", icon: "wallet", description: "Billing & payments", group: "Operations" },
+    { title: "Medical aid claims", key: "claims", href: "/claims", icon: "shield", description: "Claims & submissions", group: "Operations" },
+    { title: "Inventory", key: "inventory", href: "/inventory", icon: "box", description: "Stock & dispensing", group: "Operations" },
+    { title: "Staff", key: "staff", href: "/staff", icon: "people", description: "Your practice team", group: "Operations" },
+  ] as const;
+  const visibleModules = modules.filter(module => `${module.title} ${module.description}`.toLowerCase().includes(moduleSearch.trim().toLowerCase()));
+  const money = (value: number) => `R ${value.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const metrics = [
+    { label: "Invoiced this month", value: money(stats.invoicedThisMonth), note: "Invoices dated this month", icon: "document", href: "/invoices" },
+    { label: "Payments on this month’s invoices", value: money(stats.collectedThisMonth), note: "Payments recorded against these invoices", icon: "wallet", href: "/invoices" },
+    { label: "Outstanding balance", value: money(stats.outstandingTotal), note: "Across all invoices", icon: "clock", href: "/invoices" },
+    { label: "Upcoming appointments", value: String(stats.upcomingWeek), note: "Scheduled & confirmed · next 7 days", icon: "calendar", href: "/appointments" },
+  ];
+
   return (
-    <main className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-white/70 bg-white/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-white/80">
-              {practiceLogo ? (
-                <img
-                  src={practiceLogo}
-                  alt="Practice logo"
-                  className="h-full w-full object-contain p-1"
-                />
-              ) : (
-                <span className="text-sm font-black tracking-tight text-[#1f7c7a]">
-                  J&J
-                </span>
-              )}
-            </div>
-
-            <div>
-              <h1 className="text-base font-bold tracking-tight text-slate-900 sm:text-lg">
-                J&J PRACTICE CLOUD
-              </h1>
-
-              <p className="text-xs text-slate-500 sm:text-sm">
-                Practice Management System
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={handleSignOut}
-            className="btn btn-secondary btn-sm"
-          >
-            Sign out
-          </button>
+    <div className={styles.shell}>
+      <Link className={styles.skip} href="#dashboard-content">Skip to dashboard</Link>
+      <aside className={styles.sidebar} aria-label="Practice navigation">
+        <Link href="/dashboard" className={styles.brand}>
+          <span className={styles.brandMark}>J&J</span>
+          <span>PracticeCloud<small>YOUR PRACTICE, CONNECTED</small></span>
+        </Link>
+        <div className={styles.workspace}>
+          <span className={styles.workspaceIcon}><Icon name="shield" /></span>
+          <div><strong>{practiceName || "Your practice"}</strong><small>{specialtyLabel}</small></div>
         </div>
-      </header>
-
-      <nav className="sticky top-[73px] z-10 border-b border-white/70 bg-white/70 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl overflow-x-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex min-w-max items-center gap-1 py-2">
-            <a
-              href="/dashboard"
-              className="rounded-xl bg-[#1f7c7a] px-3 py-2 text-sm font-semibold text-white shadow-sm"
-            >
-              Dashboard
-            </a>
-
-            <a
-              href="/patients"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Patients
-            </a>
-
-            <a
-              href="/appointments"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Appointments
-            </a>
-
-            <a
-              href="/ai/no-show"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              J&J AI
-            </a>
-
-            <a
-              href="/prescriptions"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Prescriptions
-            </a>
-
-            <a
-              href="/sick-notes"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Sick Notes
-            </a>
-
-            <a
-              href="/invoices"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Invoices
-            </a>
-
-            <a
-              href="/claims"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Claims
-            </a>
-
-            <a
-              href="/inventory"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Inventory
-            </a>
-
-            <a
-              href="/staff"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Staff
-            </a>
-
-            <a
-              href="/settings"
-              className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-[#f8fafc] hover:text-[#1f7c7a]"
-            >
-              Settings
-            </a>
+        <nav className={styles.nav} aria-label="Main navigation">
+          <Link className={styles.activeNav} aria-current="page" href="/dashboard"><Icon name="grid" />Overview</Link>
+          {["Care", "Operations"].map(group => <div key={group} className={styles.navGroup}>
+            <p>{group === "Care" ? "PATIENT CARE" : "PRACTICE OPERATIONS"}</p>
+            {modules.filter(module => module.group === group).map(module => <Link key={module.key} href={module.href}><Icon name={module.icon} />{module.title}</Link>)}
+          </div>)}
+          <div className={styles.navGroup}><p>WORKSPACE</p>
+            <Link href="/ai/no-show"><Icon name="spark" />Appointment follow-up</Link>
+            <Link href="/settings"><Icon name="settings" />Settings</Link>
           </div>
-        </div>
-      </nav>
+        </nav>
+        <div className={styles.sidebarFooter}><span>Built for better practice days.</span><small>J & J SOFTWARE DEVELOPERS</small></div>
+      </aside>
 
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <section className="mb-8">
-          <div className="card p-6 sm:p-7">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 flex-none items-center justify-center overflow-hidden rounded-2xl border border-white/80 bg-white shadow-[var(--glass-shadow)]">
-                  {practiceLogo ? (
-                    <img
-                      src={practiceLogo}
-                      alt="Practice logo"
-                      className="h-full w-full object-contain p-1.5"
-                    />
-                  ) : (
-                    <span className="text-sm font-bold text-[#1f7c7a]">
-                      J&J
-                    </span>
-                  )}
-                </div>
+      <div className={styles.mainColumn}>
+        <header className={styles.topbar}>
+          <div className={styles.breadcrumb}>Workspace <span>/</span> <strong>Overview</strong></div>
+          <div className={styles.topbarActions}>
+            <span className={styles.userAvatar} aria-hidden="true">{userName ? userName.charAt(0).toUpperCase() : "J"}</span>
+            <span className={styles.userName}>{userName || "Practice workspace"}</span>
+            <button type="button" className={styles.signOut} onClick={handleSignOut}>Sign out <Icon name="logout" /></button>
+          </div>
+        </header>
+        <main id="dashboard-content" className={styles.content}>
+          <section className={styles.heading} aria-labelledby="dashboard-title">
+            <div><p className={styles.eyebrow}>YOUR PRACTICE AT A GLANCE</p><h1 id="dashboard-title">Good day{userName ? `, ${userName}` : ""}<span>.</span></h1><p>A clear view of your practice. More time for your patients.</p></div>
+            <Link className={styles.primaryButton} href="/appointments/new"><Icon name="plus" />New appointment</Link>
+          </section>
 
-                <div>
-                  <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                    <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#1f7c7a]">
-                      {practiceName || "J&J Practice Medical Centre"}
-                    </p>
-
-                    <span className="rounded-full border border-white/80 bg-white/70 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-[#1f7c7a] backdrop-blur-xl">
-                      {specialtyLabel}
-                    </span>
-                  </div>
-
-                  <h2 className="display-font text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-                    Good day{userName ? `, ${userName}` : ""}
-                  </h2>
-
-                  <p className="mt-1.5 text-sm leading-6 text-slate-500 sm:text-base">
-                    Here is an overview of your practice today.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-none items-center gap-3 rounded-2xl border border-white/70 bg-white/60 px-5 py-3.5 shadow-[var(--glass-shadow)] backdrop-blur-xl">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#effaf8] text-[11px] font-extrabold tracking-wide text-[#1f7c7a]">
-                  REC
-                </div>
-
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Total records
-                  </p>
-
-                  <p className="display-font text-2xl font-extrabold leading-6 text-slate-900">
-                    {loading
-                      ? "—"
-                      : counts.patients +
-                        counts.appointments +
-                        counts.prescriptions +
-                        counts.sick_notes +
-                        counts.invoices +
-                        counts.claims +
-                        counts.inventory +
-                        counts.staff}
-                  </p>
-                </div>
-              </div>
+          <section className={styles.welcome} aria-label="Practice overview">
+            <div className={styles.welcomeCopy}>
+              <span className={styles.welcomeTag}>{specialtyLabel}</span>
+              <h2>{practiceName || "Your practice, in one place."}</h2>
+              <p>Care, coordination and the details that keep your day moving.</p>
+              <Link href="/patients/new">Register a patient <span aria-hidden="true">↗</span></Link>
             </div>
-          </div>
-        </section>
+            <div className={styles.welcomeArt} aria-hidden="true"><div className={styles.orbit}></div><div className={styles.orbitInner}></div><div className={styles.cross}>{practiceLogo ? <img src={practiceLogo} alt="" /> : <Icon name="plus" />}</div><span className={styles.artDot}></span></div>
+          </section>
 
-        {error && (
-          <div className="mb-6 alert-error">
-            {error}
-          </div>
-        )}
+          {error && <div className="alert-error" role="alert">{error}</div>}
+          <section className={styles.metrics} aria-label="Practice statistics" aria-busy={loading}>
+            {metrics.map(metric => <Link key={metric.label} href={metric.href} className={styles.metric}>
+              <div className={styles.metricTop}><span>{metric.label}</span><span className={styles.metricIcon}><Icon name={metric.icon} /></span></div>
+              <strong>{loading || error ? "—" : metric.value}</strong><p>{metric.note}</p>
+            </Link>)}
+          </section>
 
-        <section className="mb-8">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              {
-                label: "Invoiced this month",
-                chip: "IN",
-                chipClass: "bg-[#effaf8] text-[#1f7c7a]",
-                value: `R ${stats.invoicedThisMonth.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
-                tone: "text-slate-900",
-              },
-              {
-                label: "Collected this month",
-                chip: "COL",
-                chipClass: "bg-emerald-50 text-emerald-600",
-                value: `R ${stats.collectedThisMonth.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
-                tone: "text-emerald-600",
-              },
-              {
-                label: "Outstanding balance",
-                chip: "OUT",
-                chipClass: "bg-amber-50 text-amber-600",
-                value: `R ${stats.outstandingTotal.toLocaleString("en-ZA", { minimumFractionDigits: 2 })}`,
-                tone:
-                  stats.outstandingTotal > 0
-                    ? "text-amber-600"
-                    : "text-slate-900",
-              },
-              {
-                label: "Appointments next 7 days",
-                chip: "APT",
-                chipClass: "bg-sky-50 text-sky-600",
-                value: String(stats.upcomingWeek),
-                tone: "text-slate-900",
-              },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="group rounded-2xl border border-white/70 bg-white/70 p-5 shadow-[var(--glass-shadow)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[var(--glass-shadow-hover)]"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    {stat.label}
-                  </p>
-
-                  <span
-                    className={`flex h-7 w-9 flex-none items-center justify-center rounded-lg text-[10px] font-extrabold tracking-wide ${stat.chipClass}`}
-                  >
-                    {stat.chip}
-                  </span>
-                </div>
-
-                <p
-                  className={`display-font mt-3 text-xl font-extrabold tracking-tight sm:text-2xl ${stat.tone}`}
-                >
-                  {loading ? "—" : stat.value}
-                </p>
+          <div className={styles.lowerGrid}>
+            <section className={styles.moduleSection} aria-labelledby="modules-title">
+              <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>EVERYTHING WITHIN REACH</p><h2 id="modules-title">Practice modules</h2></div><span className={styles.moduleCount}>8 modules</span></div>
+              <label className={styles.search}><Icon name="search" /><span className={styles.srOnly}>Find a practice module</span><input type="search" placeholder="Find a module…" value={moduleSearch} onChange={event => setModuleSearch(event.target.value)} />{moduleSearch && <button type="button" aria-label="Clear module search" onClick={() => setModuleSearch("")}>×</button>}</label>
+              <div className={styles.moduleGrid} aria-busy={loading}>
+                {visibleModules.map(module => <Link className={styles.moduleCard} key={module.key} href={module.href}>
+                  <div className={styles.moduleTop}><span className={styles.moduleIcon}><Icon name={module.icon} /></span><span className={styles.recordCount}>{loading || error ? "—" : counts[module.key]} <small>records</small></span></div>
+                  <h3>{module.title}</h3><p>{module.description}</p><span className={styles.moduleArrow} aria-hidden="true">↗</span>
+                </Link>)}
               </div>
-            ))}
-          </div>
-        </section>
-
-        {loading ? (
-          <div className="rounded-2xl border border-white/70 bg-white/70 backdrop-blur-xl p-12 text-center">
-            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#1f7c7a]" />
-
-            <p className="text-sm font-medium text-slate-500">
-              Loading dashboard...
-            </p>
-          </div>
-        ) : (
-          <>
-            <section>
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Practice modules
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Manage your practice from one place.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <DashboardCard
-                  title="Patients"
-                  count={counts.patients}
-                  description="Patient records"
-                  icon="PA"
-                  onClick={() => {
-                    window.location.href = "/patients";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Appointments"
-                  count={counts.appointments}
-                  description="Scheduled visits"
-                  icon="AP"
-                  onClick={() => {
-                    window.location.href = "/appointments";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Prescriptions"
-                  count={counts.prescriptions}
-                  description="Prescription records"
-                  icon="RX"
-                  onClick={() => {
-                    window.location.href = "/prescriptions";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Sick Notes"
-                  count={counts.sick_notes}
-                  description="Medical leave notes"
-                  icon="SN"
-                  onClick={() => {
-                    window.location.href = "/sick-notes";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Invoices"
-                  count={counts.invoices}
-                  description="Practice billing"
-                  icon="IN"
-                  onClick={() => {
-                    window.location.href = "/invoices";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Medical Aid Claims"
-                  count={counts.claims}
-                  description="Submitted claims"
-                  icon="CL"
-                  onClick={() => {
-                    window.location.href = "/claims";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Inventory"
-                  count={counts.inventory}
-                  description="Stock products"
-                  icon="ST"
-                  onClick={() => {
-                    window.location.href = "/inventory";
-                  }}
-                />
-
-                <DashboardCard
-                  title="Staff"
-                  count={counts.staff}
-                  description="Practice staff"
-                  icon="SF"
-                  onClick={() => {
-                    window.location.href = "/staff";
-                  }}
-                />
-              </div>
+              {visibleModules.length === 0 && <p className={styles.empty} role="status">No modules match “{moduleSearch}”. Try patients, billing or stock.</p>}
+              {loading && <p className={styles.loading} role="status">Loading your practice overview…</p>}
             </section>
 
-            <section className="mt-8">
-              <div className="card p-5 sm:p-6">
-                <div className="mb-5">
-                  <h3 className="text-lg font-bold text-slate-900">
-                    Quick actions
-                  </h3>
-
-                  <p className="mt-1 text-sm text-slate-500">
-                    Jump directly into commonly used areas.
-                  </p>
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <QuickAction
-                    label="New patient"
-                    chip="NP"
-                    chipClass="bg-[#effaf8] text-[#1f7c7a]"
-                    onClick={() => {
-                      window.location.href = "/patients/new";
-                    }}
-                  />
-
-                  <QuickAction
-                    label="New appointment"
-                    chip="NA"
-                    chipClass="bg-sky-50 text-sky-600"
-                    onClick={() => {
-                      window.location.href = "/appointments/new";
-                    }}
-                  />
-
-                  <QuickAction
-                    label="AI appointment follow-up"
-                    chip="AI"
-                    chipClass="bg-[#effaf8] text-[#1f7c7a]"
-                    onClick={() => {
-                      window.location.href = "/ai/no-show";
-                    }}
-                  />
-
-                  <QuickAction
-                    label="Prescriptions"
-                    chip="RX"
-                    chipClass="bg-emerald-50 text-emerald-600"
-                    onClick={() => {
-                      window.location.href = "/prescriptions";
-                    }}
-                  />
-
-                  <QuickAction
-                    label="Open inventory"
-                    chip="ST"
-                    chipClass="bg-amber-50 text-amber-600"
-                    onClick={() => {
-                      window.location.href = "/inventory";
-                    }}
-                  />
-                </div>
-              </div>
-            </section>
-          </>
-        )}
-
-        <footer className="mt-10 border-t border-slate-200/70 pt-5 pb-8">
-          <p className="mx-auto max-w-3xl text-center text-[11px] leading-5 text-slate-400">
-            J&amp;J Practice Cloud supports POPIA-minded practice workflows
-            through role-based access, secure HTTPS transport and audit logging
-            on selected sensitive record views. Each practice remains
-            responsible for its own access controls, policies and lawful use of
-            patient information.
-          </p>
-        </footer>
+            <aside className={styles.rightRail} aria-label="Practice shortcuts">
+              <section className={styles.quickPanel}><div className={styles.sectionHeading}><h2>Quick actions</h2><Icon name="spark" /></div>
+                {[
+                  { label: "Register a patient", detail: "Start a new patient record", href: "/patients/new", icon: "people" },
+                  { label: "Book an appointment", detail: "Plan the next visit", href: "/appointments/new", icon: "calendar" },
+                  { label: "Prescriptions", detail: "Review medication records", href: "/prescriptions", icon: "prescription" },
+                  { label: "Manage stock", detail: "Receive, adjust and dispense", href: "/inventory", icon: "box" },
+                ].map(action => <Link key={action.href} href={action.href} className={styles.quickAction}><span className={styles.quickIcon}><Icon name={action.icon} /></span><span><strong>{action.label}</strong><small>{action.detail}</small></span><span aria-hidden="true">›</span></Link>)}
+              </section>
+              <section className={styles.followup}><span className={styles.followupIcon}><Icon name="spark" /></span><p className={styles.eyebrow}>APPOINTMENT FOLLOW-UP</p><h2>Keep the next visit<br />on track.</h2><p>Review follow-up priorities and give your team a clear place to start.</p><Link href="/ai/no-show">Open follow-up workspace <span aria-hidden="true">↗</span></Link></section>
+              <Link href="/settings" className={styles.settingsLink}><Icon name="settings" /><span>Make this workspace yours<small>Practice details & preferences</small></span><span aria-hidden="true">→</span></Link>
+            </aside>
+          </div>
+          <footer className={styles.footer}><strong>J&J PracticeCloud</strong><span>Thoughtfully connected. Focused on care.</span><p>J&amp;J Practice Cloud supports POPIA-minded practice workflows through role-based access, secure HTTPS transport and audit logging on selected sensitive record views. Each practice remains responsible for its own access controls, policies and lawful use of patient information.</p></footer>
+        </main>
       </div>
-    </main>
+    </div>
   );
 }
 
-function DashboardCard({
-  title,
-  count,
-  description,
-  icon,
-  onClick,
-}: {
-  title: string;
-  count: number;
-  description: string;
-  icon: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl bg-white p-4 text-left border border-white/70 backdrop-blur-xl shadow-[0_1px_2px_rgb(15,31,45,0.04)] hover:shadow-md hover:border-[#7dd1c8] transition-all duration-200"
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#effaf8] text-[12px] font-bold text-[#1f7c7a]">
-          {icon}
-        </div>
-
-        <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-400">
-          View
-        </span>
-      </div>
-
-      <div className="mt-3">
-        <p className="text-sm font-semibold text-slate-500">
-          {title}
-        </p>
-
-        <p className="mt-0.5 text-2xl font-bold tracking-tight text-slate-900">
-          {count}
-        </p>
-
-        <p className="mt-1 text-xs text-slate-400">
-          {description}
-        </p>
-      </div>
-
-      <div className="mt-3 flex items-center text-xs font-semibold text-[#1f7c7a]">
-        Open {title.toLowerCase()} →
-      </div>
-    </button>
-  );
-}
-
-function QuickAction({
-  label,
-  chip,
-  chipClass,
-  onClick,
-}: {
-  label: string;
-  chip: string;
-  chipClass: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group flex items-center gap-3 rounded-2xl border border-white/70 bg-white/70 px-4 py-3.5 text-left shadow-[var(--glass-shadow)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-0.5 hover:border-[#7dd1c8] hover:bg-white/90 hover:shadow-[var(--glass-shadow-hover)]"
-    >
-      <span
-        className={`flex h-9 w-9 flex-none items-center justify-center rounded-xl text-[11px] font-extrabold tracking-wide transition-transform duration-200 group-hover:scale-105 ${chipClass}`}
-      >
-        {chip}
-      </span>
-
-      <span className="flex-1 text-sm font-semibold text-slate-700">
-        {label}
-      </span>
-
-      <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full text-[#1f7c7a] transition-all duration-200 group-hover:bg-[#effaf8] group-hover:translate-x-0.5">
-        →
-      </span>
-    </button>
-  );
+function Icon({ name }: { name: string }) {
+  const paths: Record<string, string> = {
+    grid: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
+    people: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M16 3a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-3.87 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
+    calendar: "M4 5h16v16H4z M16 3v4 M8 3v4 M4 11h16 M8 15h2 M14 15h2",
+    prescription: "M8 3h8v3h4v15H4V6h4z M9 3v5h6V3 M12 12v6 M9 15h6",
+    document: "M14 2H5v20h14V7z M14 2v6h5 M8 12h8 M8 16h6",
+    wallet: "M3 6h17v15H3z M3 6V3h14v3 M15 11h6v5h-6z",
+    shield: "M12 3 3 7v5c0 5 9 10 9 10s9-5 9-10V7z M8 12l3 3 5-6",
+    box: "m3 7 9-5 9 5v10l-9 5-9-5z M3 7l9 5 9-5 M12 12v10 M7 4.8l10 5.6",
+    clock: "M12 8v5l3 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
+    spark: "m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z",
+    settings: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M12 2v3 M12 19v3 M2 12h3 M19 12h3 M5 5l2 2 M17 17l2 2 M5 19l2-2 M17 7l2-2",
+    plus: "M12 5v14 M5 12h14",
+    search: "m21 21-5-5 M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0",
+    logout: "M9 3H3v18h6 M9 12h12 M17 8l4 4-4 4",
+  };
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name] || paths.grid} /></svg>;
 }
