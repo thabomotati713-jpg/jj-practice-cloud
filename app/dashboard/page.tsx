@@ -15,6 +15,7 @@ type Counts = {
   claims: number;
   staff: number;
   inventory: number;
+  queue: number;
 };
 
 export default function Dashboard() {
@@ -33,6 +34,7 @@ export default function Dashboard() {
     claims: 0,
     staff: 0,
     inventory: 0,
+    queue: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -186,6 +188,7 @@ export default function Dashboard() {
       claimsResult,
       staffResult,
       inventoryResult,
+      queueResult,
     ] = await Promise.all([
       supabase
         .from("patients")
@@ -298,6 +301,18 @@ export default function Dashboard() {
           "practice_id",
           practiceId
         ),
+
+      supabase
+        .from("patient_queue_entries")
+        .select(
+          "id",
+          {
+            count: "exact",
+            head: true,
+          }
+        )
+        .eq("practice_id", practiceId)
+        .in("status", ["waiting", "called", "in_consultation"]),
     ]);
 
     const firstError =
@@ -308,7 +323,8 @@ export default function Dashboard() {
       invoicesResult.error ||
       claimsResult.error ||
       staffResult.error ||
-      inventoryResult.error;
+      inventoryResult.error ||
+      queueResult.error;
 
     if (firstError) {
       setError(
@@ -340,6 +356,9 @@ export default function Dashboard() {
 
       inventory:
         inventoryResult.count || 0,
+
+      queue:
+        queueResult.count || 0,
     });
 
     // Practice analytics: billing performance and
@@ -449,6 +468,7 @@ export default function Dashboard() {
     { title: "Patients", key: "patients", href: "/patients", icon: "people", description: "Records & clinical history", group: "Care" },
     { title: "Appointments", key: "appointments", href: "/appointments", icon: "calendar", description: "Visits & scheduling", group: "Care" },
     { title: "Online consultations", key: "video", href: "/appointments#online-consultations", icon: "video", description: "Video calls & patient links", group: "Care" },
+    { title: "Patients in Line", key: "queue", href: "/queue", icon: "queue", description: "Live QR reception queue", group: "Care" },
     { title: "Prescriptions", key: "prescriptions", href: "/prescriptions", icon: "prescription", description: "Medication & treatment", group: "Care" },
     { title: "Sick notes", key: "sick_notes", href: "/sick-notes", icon: "document", description: "Medical leave certificates", group: "Care" },
     { title: "Invoices", key: "invoices", href: "/invoices", icon: "wallet", description: "Billing & payments", group: "Operations" },
@@ -574,6 +594,7 @@ function Icon({ name }: { name: string }) {
     shield: "M12 3 3 7v5c0 5 9 10 9 10s9-5 9-10V7z M8 12l3 3 5-6",
     box: "m3 7 9-5 9 5v10l-9 5-9-5z M3 7l9 5 9-5 M12 12v10 M7 4.8l10 5.6",
     clock: "M12 8v5l3 2 M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0",
+    queue: "M5 7h14 M5 12h14 M5 17h14 M2 7h.01 M2 12h.01 M2 17h.01",
     spark: "m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z",
     settings: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M12 2v3 M12 19v3 M2 12h3 M19 12h3 M5 5l2 2 M17 17l2 2 M5 19l2-2 M17 7l2-2",
     plus: "M12 5v14 M5 12h14",
