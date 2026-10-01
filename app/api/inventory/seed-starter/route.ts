@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { fetchMySpecialty } from "@/lib/specialties";
+import { createHash } from "node:crypto";
+import { fetchMySpecialty, SPECIALTIES, getSpecialty } from "@/lib/specialties";
 import { SPECIALTY_CATALOGS } from "@/lib/specialty-catalog";
 
 export const dynamic = "force-dynamic";
@@ -67,8 +68,8 @@ export async function POST(request: Request) {
       profileError ||
       !profile?.active ||
       !profile.practice_id ||
-      !["owner", "ADMIN", "INVENTORY"].includes(
-        String((profile as { role: string }).role)
+      !["owner", "admin", "inventory"].includes(
+        String((profile as { role: string }).role).toLowerCase()
       )
     ) {
       return NextResponse.json(
@@ -84,21 +85,37 @@ export async function POST(request: Request) {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const specialty = await fetchMySpecialty(
+    const {data: practice, error: practiceError} = await adminClient
+      .from("practices").select("active").eq("id", practiceId).single();
+    if (practiceError || !practice?.active) {
+      return NextResponse.json({error:"Your practice is inactive or unavailable."}, {status:403});
+    }
+    const rawBody = await request.text();
+    let body: {specialty?: string} = {};
+    try { body = rawBody ? JSON.parse(rawBody) : {}; }
+    catch { return NextResponse.json({error:"Invalid catalogue selection."}, {status:400}); }
+    if (!body || (body.specialty !== undefined && !SPECIALTIES.some(s => s.id === body.specialty))) {
+      return NextResponse.json({error:"Select a supported speciality."}, {status:400});
+    }
+    const specialty = body.specialty ? getSpecialty(body.specialty) : await fetchMySpecialty(
       authClient as never,
       authClient
     );
 
     const catalog = SPECIALTY_CATALOGS[specialty.id] || [];
 
-    const { data: existing } = await adminClient
-      .from("inventory")
+    const { data: existing, error: existingError } = await adminClient
+      .from("inventory_products")
       .select("name")
       .eq("practice_id", practiceId);
 
+    if (existingError) {
+      console.error("Starter inventory lookup failed", existingError);
+      return NextResponse.json({error:"Could not read inventory. Please try again."}, {status:500});
+    }
     const existingNames = new Set(
       ((existing || []) as { name: string }[]).map((row) =>
-        row.name.toLowerCase()
+        row.name.trim().toLowerCase()
       )
     );
 
@@ -106,7 +123,7 @@ export async function POST(request: Request) {
       .filter((item) => !existingNames.has(item.name.toLowerCase()))
       .map((item) => ({
         practice_id: practiceId,
-        product_code: null,
+        product_code: `STARTER-${createHash("sha256").update(item.name.trim().toLowerCase()).digest("hex").slice(0,24)}`,
         name: item.name,
         generic_name: item.generic_name || null,
         category: item.category,
@@ -131,9 +148,9 @@ export async function POST(request: Request) {
       });
     }
 
-    const { error: insertError } = await adminClient
-      .from("inventory")
-      .insert(toInsert);
+    const { data: inserted, error: insertError } = await adminClient
+      .from("inventory_products")
+      .upsert(toInsert, { onConflict: "practice_id,product_code", ignoreDuplicates: true }).select("id");
 
     if (insertError) {
       return NextResponse.json(
@@ -144,8 +161,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ok: true,
-      added: toInsert.length,
-      message: `Added ${toInsert.length} starter items for ${specialty.label} practices. Set the prices and stock counts to match your suppliers.`,
+      added: inserted?.length || 0,
+      message: `Added ${inserted?.length || 0} starter items for ${specialty.label} practices. Set the prices and stock counts to match your suppliers.`,
     });
   } catch (error) {
     console.error("seed-starter error:", error);

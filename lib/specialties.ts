@@ -72,6 +72,7 @@ export const SPECIALTIES: SpecialtyConfig[] = [
       "Frames",
       "Lenses",
       "Contact Lenses",
+      "Accessories",
       "Solutions",
       "Instruments",
     ],

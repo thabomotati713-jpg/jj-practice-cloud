@@ -41,6 +41,16 @@ const DENTAL: CatalogItem[] = [
 ];
 
 const OPTICAL: CatalogItem[] = [
+  { name: "Children's Frames", category: "Frames", unit: "each", minimum_stock: 4 },
+  { name: "Semi-Rimless Frames", category: "Frames", unit: "each", minimum_stock: 4 },
+  { name: "Prescription Sunglass Frames", category: "Frames", unit: "each", minimum_stock: 4 },
+  { name: "Photochromic Lens Blanks", category: "Lenses", unit: "pair", minimum_stock: 4 },
+  { name: "High-Index Lens Blanks", category: "Lenses", unit: "pair", minimum_stock: 4 },
+  { name: "Toric Contact Lenses", category: "Contact Lenses", unit: "box", minimum_stock: 4 },
+  { name: "Spectacle Cases", category: "Accessories", unit: "each", minimum_stock: 10 },
+  { name: "Microfibre Lens Cloths", category: "Accessories", unit: "each", minimum_stock: 10 },
+  { name: "Replacement Nose Pads", category: "Accessories", unit: "pair", minimum_stock: 10 },
+  { name: "Frame Repair Screws", category: "Accessories", unit: "pack", minimum_stock: 4 },
   { name: "Reading Glasses (Assorted Powers)", category: "Frames", unit: "each", minimum_stock: 10 },
   { name: "Metal Frame — Full Rim", category: "Frames", unit: "each", minimum_stock: 6 },
   { name: "Plastic Frame — Full Rim", category: "Frames", unit: "each", minimum_stock: 6 },

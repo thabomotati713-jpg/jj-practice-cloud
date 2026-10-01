@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../lib/supabase";
-import { fetchMySpecialty, getSpecialty, type SpecialtyConfig } from "../../lib/specialties";
+import { fetchMySpecialty, getSpecialty, SPECIALTIES, type SpecialtyConfig } from "../../lib/specialties";
 
 type Product = {
   id: string;
@@ -34,15 +34,16 @@ export default function InventoryPage() {
   const [specialty, setSpecialty] = useState<SpecialtyConfig>(
     getSpecialty("general")
   );
+  const [specialtyReady, setSpecialtyReady] = useState(false);
   const [seeding, setSeeding] = useState(false);
   const [seedMessage, setSeedMessage] = useState("");
 
   useEffect(() => {
     loadProducts();
-    fetchMySpecialty(supabase, supabase).then(setSpecialty);
+    fetchMySpecialty(supabase, supabase).then(setSpecialty).finally(() => setSpecialtyReady(true));
   }, []);
 
-  const loadProducts = async () => {
+  async function loadProducts() {
     setLoading(true);
     setError("");
 
@@ -100,7 +101,9 @@ export default function InventoryPage() {
         method: "POST",
         headers: {
           Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({specialty: specialty.id}),
       });
 
       const result = await response.json();
@@ -224,6 +227,13 @@ export default function InventoryPage() {
           </a>
 
           <div className="page-actions">
+            <label className="field" style={{margin:0}}>
+              <span className="label">Starter catalogue speciality</span>
+              <select className="input" value={specialty.id} disabled={seeding || !specialtyReady}
+                onChange={event => {setSpecialty(getSpecialty(event.target.value));setSeedMessage("");}}>
+                {SPECIALTIES.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
             <button
               type="button"
               onClick={() => {
@@ -247,10 +257,17 @@ export default function InventoryPage() {
           </div>
 
           <div className="page-actions">
+            <label className="field" style={{margin:0}}>
+              <span className="label">Starter catalogue speciality</span>
+              <select className="input" value={specialty.id} disabled={seeding || !specialtyReady}
+                onChange={event => {setSpecialty(getSpecialty(event.target.value));setSeedMessage("");}}>
+                {SPECIALTIES.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
+              </select>
+            </label>
             <button
               type="button"
               onClick={loadStarterCatalog}
-              disabled={seeding}
+              disabled={seeding || !specialtyReady}
               className="btn btn-secondary"
             >
               {seeding
@@ -270,6 +287,11 @@ export default function InventoryPage() {
           </div>
         </div>
 
+        <p className="page-subtitle" style={{marginBottom:20}}>
+          Choose a speciality and load its ready-made product list. Existing items are kept.
+          New items start with zero stock and prices; receive stock and set your supplier prices before use.
+          Mixed practices can load more than one catalogue.
+        </p>
         {seedMessage && (
           <div className="alert-info">{seedMessage}</div>
         )}
