@@ -12,7 +12,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  const logoUrl = "/logo.jpg";
+  const logoUrl = "/brand/jj-practice-cloud-leather.svg";
 
   const handleSignIn = async (
     e: React.FormEvent<HTMLFormElement>
@@ -169,12 +169,12 @@ export default function Home() {
         />
 
         <div className="relative flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/20">
+          <div className="flex h-14 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/20">
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt="J&J Practice Cloud logo"
-                className="h-full w-full object-contain p-1.5"
+                className="h-full w-full object-contain p-1"
               />
             ) : (
               <span className="text-lg font-bold">J&J</span>
