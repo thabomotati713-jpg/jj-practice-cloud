@@ -34,7 +34,7 @@ export default function MarketingHome() {
     <main className="marketing-shell">
       <header className="marketing-nav">
         <a href="/" className="marketing-brand" aria-label="J&J Practice Cloud home">
-          <img src="/logo.jpg" alt="" />
+          <img src="/brand/jj-practice-cloud-metallic.svg" alt="" />
           <span><strong>J&amp;J</strong> Practice Cloud</span>
         </a>
         <nav className="marketing-links" aria-label="Main navigation">
@@ -73,7 +73,7 @@ export default function MarketingHome() {
         <div className="marketing-product-stage" aria-label="Product dashboard preview">
           <div className="product-window">
             <div className="product-topbar">
-              <div className="product-logo"><img src="/logo.jpg" alt="" /></div>
+              <div className="product-logo"><img src="/brand/jj-practice-cloud-metallic.svg" alt="" /></div>
               <div><strong>J&amp;J Practice Cloud</strong><small>Practice overview</small></div>
               <span className="product-status">LIVE</span>
             </div>
@@ -181,7 +181,7 @@ export default function MarketingHome() {
       </section>
 
       <footer className="marketing-footer">
-        <div className="marketing-footer-top"><a href="/" className="marketing-brand"><img src="/logo.jpg" alt="" /><span><strong>J&amp;J</strong> Practice Cloud</span></a><p>Modern practice management, built in Springs for South African healthcare.</p></div>
+        <div className="marketing-footer-top"><a href="/" className="marketing-brand"><img src="/brand/jj-practice-cloud-metallic.svg" alt="" /><span><strong>J&amp;J</strong> Practice Cloud</span></a><p>Modern practice management, built in Springs for South African healthcare.</p></div>
         <div className="marketing-footer-grid"><div><strong>Product</strong><a href="#product">Capabilities</a><a href="#pricing">Pricing</a><a href="/signup">Register</a><a href="/login">Client sign in</a></div><div><strong>Contact</strong><a href={whatsapp}>WhatsApp</a><a href="mailto:jjpracticecloud@gmail.com">jjpracticecloud@gmail.com</a><span>Springs, Gauteng</span></div><div><strong>Privacy</strong><span>Designed around POPIA principles, controlled access and auditable record activity.</span></div></div>
         <div className="marketing-footer-bottom"><span>© 2026 J&amp;J Practice Cloud. All rights reserved.</span><span>Built by Thabo Simon Motati.</span></div>
       </footer>
