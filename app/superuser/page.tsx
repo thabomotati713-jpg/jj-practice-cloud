@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AppearanceEditor from "../../components/AppearanceEditor";
 import { supabase } from "../../lib/supabase";
 
 type Practice = {
@@ -22,6 +23,8 @@ type Stats = {
 };
 
 export default function SuperuserPage() {
+  const [query,setQuery] = useState("");
+  const [statusFilter,setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [userName, setUserName] = useState("");
@@ -42,7 +45,7 @@ export default function SuperuserPage() {
     loadSuperuserDashboard();
   }, []);
 
-  const loadSuperuserDashboard = async () => {
+  async function loadSuperuserDashboard() {
     try {
       setLoading(true);
       setError("");
@@ -208,6 +211,13 @@ export default function SuperuserPage() {
     window.location.href = "/login";
   };
 
+  const filteredPractices=practices.filter(p=>(statusFilter==='all'||(statusFilter==='active' ? p.active : !p.active)) && [p.name,p.practice_code,p.email,p.city,p.province].join(' ').toLowerCase().includes(query.toLowerCase()));
+  function exportPractices() {
+    const cell=(value:unknown)=>'"'+String(value??'').replace(/^[=+@-]/,"'$&").replaceAll('"','""')+'"';
+    const rows=[['Practice','Code','Email','Phone','City','Province','Status'],...filteredPractices.map(p=>[p.name,p.practice_code,p.email,p.phone,p.city,p.province,p.active?'Active':'Inactive'])];
+    const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download='practice-directory.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
   if (loading) {
     return (
       <main className="page-shell">
@@ -275,6 +285,7 @@ export default function SuperuserPage() {
           <div className="alert-error">{error}</div>
         )}
 
+        <AppearanceEditor practices={practices} />
         <section className="stat-grid">
           <div className="stat-card">
             <p className="stat-label">
@@ -330,9 +341,10 @@ export default function SuperuserPage() {
             </div>
           </div>
 
-          {practices.length === 0 ? (
+          <div className="admin-filters"><label className="field"><span className="label">Find a practice</span><input className="input" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Name, code, email or location" /></label><label className="field"><span className="label">Status</span><select className="input" value={statusFilter} onChange={e=>setStatusFilter(e.target.value)}><option value="all">All practices</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label><button className="btn btn-secondary" onClick={()=>void loadSuperuserDashboard()}>Refresh</button><button className="btn btn-secondary" disabled={!filteredPractices.length} onClick={exportPractices}>Export CSV</button></div><p className="card-body">Showing {filteredPractices.length} of {practices.length} practices</p>
+          {filteredPractices.length === 0 ? (
             <div className="empty-state">
-              No practices have been created yet.
+              No practices match this selection.
             </div>
           ) : (
             <div className="table-wrap border-0 shadow-none">
@@ -354,7 +366,7 @@ export default function SuperuserPage() {
                 </thead>
 
                 <tbody>
-                  {practices.map((practice) => (
+                  {filteredPractices.map((practice) => (
                     <tr key={practice.id}>
                       <td>
                         <div className="font-semibold">

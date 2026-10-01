@@ -471,7 +471,7 @@ export default function Dashboard() {
         <Link href="/dashboard" className={styles.brand}>
           <img
             className={styles.brandLogo}
-            src="/brand/jj-practice-cloud-leather.svg"
+            src="/brand/jj-sidebar.png"
             alt="J&J Practice Cloud"
           />
           <span>PracticeCloud<small>YOUR PRACTICE, CONNECTED</small></span>

@@ -12,7 +12,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  const logoUrl = "/brand/jj-practice-cloud-leather.svg";
+  const logoUrl = "/brand/jj-signin.png";
 
   const handleSignIn = async (
     e: React.FormEvent<HTMLFormElement>
@@ -158,7 +158,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col lg:flex-row">
       {/* Brand panel */}
-      <section className="relative flex flex-col justify-between overflow-hidden bg-[#123339] px-8 py-10 text-white lg:w-[45%] lg:px-14 lg:py-14">
+      <section className="login-brand-panel relative flex flex-col justify-between overflow-hidden bg-[#123339] px-8 py-10 text-white lg:w-[45%] lg:px-14 lg:py-14">
         <div
           aria-hidden
           className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#2b9a95] opacity-20 blur-3xl"
@@ -169,7 +169,7 @@ export default function Home() {
         />
 
         <div className="relative flex items-center gap-4">
-          <div className="flex h-14 w-24 items-center justify-center overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/20">
+          <div className="login-brand-logo">
             {logoUrl ? (
               <img
                 src={logoUrl}
