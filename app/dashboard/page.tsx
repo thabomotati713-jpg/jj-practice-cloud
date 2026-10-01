@@ -448,6 +448,7 @@ export default function Dashboard() {
   const modules = [
     { title: "Patients", key: "patients", href: "/patients", icon: "people", description: "Records & clinical history", group: "Care" },
     { title: "Appointments", key: "appointments", href: "/appointments", icon: "calendar", description: "Visits & scheduling", group: "Care" },
+    { title: "Online consultations", key: "video", href: "/appointments#online-consultations", icon: "video", description: "Video calls & patient links", group: "Care" },
     { title: "Prescriptions", key: "prescriptions", href: "/prescriptions", icon: "prescription", description: "Medication & treatment", group: "Care" },
     { title: "Sick notes", key: "sick_notes", href: "/sick-notes", icon: "document", description: "Medical leave certificates", group: "Care" },
     { title: "Invoices", key: "invoices", href: "/invoices", icon: "wallet", description: "Billing & payments", group: "Operations" },
@@ -529,11 +530,11 @@ export default function Dashboard() {
 
           <div className={styles.lowerGrid}>
             <section className={styles.moduleSection} aria-labelledby="modules-title">
-              <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>EVERYTHING WITHIN REACH</p><h2 id="modules-title">Practice modules</h2></div><span className={styles.moduleCount}>8 modules</span></div>
+              <div className={styles.sectionHeading}><div><p className={styles.eyebrow}>EVERYTHING WITHIN REACH</p><h2 id="modules-title">Practice modules</h2></div><span className={styles.moduleCount}>{modules.length} modules</span></div>
               <label className={styles.search}><Icon name="search" /><span className={styles.srOnly}>Find a practice module</span><input type="search" placeholder="Find a module…" value={moduleSearch} onChange={event => setModuleSearch(event.target.value)} />{moduleSearch && <button type="button" aria-label="Clear module search" onClick={() => setModuleSearch("")}>×</button>}</label>
               <div className={styles.moduleGrid} aria-busy={loading}>
                 {visibleModules.map(module => <Link className={styles.moduleCard} key={module.key} href={module.href}>
-                  <div className={styles.moduleTop}><span className={styles.moduleIcon}><Icon name={module.icon} /></span><span className={styles.recordCount}>{loading || error ? "—" : counts[module.key]} <small>records</small></span></div>
+                  <div className={styles.moduleTop}><span className={styles.moduleIcon}><Icon name={module.icon} /></span><span className={styles.recordCount}>{loading || error ? "—" : counts[module.key === "video" ? "appointments" : module.key]} <small>records</small></span></div>
                   <h3>{module.title}</h3><p>{module.description}</p><span className={styles.moduleArrow} aria-hidden="true">↗</span>
                 </Link>)}
               </div>
@@ -565,6 +566,7 @@ function Icon({ name }: { name: string }) {
   const paths: Record<string, string> = {
     grid: "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z",
     people: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M16 3a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-3.87 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0",
+    video: "M3 6h12v12H3z M15 10l6-4v12l-6-4",
     calendar: "M4 5h16v16H4z M16 3v4 M8 3v4 M4 11h16 M8 15h2 M14 15h2",
     prescription: "M8 3h8v3h4v15H4V6h4z M9 3v5h6V3 M12 12v6 M9 15h6",
     document: "M14 2H5v20h14V7z M14 2v6h5 M8 12h8 M8 16h6",

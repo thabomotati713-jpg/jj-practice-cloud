@@ -426,6 +426,13 @@ export default function AppointmentsPage() {
           </div>
         </div>
 
+        <section id="online-consultations" className="card" style={{marginBottom:24, scrollMarginTop:24}} aria-labelledby="video-heading">
+          <div className="card-body">
+            <h2 id="video-heading" className="card-title">Online consultations</h2>
+            <p className="page-subtitle">Find an appointment below and select <strong>Video consult</strong> in its Actions column. On a small screen, swipe the schedule sideways to see the actions.</p>
+            <p className="page-subtitle">In the consultation room, copy the patient link and select <strong>Join consultation room</strong>. Video consult is available for appointments that are not completed or cancelled.</p>
+          </div>
+        </section>
         {message && <div className="alert-info">{message}</div>}
 
         <div className="stat-grid">

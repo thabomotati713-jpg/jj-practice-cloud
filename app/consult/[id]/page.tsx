@@ -73,16 +73,16 @@ export default function ConsultRoomPage() {
         </button>
       </header>
 
-      <div className="flex-1">
+      <div className="flex flex-1 flex-col">
         {joined ? (
           <iframe
             title="Video consultation"
             src={meetUrl}
             allow="camera; microphone; fullscreen; display-capture; autoplay"
-            className="h-full w-full border-0"
+            className="min-h-[80vh] w-full flex-1 border-0"
           />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-6 px-6 text-center">
+          <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#2b9a95]/20 text-3xl">
               🩺
             </div>
