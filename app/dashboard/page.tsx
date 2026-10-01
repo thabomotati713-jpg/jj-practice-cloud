@@ -469,7 +469,11 @@ export default function Dashboard() {
       <Link className={styles.skip} href="#dashboard-content">Skip to dashboard</Link>
       <aside className={styles.sidebar} aria-label="Practice navigation">
         <Link href="/dashboard" className={styles.brand}>
-          <span className={styles.brandMark}>J&J</span>
+          <img
+            className={styles.brandLogo}
+            src="/brand/jj-practice-cloud-leather.svg"
+            alt="J&J Practice Cloud"
+          />
           <span>PracticeCloud<small>YOUR PRACTICE, CONNECTED</small></span>
         </Link>
         <div className={styles.workspace}>
