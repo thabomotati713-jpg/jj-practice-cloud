@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 87" role="img" aria-labelledby="title desc">
+<title id="title">J&amp;J Practice Cloud metallic mark</title>
+<desc id="desc">Metallic blue and cyan cloud, healthcare cross, analytics bars and stethoscope mark.</desc>
+<defs>
+  <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#052f78"/>
+    <stop offset=".28" stop-color="#0879db"/>
+    <stop offset=".52" stop-color="#29d7e8"/>
+    <stop offset=".72" stop-color="#0871c8"/>
+    <stop offset="1" stop-color="#061f5b"/>
+  </linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7ff7f4"/>
+    <stop offset=".35" stop-color="#19d6d2"/>
+    <stop offset=".7" stop-color="#078db9"/>
+    <stop offset="1" stop-color="#07447f"/>
+  </linearGradient>
+  <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffffff"/>
+    <stop offset=".22" stop-color="#9fb6c7"/>
+    <stop offset=".48" stop-color="#f7fbff"/>
+    <stop offset=".72" stop-color="#738a9b"/>
+    <stop offset="1" stop-color="#e8f0f5"/>
+  </linearGradient>
+  <filter id="shine" x="-20%" y="-30%" width="140%" height="170%">
+    <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#001a3a" flood-opacity=".22"/>
+  </filter>
+</defs>
+<g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#shine)">
+  <path d="M33 58C12 57 7 31 24 19c13-10 30-6 39 5C72 8 87 3 102 9c10 4 18 12 21 22 6-7 15-11 25-10 17 2 28 18 23 34-4 13-16 22-30 22H42" stroke="url(#blue)" stroke-width="9"/>
+  <path d="M24 57c22 2 35-7 49-25 13-17 29-18 42-2 12 14 19 28 34 28 9 0 16-5 19-12" stroke="url(#cyan)" stroke-width="8"/>
+  <path d="M25 57c16 4 30 1 41-7" stroke="url(#chrome)" stroke-width="2.4" opacity=".78"/>
+  <path d="M72 32c14-17 29-18 43-2" stroke="#ecffff" stroke-width="1.6" opacity=".62"/>
+</g>
+<g filter="url(#shine)">
+  <g fill="url(#cyan)" stroke="#dffeff" stroke-width=".9">
+    <rect x="35" y="45" width="7" height="12" rx="2"/>
+    <rect x="45" y="38" width="7" height="19" rx="2"/>
+    <rect x="55" y="30" width="7" height="27" rx="2"/>
+  </g>
+  <path d="M89 18h8v8h8v8h-8v8h-8v-8h-8v-8h8z" fill="url(#blue)" stroke="#79f1f1" stroke-width="1"/>
+  <circle cx="151" cy="43" r="10" fill="url(#cyan)" stroke="#dffeff" stroke-width="1"/>
+  <circle cx="151" cy="43" r="5.4" fill="#0867a6" stroke="url(#chrome)" stroke-width="2.5"/>
+</g>
+</svg>
