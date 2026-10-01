@@ -7,8 +7,8 @@
  html[data-appearance] .btn-primary {background:var(--pc-action);border-color:var(--pc-action)}
  html[data-density=compact] .table :is(td,th) {padding-top:8px;padding-bottom:8px}
 }
-.login-brand-logo {width:clamp(140px,18vw,240px);flex-shrink:0;background:#000;border-radius:16px;overflow:hidden;}
-.login-brand-logo img {display:block;width:100%;height:auto;padding:0;object-fit:contain;}
+.login-brand-logo {width:clamp(140px,18vw,240px);flex-shrink:0;background:transparent;mix-blend-mode:screen;}
+.login-brand-logo img {display:block;width:100%;height:auto;padding:0;object-fit:contain;mix-blend-mode:screen;}
 .theme-swatches {display:flex;flex-wrap:wrap;gap:10px;margin:10px 0 20px;}
 .theme-swatch {display:flex;align-items:center;gap:8px;padding:10px 13px;min-height:44px;border:1px solid var(--pc-line);border-radius:10px;background:white;color:#183b3d;font-size:13px;cursor:pointer;}
 .theme-swatch[aria-pressed=true] {outline:2px solid var(--pc-action);outline-offset:2px;}

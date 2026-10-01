@@ -116,7 +116,7 @@
 .shell { --ink:var(--pc-ink,#183b3d); background:var(--ambient); }
 .sidebar { background:var(--pc-sidebar,#123b3c); }
 .brand { flex-direction:column; align-items:flex-start; }
-.brandLogo { width:100%; max-width:210px; height:auto; border-radius:9px; background:#000; }
+.brandLogo { width:100%; max-width:210px; height:auto; border-radius:0; background:transparent; mix-blend-mode:screen; filter:none; }
 .brand > span { font-size:15px; }
 .workspace { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.18); }
 .nav a.activeNav { background:var(--pc-wash,#d8eee5);color:var(--pc-ink,#153e3b); }
