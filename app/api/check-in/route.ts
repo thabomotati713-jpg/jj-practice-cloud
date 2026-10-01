@@ -190,12 +190,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const today = todayInSouthAfrica();
+    const todayStart = new Date(`${today}T00:00:00+02:00`).toISOString();
+
     const { data: existing } = await admin
       .from("patient_queue_entries")
       .select("id, status, checked_in_at")
       .eq("practice_id", practice.id)
       .eq("patient_id", patient.id)
       .in("status", ["waiting", "called", "in_consultation"])
+      .gte("checked_in_at", todayStart)
       .maybeSingle();
 
     if (existing) {
@@ -209,7 +213,20 @@ export async function POST(request: Request) {
       });
     }
 
-    const today = todayInSouthAfrica();
+    const now = new Date().toISOString();
+
+    await admin
+      .from("patient_queue_entries")
+      .update({
+        status: "cancelled",
+        completed_at: now,
+        updated_at: now,
+        notes: "Automatically closed when the patient checked in on a later day.",
+      })
+      .eq("practice_id", practice.id)
+      .eq("patient_id", patient.id)
+      .in("status", ["waiting", "called", "in_consultation"])
+      .lt("checked_in_at", todayStart);
 
     const { data: appointment } = await admin
       .from("appointments")
