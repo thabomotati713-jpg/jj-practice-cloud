@@ -249,6 +249,16 @@ export default function SuperuserPage() {
             <button
               type="button"
               onClick={() => {
+                window.location.href = "/marketing";
+              }}
+              className="btn btn-secondary btn-sm"
+            >
+              Marketing Command Centre
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
                 window.location.href =
                   "/superuser/practices/new";
               }}
