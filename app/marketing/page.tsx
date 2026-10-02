@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import MarketingInsights from "@/components/MarketingInsights";
+import MarketingLeadEditor from "@/components/MarketingLeadEditor";
 import { supabase } from "@/lib/supabase";
 
 type Channel = {
@@ -36,6 +38,8 @@ type MarketingPost = {
   scheduled_at: string | null;
   status: string;
   published_at: string | null;
+  auto_publish: boolean;
+  publish_error: string | null;
   created_at: string;
 };
 
@@ -62,6 +66,7 @@ type TrackingLink = {
 };
 
 const featureLibrary = [
+  { title: "Practice reporting", hook: "See practice activity, billing and stock information in a dedicated reporting workspace.", proof: "Reporting supports daily operational review across practice modules." },
   {
     title: "QR reception check-in",
     hook: "Patients scan, check in and join a live reception queue without another clipboard.",
@@ -114,10 +119,11 @@ const featureLibrary = [
   },
 ];
 
-const platforms = ["facebook", "instagram", "linkedin", "whatsapp", "x", "email"];
+const platforms = ["facebook", "google_business", "instagram", "linkedin", "whatsapp", "x", "email"];
 
 const platformLabels: Record<string, string> = {
   facebook: "Facebook",
+  google_business: "Google Business",
   instagram: "Instagram",
   linkedin: "LinkedIn",
   whatsapp: "WhatsApp",
@@ -135,6 +141,7 @@ function formatDate(value: string | null | undefined) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Africa/Johannesburg",
   });
 }
 
@@ -250,6 +257,7 @@ export default function MarketingPage() {
     cta: "Book a demo",
     targetUrl: "",
     scheduledAt: "",
+    autoPublish: false,
   });
 
   const [channelForm, setChannelForm] = useState({
@@ -383,6 +391,18 @@ export default function MarketingPage() {
     [posts]
   );
 
+  async function publishNow(postId: string) {
+    setWorking(postId);
+    try {
+      const token = await accessToken();
+      const response = await fetch("/api/marketing/publish", {method:"POST", headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({postId})});
+      const result = await response.json();
+      await load();
+      if(!response.ok) throw new Error(result.error);
+      setMessage("Organic post published successfully.");
+    } catch(error) {setMessage((error as Error).message);} finally {setWorking("");}
+  }
+
   async function createCampaign(event: FormEvent) {
     event.preventDefault();
     try {
@@ -405,6 +425,7 @@ export default function MarketingPage() {
       setWorking("post");
       setMessage("");
       await request("create_post", {
+        autoPublish: composer.autoPublish,
         campaignId: composer.campaignId || null,
         platform: composer.platform,
         title: composer.title,
@@ -412,7 +433,7 @@ export default function MarketingPage() {
         cta: composer.cta,
         targetUrl: composer.targetUrl,
         scheduledAt: composer.scheduledAt
-          ? new Date(composer.scheduledAt).toISOString()
+          ? new Date(composer.scheduledAt + ":00+02:00").toISOString()
           : null,
       });
       await load();
@@ -577,15 +598,15 @@ export default function MarketingPage() {
               <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">
                 Plan campaigns, compose platform-ready posts, schedule content, track leads and
                 use measurable demo links. Organic publishing stays free; paid campaigns remain
-                optional and only spend money when you deliberately activate them on an ad platform.
+                disabled in this application until spending is explicitly approved.
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-sky-300">Automation readiness</p>
               <p className="mt-3 text-sm leading-6 text-slate-300">
-                The workspace is ready for provider OAuth/API connections. Until those credentials
-                are connected, “Publish” uses free platform share flows and the calendar keeps the
-                campaign organised without pretending a post was sent automatically.
+                Facebook and Google Business support organic publishing through Windsor.
+                Scheduled automation runs daily at 08:00 SAST, one post per run.
+                Other posts remain manual. LinkedIn is pending. Server credentials are required.
               </p>
             </div>
           </div>
@@ -596,6 +617,8 @@ export default function MarketingPage() {
             {message}
           </div>
         )}
+
+        <MarketingInsights />
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {[
@@ -772,6 +795,7 @@ export default function MarketingPage() {
                       setComposer((current) => ({
                         ...current,
                         platform,
+                        autoPublish: false,
                         body: buildCopy(platform, current.featureIndex, current.targetUrl),
                       }));
                     }}
@@ -843,7 +867,7 @@ export default function MarketingPage() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-2 block text-sm font-semibold">Schedule</span>
+                  <span className="mb-2 block text-sm font-semibold">Schedule (SAST)</span>
                   <input
                     type="datetime-local"
                     value={composer.scheduledAt}
@@ -853,6 +877,7 @@ export default function MarketingPage() {
                 </label>
               </div>
 
+              <label className="block text-sm"><input type="checkbox" checked={composer.autoPublish} disabled={!["facebook","google_business"].includes(composer.platform)} onChange={e=>setComposer({...composer,autoPublish:e.target.checked})}/> Automatically publish this organic post on the next daily run after its schedule. Requires server connection.</label>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -886,7 +911,7 @@ export default function MarketingPage() {
                 <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Publishing queue</p>
                 <h2 className="mt-2 text-2xl font-bold">Upcoming & ready content</h2>
               </div>
-              <span className="text-sm text-slate-400">Free share flows now, API publishing when connected</span>
+              <span className="text-sm text-slate-400">Organic publishing · daily schedule · SAST</span>
             </div>
             <div className="mt-6 space-y-4">
               {upcomingPosts.map((post) => (
@@ -922,14 +947,17 @@ export default function MarketingPage() {
                     >
                       Open {platformLabels[post.platform] || post.platform}
                     </button>
-                    {post.status !== "published" && (
+                    {["ready","scheduled"].includes(post.status) && ["facebook","google_business"].includes(post.platform) && <button type="button" disabled={working===post.id} onClick={()=>void publishNow(post.id)} className="rounded-lg bg-teal-200 px-3 py-2 text-xs font-bold text-slate-950">Publish organic now</button>}
+                    {["draft","ready","scheduled"].includes(post.status) && <button type="button" disabled={working===post.id} onClick={()=>void markPost(post.id,"cancelled")} className="rounded-lg border border-white/10 px-3 py-2 text-xs">Cancel</button>}
+                    {post.publish_error && <p className="text-xs text-amber-200">{post.publish_error}</p>}
+                    {["draft","ready","scheduled"].includes(post.status) && (
                       <button
                         type="button"
                         disabled={working === post.id}
                         onClick={() => void markPost(post.id, "published")}
                         className="rounded-lg border border-emerald-300/20 bg-emerald-300/10 px-3 py-2 text-xs font-bold text-emerald-200"
                       >
-                        Mark published
+                        Mark manually published
                       </button>
                     )}
                   </div>
@@ -1044,6 +1072,7 @@ export default function MarketingPage() {
                       <td className="px-3 py-4">
                         <strong>{lead.contact_name}</strong>
                         <div className="mt-1 text-xs text-slate-400">{lead.email || lead.phone || "No contact detail"}</div>
+                        <MarketingLeadEditor lead={lead} onSaved={load} />
                       </td>
                       <td className="px-3 py-4">{lead.practice_name || "—"}</td>
                       <td className="px-3 py-4">{lead.specialty || "—"}</td>
@@ -1138,8 +1167,7 @@ export default function MarketingPage() {
 
         <footer className="rounded-[2rem] border border-white/10 bg-black/20 p-6 text-sm leading-6 text-slate-400">
           <strong className="text-slate-200">Free-first rule:</strong> organic publishing, the campaign planner,
-          demo funnel, CRM, copy templates and link tracking do not require ad spend. Paid advertising platforms
-          charge only when you deliberately create or activate paid campaigns. Automatic posting through official
+          demo funnel, CRM, copy templates and link tracking do not require ad spend. Paid advertising is disabled in this application. Automatic posting through official
           social APIs may require provider approval and account permissions.
         </footer>
       </div>

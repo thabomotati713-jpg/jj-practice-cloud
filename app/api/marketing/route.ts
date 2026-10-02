@@ -1,3 +1,5 @@
+import { organicAction, validFuture } from "@/lib/marketing/config";
+import { configured } from "@/lib/marketing/windsor";
 import { NextRequest } from "next/server";
 import { accessError, requireProfile } from "@/lib/serverAccess";
 
@@ -12,6 +14,7 @@ const PROVIDERS = new Set([
 ]);
 
 const PLATFORMS = new Set([
+  "google_business",
   "facebook",
   "instagram",
   "linkedin",
@@ -225,7 +228,16 @@ export async function POST(request: NextRequest) {
         return jsonError("Choose a supported platform and add post copy.");
       }
 
-      const scheduledAt = nullable(body.scheduledAt, 80);
+      let scheduledAt: string | null;
+      try { scheduledAt = validFuture(body.scheduledAt || null); }
+      catch (error) { return jsonError((error as Error).message); }
+      const autoPublish = body.autoPublish === true;
+      if (autoPublish) {
+        if (!configured()) return jsonError("Configure the Windsor server credential before enabling automatic publishing.");
+        if (!scheduledAt) return jsonError("Automatic publishing requires a future schedule.");
+        try { organicAction(platform, text, safeHttpUrl(body.targetUrl)); }
+        catch (error) { return jsonError((error as Error).message); }
+      }
       const status = scheduledAt ? "scheduled" : "ready";
 
       const { data, error } = await admin
@@ -238,6 +250,7 @@ export async function POST(request: NextRequest) {
           cta: nullable(body.cta, 160),
           target_url: safeHttpUrl(body.targetUrl),
           scheduled_at: scheduledAt,
+          auto_publish: autoPublish,
           status,
           created_by: user.id,
         })
@@ -258,6 +271,7 @@ export async function POST(request: NextRequest) {
 
       const patch: Record<string, unknown> = {
         status,
+        auto_publish: false,
         updated_at: new Date().toISOString(),
       };
 
@@ -269,6 +283,7 @@ export async function POST(request: NextRequest) {
         .from("marketing_posts")
         .update(patch)
         .eq("id", postId)
+        .in("status", ["draft", "ready", "scheduled"])
         .select("*")
         .single();
 

@@ -40,7 +40,12 @@ export default function DemoRequestPage() {
       const response = await fetch("/api/marketing/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form,
+          campaignId: new URLSearchParams(window.location.search).get("campaign_id"),
+          utmSource: new URLSearchParams(window.location.search).get("utm_source"),
+          utmMedium: new URLSearchParams(window.location.search).get("utm_medium"),
+          utmCampaign: new URLSearchParams(window.location.search).get("utm_campaign"),
+        }),
       });
       const result = await response.json();
 

@@ -67,6 +67,9 @@ export async function POST(request: NextRequest) {
     }
 
     const admin = adminClient();
+    const campaignId = clean(body?.campaignId, 80);
+    const validCampaign = /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(campaignId)
+      ? (await admin.from("marketing_campaigns").select("id").eq("id", campaignId).maybeSingle()).data?.id : null;
     const { error } = await admin.from("marketing_leads").insert({
       contact_name: contactName,
       practice_name: practiceName || null,
@@ -75,6 +78,10 @@ export async function POST(request: NextRequest) {
       specialty: specialty || null,
       province: province || null,
       source: "website-demo-request",
+      campaign_id: validCampaign || null,
+      utm_source: clean(body?.utmSource, 100) || null,
+      utm_medium: clean(body?.utmMedium, 100) || null,
+      utm_campaign: clean(body?.utmCampaign, 160) || null,
       status: "new",
       notes: clean(body?.notes, 1500) || null,
     });
