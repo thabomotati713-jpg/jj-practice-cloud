@@ -60,8 +60,9 @@ export default function MarketingHome() {
             prescriptions, billing, medical aid claims, inventory and your team.
           </p>
           <div className="marketing-hero-actions">
-            <a href="/signup" className="marketing-button">Register your practice <span>→</span></a>
-            <a href={whatsapp} className="marketing-button-ghost" target="_blank" rel="noreferrer">Talk to us on WhatsApp</a>
+            <a href="/demo-request" className="marketing-button">Book a live demo <span>→</span></a>
+            <a href="/signup" className="marketing-button-ghost">Register your practice</a>
+            <a href={whatsapp} className="marketing-button-ghost" target="_blank" rel="noreferrer">WhatsApp us</a>
           </div>
           <div className="marketing-reassurance">
             <span><b>01</b> No card required</span>
@@ -177,7 +178,7 @@ export default function MarketingHome() {
 
       <section id="contact" className="marketing-final-cta">
         <div><span className="marketing-eyebrow marketing-eyebrow-light">READY WHEN YOU ARE</span><h2 className="display-font">Give your practice a<br />better operating system.</h2></div>
-        <div><p>Register online now, or talk directly to Thabo about your practice and onboarding needs.</p><div className="marketing-hero-actions"><a href="/signup" className="marketing-button marketing-button-light">Register your practice →</a><a href={whatsapp} target="_blank" rel="noreferrer" className="marketing-button-outline">WhatsApp 060 112 8855</a></div></div>
+        <div><p>Register online now, or talk directly to Thabo about your practice and onboarding needs.</p><div className="marketing-hero-actions"><a href="/demo-request" className="marketing-button marketing-button-light">Book a live demo →</a><a href="/signup" className="marketing-button-outline">Register practice</a><a href={whatsapp} target="_blank" rel="noreferrer" className="marketing-button-outline">WhatsApp 060 112 8855</a></div></div>
       </section>
 
       <footer className="marketing-footer">
