@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePracticeList } from "../../lib/usePracticeList";
+import ListPagination from "../../components/ListPagination";
 import { supabase } from "../../lib/supabase";
 import { fetchMySpecialty, getSpecialty, SPECIALTIES, type SpecialtyConfig } from "../../lib/specialties";
 
@@ -27,10 +29,7 @@ type Product = {
 };
 
 export default function InventoryPage() {
-  const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [specialty, setSpecialty] = useState<SpecialtyConfig>(
     getSpecialty("general")
   );
@@ -38,49 +37,14 @@ export default function InventoryPage() {
   const [seeding, setSeeding] = useState(false);
   const [seedMessage, setSeedMessage] = useState("");
 
+  const [page, setPage] = useState(0);
+  const { rows: products, total, summary, loading, error, refresh } = usePracticeList<Product>("pc_inventory_page", search, page, { p_categories: specialty.inventoryCategories });
   useEffect(() => {
-    loadProducts();
-    fetchMySpecialty(supabase, supabase).then(setSpecialty).finally(() => setSpecialtyReady(true));
+    let active = true;
+    fetchMySpecialty(supabase, supabase).then(config => { if (active) setSpecialty(config); })
+      .finally(() => { if (active) setSpecialtyReady(true); });
+    return () => { active = false; };
   }, []);
-
-  async function loadProducts() {
-    setLoading(true);
-    setError("");
-
-    const { data: userData } = await supabase.auth.getUser();
-
-    if (!userData.user) {
-      window.location.href = "/login";
-      return;
-    }
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("practice_id")
-      .eq("id", userData.user.id)
-      .single();
-
-    if (profileError || !profile) {
-      setError("Your practice profile could not be found.");
-      setLoading(false);
-      return;
-    }
-
-    const { data, error: productsError } = await supabase
-      .from("inventory_products")
-      .select("*")
-      .eq("practice_id", profile.practice_id)
-      .order("name", { ascending: true });
-
-    if (productsError) {
-      setError(productsError.message);
-      setLoading(false);
-      return;
-    }
-
-    setProducts(data || []);
-    setLoading(false);
-  };
 
   const loadStarterCatalog = async () => {
     setSeeding(true);
@@ -117,7 +81,8 @@ export default function InventoryPage() {
       setSeedMessage(result.message || "Starter catalog loaded.");
 
       if (result.added > 0) {
-        await loadProducts();
+        setPage(0);
+        refresh();
       }
     } catch (seedError) {
       console.error(seedError);
@@ -127,63 +92,11 @@ export default function InventoryPage() {
     setSeeding(false);
   };
 
-  const filteredProducts = useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    const matches = term
-      ? products.filter((product) =>
-          [
-            product.name,
-            product.generic_name,
-            product.product_code,
-            product.barcode,
-            product.category,
-            product.manufacturer,
-          ]
-            .filter(Boolean)
-            .some((value) => String(value).toLowerCase().includes(term))
-        )
-      : products;
-
-    // Specialty-aware ordering: items in the logged-in provider's own
-    // categories (a dentist's dental stock, an optometrist's frames)
-    // always appear before everything else.
-    const specialtyCategories = new Set(
-      specialty.inventoryCategories.map((c) => c.toLowerCase())
-    );
-
-    return [...matches].sort((a, b) => {
-      const aOwn = specialtyCategories.has(
-        String(a.category || "").toLowerCase()
-      )
-        ? 0
-        : 1;
-      const bOwn = specialtyCategories.has(
-        String(b.category || "").toLowerCase()
-      )
-        ? 0
-        : 1;
-
-      return aOwn - bOwn;
-    });
-  }, [products, search, specialty]);
-
-  const totalProducts = products.length;
-
-  const lowStockProducts = products.filter((product) => {
-    const stock = Number(product.current_stock || 0);
-    const minimum = Number(product.minimum_stock || 0);
-
-    return stock > 0 && stock <= minimum;
-  }).length;
-
-  const outOfStockProducts = products.filter(
-    (product) => Number(product.current_stock || 0) <= 0
-  ).length;
-
-  const activeProducts = products.filter(
-    (product) => product.active !== false
-  ).length;
+  const filteredProducts = products;
+  const totalProducts = summary.count || 0;
+  const lowStockProducts = summary.low || 0;
+  const outOfStockProducts = summary.out || 0;
+  const activeProducts = summary.active || 0;
 
   const formatMoney = (value: number | null) => {
     return `R ${Number(value || 0).toFixed(2)}`;
@@ -230,7 +143,7 @@ export default function InventoryPage() {
             <label className="field" style={{margin:0}}>
               <span className="label">Starter catalogue speciality</span>
               <select className="input" value={specialty.id} disabled={seeding || !specialtyReady}
-                onChange={event => {setSpecialty(getSpecialty(event.target.value));setSeedMessage("");}}>
+                onChange={event => {setSpecialty(getSpecialty(event.target.value));setSeedMessage("");setPage(0);}}>
                 {SPECIALTIES.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
@@ -260,7 +173,7 @@ export default function InventoryPage() {
             <label className="field" style={{margin:0}}>
               <span className="label">Starter catalogue speciality</span>
               <select className="input" value={specialty.id} disabled={seeding || !specialtyReady}
-                onChange={event => {setSpecialty(getSpecialty(event.target.value));setSeedMessage("");}}>
+                onChange={event => {setSpecialty(getSpecialty(event.target.value));setSeedMessage("");setPage(0);}}>
                 {SPECIALTIES.map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
               </select>
             </label>
@@ -332,7 +245,9 @@ export default function InventoryPage() {
               id="inventory-search"
               type="text"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              maxLength={200}
+              aria-label="Search all stock"
+              onChange={(event) => { setSearch(event.target.value); setPage(0); }}
               placeholder="Search by name, generic name, product code, barcode..."
               className="input"
             />
@@ -450,6 +365,7 @@ export default function InventoryPage() {
             </table>
           </div>
         )}
+        <ListPagination page={page} total={total} loading={loading} onChange={setPage} />
       </div>
     </main>
   );

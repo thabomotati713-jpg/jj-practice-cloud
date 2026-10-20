@@ -49,3 +49,6 @@ my_app_snapshot.txt
 *.backup_*
 *.before-practice-guard
 *.backup*
+
+# Supabase CLI cache
+supabase/.temp/

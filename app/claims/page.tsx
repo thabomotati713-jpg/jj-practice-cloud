@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logAudit } from "@/lib/audit";
-import { supabase } from "../../lib/supabase";
+import { usePracticeList } from "../../lib/usePracticeList";
+import ListPagination from "../../components/ListPagination";
 
 type Claim = {
   id: string;
@@ -24,6 +25,7 @@ type Claim = {
   rejection_reason: string | null;
   notes: string | null;
   created_at: string;
+  patient: Patient;
 };
 
 type Patient = {
@@ -36,50 +38,12 @@ type Patient = {
 export default function ClaimsPage() {
   const router = useRouter();
 
-  const [claims, setClaims] = useState<Claim[]>([]);
-  const [patients, setPatients] = useState<Patient[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-
+  const [page, setPage] = useState(0);
+  const { rows: claims, total, summary, loading, error, refresh } = usePracticeList<Claim>("pc_claims_page", search, page);
   useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    setLoading(true);
-
-    const [{ data: claimData, error: claimError }, { data: patientData, error: patientError }] =
-      await Promise.all([
-        supabase
-          .from("medical_aid_claims")
-          .select("*")
-          .order("created_at", { ascending: false }),
-
-        supabase
-          .from("patients")
-          .select("id, patient_id, first_name, last_name")
-          .order("last_name", { ascending: true }),
-      ]);
-
-    if (claimError) {
-      console.error("Error loading claims:", claimError);
-    }
-
-    if (patientError) {
-      console.error("Error loading patients:", patientError);
-    }
-
-    setClaims(claimData || []);
-
-    // POPIA: claims contain patient + billing data — log the access.
-    logAudit("view", "claim", null, "Claims list viewed");
-    setPatients(patientData || []);
-    setLoading(false);
-  }
-
-  function getPatient(patientId: string) {
-    return patients.find((patient) => patient.id === patientId);
-  }
+    if (!loading && !error) void logAudit("view", "claim", null, "Claims list viewed");
+  }, [loading, error]);
 
   function formatCurrency(value: number | null) {
     return `R ${(value || 0).toFixed(2)}`;
@@ -143,45 +107,11 @@ export default function ClaimsPage() {
     return "badge badge-gray";
   }
 
-  const filteredClaims = claims.filter((claim) => {
-    const patient = getPatient(claim.patient_id);
-
-    const searchText = [
-      claim.claim_number,
-      claim.medical_aid_provider,
-      claim.membership_number,
-      claim.main_member_name,
-      patient?.patient_id,
-      patient?.first_name,
-      patient?.last_name,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return searchText.includes(search.toLowerCase());
-  });
-
-  const totalClaimed = claims.reduce(
-    (sum, claim) => sum + Number(claim.claimed_amount || 0),
-    0
-  );
-
-  const totalApproved = claims.reduce(
-    (sum, claim) => sum + Number(claim.approved_amount || 0),
-    0
-  );
-
-  const totalRejected = claims.reduce(
-    (sum, claim) => sum + Number(claim.rejected_amount || 0),
-    0
-  );
-
-  const pendingClaims = claims.filter(
-    (claim) =>
-      claim.status?.toLowerCase() === "pending" ||
-      claim.status?.toLowerCase() === "submitted"
-  ).length;
+  const filteredClaims = claims;
+  const totalClaimed = summary.claimed || 0;
+  const totalApproved = summary.approved || 0;
+  const totalRejected = summary.rejected || 0;
+  const pendingClaims = summary.pending || 0;
 
   return (
     <main className="page-shell">
@@ -221,7 +151,7 @@ export default function ClaimsPage() {
         <div className="stat-grid">
           <div className="stat-card">
             <div className="stat-label">Total Claims</div>
-            <div className="stat-value">{claims.length}</div>
+            <div className="stat-value">{summary.count || 0}</div>
           </div>
 
           <div className="stat-card">
@@ -251,12 +181,16 @@ export default function ClaimsPage() {
               type="text"
               placeholder="Search by patient, claim number, medical aid or membership number..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              maxLength={200}
+              aria-label="Search all claims"
+              onChange={(e) => { setSearch(e.target.value); setPage(0); }}
               className="input"
             />
           </div>
         </div>
 
+        <p className="text-sm text-slate-600 mb-3">Financial totals cover all claims in your practice.</p>
+        {error && <div className="alert-error" role="alert">{error} <button type="button" className="btn btn-secondary btn-sm" onClick={refresh}>Retry</button></div>}
         {loading ? (
           <div className="empty-state">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
@@ -289,7 +223,7 @@ export default function ClaimsPage() {
 
               <tbody>
                 {filteredClaims.map((claim) => {
-                  const patient = getPatient(claim.patient_id);
+                  const patient = claim.patient;
 
                   return (
                     <tr key={claim.id}>
@@ -345,6 +279,7 @@ export default function ClaimsPage() {
             </table>
           </div>
         )}
+        <ListPagination page={page} total={total} loading={loading} onChange={setPage} />
       </div>
     </main>
   );
