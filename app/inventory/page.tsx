@@ -245,7 +245,9 @@ export default function InventoryPage() {
               id="inventory-search"
               type="text"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              maxLength={200}
+              aria-label="Search all stock"
+              onChange={(event) => { setSearch(event.target.value); setPage(0); }}
               placeholder="Search by name, generic name, product code, barcode..."
               className="input"
             />
