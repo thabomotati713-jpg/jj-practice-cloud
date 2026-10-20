@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useConsultationDraft } from "@/lib/useConsultationDraft";
 
 type Patient = {
   id: string;
@@ -39,7 +40,7 @@ type Profile = {
 };
 
 function today() {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Johannesburg" }).format(new Date());
 }
 
 function patientFullName(patient: Patient) {
@@ -116,15 +117,53 @@ export default function NewConsultationPage() {
 
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  const [savedConsultationId, setSavedConsultationId] = useState<string | null>(
-    null
-  );
+  const [visitLoaded, setVisitLoaded] = useState("");
+  const visitKey = `${patientId}:${appointmentId || "unscheduled"}`;
+  const draft = useConsultationDraft(patientId, appointmentId, visitLoaded === visitKey && Boolean(patient), {
+    consultation_date: consultationDate,
+    chief_complaint: chiefComplaint,
+    history_of_present_illness: history,
+    temperature: temperature,
+    pulse: pulse,
+    respiratory_rate: respiratoryRate,
+    blood_pressure_systolic: bloodPressureSystolic,
+    blood_pressure_diastolic: bloodPressureDiastolic,
+    oxygen_saturation: oxygenSaturation,
+    weight: weight,
+    height: height,
+    examination: examination,
+    diagnosis: diagnosis,
+    diagnosis_code: diagnosisCode,
+    treatment: treatment,
+    procedures: procedures,
+    clinical_notes: clinicalNotes,
+    follow_up_date: followUpDate,
+    follow_up_notes: followUpNotes,
+  }, (saved) => {
+    setConsultationDate(saved.consultation_date || today());
+    setChiefComplaint(saved.chief_complaint || "");
+    setHistory(saved.history_of_present_illness || "");
+    setTemperature(saved.temperature || "");
+    setPulse(saved.pulse || "");
+    setRespiratoryRate(saved.respiratory_rate || "");
+    setBloodPressureSystolic(saved.blood_pressure_systolic || "");
+    setBloodPressureDiastolic(saved.blood_pressure_diastolic || "");
+    setOxygenSaturation(saved.oxygen_saturation || "");
+    setWeight(saved.weight || "");
+    setHeight(saved.height || "");
+    setExamination(saved.examination || "");
+    setDiagnosis(saved.diagnosis || "");
+    setDiagnosisCode(saved.diagnosis_code || "");
+    setTreatment(saved.treatment || "");
+    setProcedures(saved.procedures || "");
+    setClinicalNotes(saved.clinical_notes || "");
+    setFollowUpDate(saved.follow_up_date || "");
+    setFollowUpNotes(saved.follow_up_notes || "");
+  });
 
   useEffect(() => {
-    loadData();
-  }, [patientId, appointmentId]);
-
-  async function loadData() {
+    let active = true;
+    async function loadData() {
     setMessage("");
 
     const {
@@ -132,6 +171,7 @@ export default function NewConsultationPage() {
       error: userError,
     } = await supabase.auth.getUser();
 
+    if (!active) return;
     if (userError || !user) {
       router.push("/login");
       return;
@@ -143,6 +183,7 @@ export default function NewConsultationPage() {
       .eq("id", user.id)
       .single();
 
+    if (!active) return;
     setProfile(profileData);
 
     const { data: patientData, error: patientError } = await supabase
@@ -169,6 +210,7 @@ export default function NewConsultationPage() {
       .eq("id", patientId)
       .single();
 
+    if (!active) return;
     if (patientError || !patientData) {
       setMessage(patientError?.message || "Patient not found.");
       return;
@@ -195,6 +237,8 @@ export default function NewConsultationPage() {
           .eq("patient_id", patientId)
           .single();
 
+      if (!active) return;
+      if (appointmentError || !appointmentData) { setMessage("This appointment could not be loaded."); return; }
       if (!appointmentError && appointmentData) {
         setAppointment(appointmentData);
 
@@ -207,7 +251,11 @@ export default function NewConsultationPage() {
         }
       }
     }
-  }
+    setVisitLoaded(visitKey);
+    }
+    void loadData();
+    return () => { active = false; };
+  }, [patientId, appointmentId, router, visitKey]);
 
   const patientName = useMemo(() => {
     if (!patient) return "Patient";
@@ -276,80 +324,18 @@ export default function NewConsultationPage() {
     setMessage("");
 
     try {
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        router.push("/login");
-        return;
-      }
-
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("practice_id")
-        .eq("id", user.id)
-        .single();
-
-      if (profileError || !profileData?.practice_id) {
-        throw new Error("Unable to determine the practice.");
-      }
-
-      const { data: inserted, error: insertError } = await supabase
-        .from("consultations")
-        .insert({
-          practice_id: profileData.practice_id,
-          patient_id: patientId,
-          appointment_id: appointmentId || null,
-          provider_id: user.id,
-          consultation_date: consultationDate,
-          chief_complaint: chiefComplaint.trim() || null,
-          history_of_present_illness: history.trim() || null,
-          temperature: toNumber(temperature),
-          pulse: toNumber(pulse),
-          respiratory_rate: toNumber(respiratoryRate),
-          blood_pressure_systolic: toNumber(bloodPressureSystolic),
-          blood_pressure_diastolic: toNumber(bloodPressureDiastolic),
-          oxygen_saturation: toNumber(oxygenSaturation),
-          weight: toNumber(weight),
-          height: toNumber(height),
-          examination: examination.trim() || null,
-          diagnosis: diagnosis.trim() || null,
-          diagnosis_code: diagnosisCode.trim() || null,
-          treatment: treatment.trim() || null,
-          procedures: procedures.trim() || null,
-          clinical_notes: clinicalNotes.trim() || null,
-          follow_up_notes: followUpNotes.trim() || null,
-          follow_up_date: followUpDate || null,
-        })
-        .select("id")
-        .single();
-
-      if (insertError || !inserted) {
-        throw new Error(insertError?.message || "Failed to save consultation.");
-      }
-
-      if (appointmentId) {
-        await supabase
-          .from("appointments")
-          .update({ status: "completed" })
-          .eq("id", appointmentId)
-          .eq("patient_id", patientId);
-      }
-
-      setSavedConsultationId(inserted.id);
+      const consultationId = await draft.finalize();
 
       if (nextAction === "prescription") {
         router.push(
-          `/patients/${patientId}/prescriptions/new?consultation_id=${inserted.id}`
+          `/patients/${patientId}/prescriptions/new?consultation_id=${consultationId}`
         );
         return;
       }
 
       if (nextAction === "sick-note") {
         router.push(
-          `/sick-notes?patient_id=${patientId}&consultation_id=${inserted.id}`
+          `/sick-notes?patient_id=${patientId}&consultation_id=${consultationId}`
         );
         return;
       }
@@ -416,9 +402,10 @@ export default function NewConsultationPage() {
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"
-                onClick={() =>
-                  router.push(`/patients/${patientId}/consultations`)
-                }
+                onClick={async () => {
+                  if (draft.dirty) { try { await draft.saveNow(); } catch { return; } }
+                  router.push(`/patients/${patientId}/consultations`);
+                }}
               >
                 Back to History
               </button>
@@ -516,10 +503,19 @@ export default function NewConsultationPage() {
 
           {message && <div className="alert-error">{message}</div>}
 
+          <div className="card mb-4" role="status" aria-live="polite">
+            <div className="card-body flex flex-wrap items-center justify-between gap-3">
+              <div><strong>{draft.status}</strong><p className="text-sm text-slate-600">Your private draft is separate from the completed patient history.</p>
+                {draft.error && <p className="text-red-700" role="alert">{draft.error}</p>}</div>
+              {draft.error && draft.ready && !draft.conflict && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void draft.saveNow().catch(() => undefined)}>Retry draft save</button>}
+              {!draft.ready && draft.error && <button type="button" className="btn btn-secondary btn-sm" onClick={() => window.location.reload()}>Reload draft</button>}
+            </div>
+          </div>
           <form
             onSubmit={(event) => saveConsultation(event, "history")}
             className="space-y-5"
           >
+            <fieldset disabled={saving || !draft.ready || draft.conflict} className="space-y-5">
             <section className="card">
               <div className="card-header">
                 <h2 className="card-title">Presenting Complaint</h2>
@@ -766,9 +762,10 @@ export default function NewConsultationPage() {
               <button
                 type="button"
                 className="btn btn-secondary"
-                onClick={() =>
-                  router.push(`/patients/${patientId}/consultations`)
-                }
+                onClick={async () => {
+                  if (draft.dirty) { try { await draft.saveNow(); } catch { return; } }
+                  router.push(`/patients/${patientId}/consultations`);
+                }}
                 disabled={saving}
               >
                 Cancel
@@ -815,6 +812,7 @@ export default function NewConsultationPage() {
                 {saving ? "Saving Consultation..." : "Save Consultation"}
               </button>
             </div>
+            </fieldset>
           </form>
         </div>
       </main>

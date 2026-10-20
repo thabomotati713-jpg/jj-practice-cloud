@@ -43,6 +43,9 @@ export default function Dashboard() {
     collectedThisMonth: 0,
     outstandingTotal: 0,
     upcomingWeek: 0,
+    receivedThisMonth: 0,
+    receivedToday: 0,
+    overdueTotal: 0,
   });
 
   useEffect(() => {
@@ -179,279 +182,12 @@ export default function Dashboard() {
         ?.trim() || ""
     );
 
-    const [
-      patientsResult,
-      appointmentsResult,
-      prescriptionsResult,
-      sickNotesResult,
-      invoicesResult,
-      claimsResult,
-      staffResult,
-      inventoryResult,
-      queueResult,
-    ] = await Promise.all([
-      supabase
-        .from("patients")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("appointments")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("prescriptions")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("sick_notes")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("invoices")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("medical_aid_claims")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("staff")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("inventory_products")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq(
-          "practice_id",
-          practiceId
-        ),
-
-      supabase
-        .from("patient_queue_entries")
-        .select(
-          "id",
-          {
-            count: "exact",
-            head: true,
-          }
-        )
-        .eq("practice_id", practiceId)
-        .in("status", ["waiting", "called", "in_consultation"]),
-    ]);
-
-    const firstError =
-      patientsResult.error ||
-      appointmentsResult.error ||
-      prescriptionsResult.error ||
-      sickNotesResult.error ||
-      invoicesResult.error ||
-      claimsResult.error ||
-      staffResult.error ||
-      inventoryResult.error ||
-      queueResult.error;
-
-    if (firstError) {
-      setError(
-        firstError.message
-      );
-    }
-
-    setCounts({
-      patients:
-        patientsResult.count || 0,
-
-      appointments:
-        appointmentsResult.count || 0,
-
-      prescriptions:
-        prescriptionsResult.count || 0,
-
-      sick_notes:
-        sickNotesResult.count || 0,
-
-      invoices:
-        invoicesResult.count || 0,
-
-      claims:
-        claimsResult.count || 0,
-
-      staff:
-        staffResult.count || 0,
-
-      inventory:
-        inventoryResult.count || 0,
-
-      queue:
-        queueResult.count || 0,
-    });
-
-    // Practice analytics: billing performance and
-    // short-term appointment load.
-    const today = new Date();
-
-    const todayStr = today
-      .toLocaleDateString("en-CA");
-
-    const weekEnd = new Date(today);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
-    const monthStart = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      1
-    );
-
-    const monthStartStr = monthStart
-      .toLocaleDateString("en-CA");
-
-    const [invoicesStats, upcomingAppointments] =
-      await Promise.all([
-        supabase
-          .from("invoices")
-          .select(
-            "total, amount_paid, balance, invoice_date"
-          )
-          .eq("practice_id", practiceId),
-
-        supabase
-          .from("appointments")
-          .select(
-            "id",
-            { count: "exact", head: true }
-          )
-          .eq("practice_id", practiceId)
-          .gte("appointment_date", todayStr)
-          .lte(
-            "appointment_date",
-            weekEnd.toLocaleDateString("en-CA")
-          )
-          .in("status", [
-            "scheduled",
-            "confirmed",
-          ]),
-      ]);
-
-    if (!invoicesStats.error) {
-      const invoiceRows =
-        invoicesStats.data || [];
-
-      const invoicedThisMonth =
-        invoiceRows
-          .filter(
-            (invoice) =>
-              invoice.invoice_date >=
-              monthStartStr
-          )
-          .reduce(
-            (sum, invoice) =>
-              sum + (invoice.total || 0),
-            0
-          );
-
-      const collectedThisMonth =
-        invoiceRows
-          .filter(
-            (invoice) =>
-              invoice.invoice_date >=
-              monthStartStr
-          )
-          .reduce(
-            (sum, invoice) =>
-              sum +
-              (invoice.amount_paid || 0),
-            0
-          );
-
-      const outstandingTotal =
-        invoiceRows.reduce(
-          (sum, invoice) =>
-            sum + (invoice.balance || 0),
-          0
-        );
-
-      setStats({
-        invoicedThisMonth,
-        collectedThisMonth,
-        outstandingTotal,
-        upcomingWeek:
-          upcomingAppointments.count || 0,
-      });
+    const { data: summary, error: summaryError } = await supabase.rpc("pc_dashboard_summary");
+    if (summaryError || !summary) {
+      setError("Could not load practice totals. Please refresh to retry.");
+    } else {
+      setCounts(summary.counts);
+      setStats(summary.stats);
     }
 
     setLoading(false);
@@ -480,7 +216,9 @@ export default function Dashboard() {
   const money = (value: number) => `R ${value.toLocaleString("en-ZA", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const metrics = [
     { label: "Invoiced this month", value: money(stats.invoicedThisMonth), note: "Invoices dated this month", icon: "document", href: "/invoices" },
-    { label: "Payments on this month’s invoices", value: money(stats.collectedThisMonth), note: "Payments recorded against these invoices", icon: "wallet", href: "/invoices" },
+    { label: "Received this month", value: money(stats.receivedThisMonth), note: "By payment date · all invoice periods", icon: "wallet", href: "/invoices" },
+    { label: "Received today", value: money(stats.receivedToday), note: "Payments recorded today · South Africa", icon: "wallet", href: "/invoices" },
+    { label: "Overdue balance", value: money(stats.overdueTotal), note: "Unpaid balances past their due date", icon: "clock", href: "/invoices" },
     { label: "Outstanding balance", value: money(stats.outstandingTotal), note: "Across all invoices", icon: "clock", href: "/invoices" },
     { label: "Upcoming appointments", value: String(stats.upcomingWeek), note: "Scheduled & confirmed · next 7 days", icon: "calendar", href: "/appointments" },
   ];

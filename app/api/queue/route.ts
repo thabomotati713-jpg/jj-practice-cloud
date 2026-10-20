@@ -19,40 +19,10 @@ export async function POST(request: Request) {
     const entryId = String(body.entryId || "");
 
     if (action === "call-next") {
-      const { data: next, error: nextError } = await admin
-        .from("patient_queue_entries")
-        .select("id")
-        .eq("practice_id", profile.practice_id)
-        .eq("status", "waiting")
-        .order("queue_order_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      if (nextError) {
-        throw nextError;
-      }
-
-      if (!next) {
-        return NextResponse.json(
-          { error: "There are no waiting patients." },
-          { status: 404 }
-        );
-      }
-
-      const now = new Date().toISOString();
-      const { error: updateError } = await admin
-        .from("patient_queue_entries")
-        .update({
-          status: "called",
-          called_at: now,
-          updated_at: now,
-        })
-        .eq("id", next.id)
-        .eq("practice_id", profile.practice_id)
-        .eq("status", "waiting");
-
-      if (updateError) throw updateError;
-      return NextResponse.json({ success: true, entryId: next.id });
+      const { data: nextId, error } = await admin.rpc("pc_queue_call_next", { p_practice_id: profile.practice_id });
+      if (error) throw error;
+      if (!nextId) return NextResponse.json({ error: "There are no waiting patients today." }, { status: 404 });
+      return NextResponse.json({ success: true, entryId: nextId });
     }
 
     if (!entryId) {
@@ -108,13 +78,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Unknown queue action." }, { status: 400 });
     }
 
-    const { error: updateError } = await admin
+    const { data: updated, error: updateError } = await admin
       .from("patient_queue_entries")
       .update(updates)
       .eq("id", entryId)
-      .eq("practice_id", profile.practice_id);
+      .eq("practice_id", profile.practice_id)
+      .eq("status", entry.status)
+      .select("id")
+      .maybeSingle();
 
     if (updateError) throw updateError;
+    if (!updated) return NextResponse.json({ error: "This queue entry changed. Refresh and try again." }, { status: 409 });
 
     return NextResponse.json({ success: true });
   } catch (error) {

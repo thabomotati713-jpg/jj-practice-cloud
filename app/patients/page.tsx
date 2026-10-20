@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
+import { usePracticeList } from "../../lib/usePracticeList";
+import ListPagination from "../../components/ListPagination";
 import { supabase } from "../../lib/supabase";
 import PracticeAccessGuard from "../../components/PracticeAccessGuard";
 
@@ -40,71 +43,9 @@ function statusBadgeClass(status: string | null): string {
 }
 
 export default function PatientsPage() {
-  const [patients, setPatients] = useState<Patient[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    loadPatients();
-  }, []);
-
-  const loadPatients = async () => {
-    setLoading(true);
-    setError("");
-
-    const { data: userData, error: userError } =
-      await supabase.auth.getUser();
-
-    if (userError || !userData.user) {
-      window.location.href = "/login";
-      return;
-    }
-
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("practice_id")
-      .eq("id", userData.user.id)
-      .single();
-
-    if (profileError || !profile) {
-      setError("Your practice profile could not be found.");
-      setLoading(false);
-      return;
-    }
-
-    const { data, error: patientsError } = await supabase
-      .from("patients")
-      .select(
-        "id, patient_id, title, first_name, middle_name, last_name, date_of_birth, gender, phone, email, status"
-      )
-      .eq("practice_id", profile.practice_id)
-      .order("created_at", { ascending: false });
-
-    if (patientsError) {
-      setError(patientsError.message);
-    } else {
-      setPatients((data || []) as Patient[]);
-    }
-
-    setLoading(false);
-  };
-
-  const filteredPatients = patients.filter((patient) => {
-    const text = [
-      patient.patient_id,
-      patient.first_name,
-      patient.middle_name,
-      patient.last_name,
-      patient.phone,
-      patient.email,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return text.includes(search.toLowerCase());
-  });
+  const [page, setPage] = useState(0);
+  const { rows: filteredPatients, total, loading, error, refresh } = usePracticeList<Patient>("pc_patients_page", search, page);
 
   return (
     <PracticeAccessGuard>
@@ -170,7 +111,8 @@ export default function PatientsPage() {
                 id="patient-search"
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                maxLength={200}
+                onChange={(e) => { setSearch(e.target.value); setPage(0); }}
                 placeholder="Search by patient ID, name, phone or email..."
                 className="input"
               />
@@ -179,7 +121,7 @@ export default function PatientsPage() {
         </div>
 
         {/* Error */}
-        {error && <div className="alert-error">{error}</div>}
+        {error && <div className="alert-error" role="alert">{error} <button type="button" onClick={refresh} className="btn btn-secondary btn-sm">Retry</button></div>}
 
         {/* Patient Table */}
         <div className="table-wrap">
@@ -219,14 +161,9 @@ export default function PatientsPage() {
                 filteredPatients.map((patient) => (
                   <tr key={patient.id}>
                     <td>
-                      <button
-                        onClick={() => {
-                          window.location.href = `/patients/${patient.id}`;
-                        }}
-                        className="btn btn-secondary btn-sm"
-                      >
+                      <Link href={`/patients/${patient.id}`} className="btn btn-secondary btn-sm">
                         {patient.patient_id}
-                      </button>
+                      </Link>
                     </td>
 
                     <td>
@@ -257,6 +194,7 @@ export default function PatientsPage() {
             </tbody>
           </table>
         </div>
+        <ListPagination page={page} total={total} loading={loading} onChange={setPage} />
       </div>
     </main>
     </PracticeAccessGuard>

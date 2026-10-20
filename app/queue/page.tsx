@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
 type QueueEntry = {
@@ -70,10 +70,13 @@ export default function PatientQueuePage() {
   const [workingId, setWorkingId] = useState("");
   const [error, setError] = useState("");
 
-  const todayStart = useMemo(() => {
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    return start.toISOString();
+  const dayStart = () => new Date(`${new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Johannesburg" }).format(new Date())}T00:00:00+02:00`).toISOString();
+  const [todayStart, setTodayStart] = useState(dayStart);
+  const [connection, setConnection] = useState("connecting");
+
+  useEffect(() => {
+    const timer = setInterval(() => setTodayStart(dayStart()), 60000);
+    return () => clearInterval(timer);
   }, []);
 
   const loadQueue = useCallback(async (id: string) => {
@@ -84,6 +87,7 @@ export default function PatientQueuePage() {
       )
       .eq("practice_id", id)
       .gte("checked_in_at", todayStart)
+      .lt("checked_in_at", new Date(new Date(todayStart).getTime() + 86400000).toISOString())
       .order("queue_order_at", { ascending: true });
 
     if (queueError) {
@@ -97,9 +101,11 @@ export default function PatientQueuePage() {
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null;
+    let active = true;
 
     const boot = async () => {
       const { data: userData } = await supabase.auth.getUser();
+      if (!active) return;
 
       if (!userData.user) {
         window.location.href = "/login";
@@ -136,7 +142,9 @@ export default function PatientQueuePage() {
         setPracticeName(settings.setting_value);
       }
 
+      if (!active) return;
       await loadQueue(profile.practice_id);
+      if (!active) return;
 
       channel = supabase
         .channel(`patient-queue-${profile.practice_id}`)
@@ -152,7 +160,11 @@ export default function PatientQueuePage() {
             void loadQueue(profile.practice_id);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          if (!active) return;
+          setConnection(status === "SUBSCRIBED" ? "live" : "reconnecting");
+          if (status === "SUBSCRIBED") void loadQueue(profile.practice_id);
+        });
 
       setLoading(false);
     };
@@ -160,11 +172,22 @@ export default function PatientQueuePage() {
     void boot();
 
     return () => {
+      active = false;
       if (channel) {
         void supabase.removeChannel(channel);
       }
     };
   }, [loadQueue]);
+
+  useEffect(() => {
+    if (!practiceId) return;
+    const refresh = () => { if (document.visibilityState === "visible") void loadQueue(practiceId); };
+    const timer = setInterval(() => { if (connection !== "live") refresh(); }, 15000);
+    window.addEventListener("online", refresh);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => { clearInterval(timer); window.removeEventListener("online", refresh); window.removeEventListener("focus", refresh); document.removeEventListener("visibilitychange", refresh); };
+  }, [practiceId, connection, loadQueue]);
 
   const act = async (action: string, entryId?: string) => {
     setError("");
@@ -277,7 +300,7 @@ export default function PatientQueuePage() {
             <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
               <div>
                 <h2 className="text-lg font-semibold">Patients in line</h2>
-                <p className="text-sm text-slate-500">Updates automatically when a patient scans the QR code.</p>
+                <p className="text-sm text-slate-500" role="status">{connection === "live" ? "Live updates connected" : "Reconnecting live updates · checking every 15 seconds"}</p>
               </div>
               <button
                 type="button"
