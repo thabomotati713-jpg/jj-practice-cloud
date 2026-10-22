@@ -42,3 +42,8 @@ test('invalid investigation dates and overlong specimen metadata block completio
  d.tests[0].performed_on='2026-02-28';assert.equal(e.validateEncounter(d),null);
  d.tests[0].specimen='x'.repeat(101);assert.match(e.validateEncounter(d),/Shorten/);
 });
+
+test('previous-visit dates use the South African clinical day rather than the UTC day',()=>{
+ const ref=e.previousVisitReference({date:'2026-10-21T22:00:00Z',diagnosis:'Prior diagnosis',treatment:null});
+ assert(ref.includes('(2026-10-22)'));assert(ref.includes('reference only; reassess today'));assert(ref.includes('Not recorded'));
+});

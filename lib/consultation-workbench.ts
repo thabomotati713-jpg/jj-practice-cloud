@@ -165,6 +165,19 @@ export function patientContext(
 export function appendNote(existing: string, added: string) {
   return [existing.trim(), added.trim()].filter(Boolean).join("\n\n");
 }
+export function previousVisitReference(previous: {
+  date: string;
+  diagnosis: string | null;
+  treatment: string | null;
+}) {
+  const instant = new Date(previous.date);
+  const date = Number.isFinite(instant.getTime())
+    ? new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Africa/Johannesburg",
+      }).format(instant)
+    : "date unavailable";
+  return `Previous consultation (${date}) — reference only; reassess today:\nRecorded diagnosis: ${previous.diagnosis || "Not recorded"}\nPrevious plan: ${previous.treatment || "Not recorded"}`;
+}
 
 export type Investigation = {
   id: string;

@@ -12,6 +12,7 @@ import {
   fillEmptyNotes,
   patientContext,
   appendNote,
+  previousVisitReference,
   newInvestigation,
   collectSpeech,
   type EncounterDetails,
@@ -377,7 +378,7 @@ export default function ConsultationWorkbench({
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => {
-                  const ref = `Previous consultation (${previous.date.slice(0, 10)}) — reference only; reassess today:\nRecorded diagnosis: ${previous.diagnosis || "Not recorded"}\nPrevious plan: ${previous.treatment || "Not recorded"}`;
+                  const ref = previousVisitReference(previous);
                   if (!fields.history_of_present_illness.includes(ref))
                     onFields({
                       ...fields,

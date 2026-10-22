@@ -27,7 +27,7 @@ Migration: `20261022162640_consultation_workbench.sql`, applied to the configure
 
 ## Verification
 
-- `node --test tests/*.test.cjs`: 31 passing, including template preservation, absent-vs-negative history, empty test defaults, draft round-trip, malformed restoration, result/date/size checks, speech result deduplication, consent gating, local-only failure and handler teardown.
+- `node --test tests/*.test.cjs`: 32 passing, including template preservation, absent-vs-negative history, empty test defaults, draft round-trip, malformed restoration, result/date/size checks, speech result deduplication, consent gating, local-only failure and handler teardown.
 - Production webpack build and TypeScript check pass.
 - ESLint has no errors in changed files; existing logo `<img>` optimisation warnings remain.
 - `tests/consultation-workbench.sql` executed against the database inside a rolled-back transaction: draft round-trip, author/tenant isolation, unreviewed completion rejection, invalid shapes/dates/IDs, direct-write constraint, atomic completion and retry safety pass.
