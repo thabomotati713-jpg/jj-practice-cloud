@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "../../lib/supabase";
+import { isSupabaseConfigured, supabase } from "../../lib/supabase";
 
 export default function Home() {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,6 +21,12 @@ export default function Home() {
 
     setLoading(true);
     setError("");
+
+    if (!isSupabaseConfigured) {
+      setError("Sign-in is temporarily unavailable. Please try again shortly.");
+      setLoading(false);
+      return;
+    }
 
     const { data, error: signInError } =
       await supabase.auth.signInWithPassword({
@@ -133,6 +139,11 @@ export default function Home() {
 
     if (!recoveryEmail) {
       setError("Enter your email address first.");
+      return;
+    }
+
+    if (!isSupabaseConfigured) {
+      setError("Password recovery is temporarily unavailable. Please try again shortly.");
       return;
     }
 
