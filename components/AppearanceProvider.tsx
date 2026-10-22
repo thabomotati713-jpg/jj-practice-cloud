@@ -6,6 +6,10 @@ import {applyAppearance,isAppearance} from '../lib/appearance';
 export default function AppearanceProvider() {
   const pathname=usePathname();
   useEffect(()=>{
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+      return;
+    }
+
     let disposed=false, version=0;
     async function refresh() {
       const current=++version;
