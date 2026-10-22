@@ -189,5 +189,5 @@ export function catalogKey(name: string) {
     .normalize("NFKC")
     .toLowerCase()
     .replace(/\s+/g, "")
-    .replace(/[^a-z0-9]/g, "");
+    .replace(/[^a-z0-9./%]/g, "");
 }

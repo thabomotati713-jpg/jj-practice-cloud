@@ -90,6 +90,7 @@ test("ICD API validates filters, paginates and caps the response", async () => {
 });
 test("medication templates contain no stock, prices or patient dosing defaults", () => {
   const rows = medications.MEDICATION_CATALOG;
+    assert.notEqual(medications.catalogKey("Example 1.5 mg"), medications.catalogKey("Example 15 mg"));
   assert.equal(rows.length, 127);
   assert.equal(
     new Set(rows.map((x) => medications.catalogKey(x.name))).size,
