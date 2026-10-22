@@ -17,14 +17,13 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const publishableKey =
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !publishableKey || !serviceRoleKey) {
       return NextResponse.json(
         { error: "Server configuration is incomplete." },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -33,7 +32,7 @@ export async function POST(request: Request) {
     if (!authorization?.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Authentication is required." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -55,7 +54,7 @@ export async function POST(request: Request) {
     if (userError || !user) {
       return NextResponse.json(
         { error: "Your login session is invalid." },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -70,7 +69,7 @@ export async function POST(request: Request) {
       !profile?.active ||
       !profile.practice_id ||
       !["owner", "admin", "inventory"].includes(
-        String((profile as { role: string }).role).toLowerCase()
+        String((profile as { role: string }).role).toLowerCase(),
       )
     ) {
       return NextResponse.json(
@@ -78,7 +77,7 @@ export async function POST(request: Request) {
           error:
             "Only practice administrators or inventory managers can load the starter catalog.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -86,37 +85,80 @@ export async function POST(request: Request) {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    const {data: practice, error: practiceError} = await adminClient
-      .from("practices").select("active").eq("id", practiceId).single();
+    const { data: practice, error: practiceError } = await adminClient
+      .from("practices")
+      .select("active")
+      .eq("id", practiceId)
+      .single();
     if (practiceError || !practice?.active) {
-      return NextResponse.json({error:"Your practice is inactive or unavailable."}, {status:403});
+      return NextResponse.json(
+        { error: "Your practice is inactive or unavailable." },
+        { status: 403 },
+      );
     }
     const rawBody = await request.text();
-    let body: {specialty?: string;medications?: string[]} = {};
-    try { body = rawBody ? JSON.parse(rawBody) : {}; }
-    catch { return NextResponse.json({error:"Invalid catalogue selection."}, {status:400}); }
-    if (!body || typeof body !== "object" || Array.isArray(body) || (body.specialty !== undefined && !SPECIALTIES.some(s => s.id === body.specialty))) {
-      return NextResponse.json({error:"Select a supported speciality."}, {status:400});
+    let body: { specialty?: string; medications?: string[] } = {};
+    try {
+      body = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid catalogue selection." },
+        { status: 400 },
+      );
     }
-    if (body.medications !== undefined && (!Array.isArray(body.medications) || body.medications.length < 1 || body.medications.length > 200 || body.medications.some(name => typeof name !== "string" || !MEDICATION_CATALOG.some(item => item.name === name)))) {
-      return NextResponse.json({error:"Choose between 1 and 200 supported medication templates."},{status:400});
+    if (
+      !body ||
+      typeof body !== "object" ||
+      Array.isArray(body) ||
+      (body.specialty !== undefined &&
+        !SPECIALTIES.some((s) => s.id === body.specialty))
+    ) {
+      return NextResponse.json(
+        { error: "Select a supported speciality." },
+        { status: 400 },
+      );
     }
-    const specialty = body.specialty ? getSpecialty(body.specialty) : await fetchMySpecialty(
-      authClient as never,
-      authClient
-    );
+    if (
+      body.medications !== undefined &&
+      (!Array.isArray(body.medications) ||
+        body.medications.length < 1 ||
+        body.medications.length > 200 ||
+        body.medications.some(
+          (name) =>
+            typeof name !== "string" ||
+            !MEDICATION_CATALOG.some((item) => item.name === name),
+        ))
+    ) {
+      return NextResponse.json(
+        { error: "Choose between 1 and 200 supported medication templates." },
+        { status: 400 },
+      );
+    }
+    const specialty = body.specialty
+      ? getSpecialty(body.specialty)
+      : await fetchMySpecialty(authClient as never, authClient);
 
-    const catalog = body.medications ? MEDICATION_CATALOG.filter(item => body.medications!.includes(item.name)) : SPECIALTY_CATALOGS[specialty.id] || [];
+    const catalog = body.medications
+      ? MEDICATION_CATALOG.filter((item) =>
+          body.medications!.includes(item.name),
+        )
+      : SPECIALTY_CATALOGS[specialty.id] || [];
 
     // Read every page: a practice can have more than PostgREST's row cap.
     const existingNames = new Set<string>();
     for (let offset = 0; ; offset += 1000) {
       const { data: existing, error: existingError } = await adminClient
-        .from("inventory_products").select("name").eq("practice_id", practiceId)
-        .order("id").range(offset, offset + 999);
+        .from("inventory_products")
+        .select("name")
+        .eq("practice_id", practiceId)
+        .order("id")
+        .range(offset, offset + 999);
       if (existingError) {
         console.error("Starter inventory lookup failed", existingError);
-        return NextResponse.json({error:"Could not read inventory. Please try again."},{status:500});
+        return NextResponse.json(
+          { error: "Could not read inventory. Please try again." },
+          { status: 500 },
+        );
       }
       for (const row of existing || []) existingNames.add(catalogKey(row.name));
       if (!existing || existing.length < 1000) break;
@@ -131,7 +173,7 @@ export async function POST(request: Request) {
       })
       .map((item) => ({
         practice_id: practiceId,
-        product_code: `STARTER-${createHash("sha256").update(catalogKey(item.name)).digest("hex").slice(0,24)}`,
+        product_code: `STARTER-${createHash("sha256").update(catalogKey(item.name)).digest("hex").slice(0, 24)}`,
         name: item.name,
         generic_name: item.generic_name || null,
         category: item.category,
@@ -158,13 +200,14 @@ export async function POST(request: Request) {
 
     const { data: inserted, error: insertError } = await adminClient
       .from("inventory_products")
-      .upsert(toInsert, { onConflict: "practice_id,product_code", ignoreDuplicates: true }).select("id");
+      .upsert(toInsert, {
+        onConflict: "practice_id,product_code",
+        ignoreDuplicates: true,
+      })
+      .select("id");
 
     if (insertError) {
-      return NextResponse.json(
-        { error: insertError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -176,7 +219,7 @@ export async function POST(request: Request) {
     console.error("seed-starter error:", error);
     return NextResponse.json(
       { error: "Could not load the starter catalog." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
