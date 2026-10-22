@@ -3,6 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import ConsultationWorkbench from "@/components/ConsultationWorkbench";
+import EncounterRecord from "@/components/EncounterRecord";
+import {
+  emptyEncounter,
+  parseEncounter,
+  validateEncounter,
+  type EncounterDetails,
+  type NoteFields,
+} from "@/lib/consultation-workbench";
 import IcdCodePicker from "@/components/IcdCodePicker";
 import { useConsultationDraft } from "@/lib/useConsultationDraft";
 
@@ -41,15 +50,13 @@ type Profile = {
 };
 
 function today() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Johannesburg" }).format(new Date());
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Johannesburg",
+  }).format(new Date());
 }
 
 function patientFullName(patient: Patient) {
-  return [
-    patient.first_name,
-    patient.middle_name,
-    patient.last_name,
-  ]
+  return [patient.first_name, patient.middle_name, patient.last_name]
     .filter(Boolean)
     .join(" ");
 }
@@ -60,12 +67,7 @@ function toNumber(value: string) {
   return Number.isFinite(number) ? number : null;
 }
 
-function validateRange(
-  label: string,
-  value: string,
-  min: number,
-  max: number
-) {
+function validateRange(label: string, value: string, min: number, max: number) {
   const number = toNumber(value);
 
   if (number === null) {
@@ -81,12 +83,26 @@ function validateRange(
 
 export default function NewConsultationPage() {
   const params = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
-
   const patientId = String(params.id);
   const appointmentId = searchParams.get("appointment_id");
+  return (
+    <ConsultationEditor
+      key={`${patientId}:${appointmentId || "unscheduled"}`}
+      patientId={patientId}
+      appointmentId={appointmentId}
+    />
+  );
+}
 
+function ConsultationEditor({
+  patientId,
+  appointmentId,
+}: {
+  patientId: string;
+  appointmentId: string | null;
+}) {
+  const router = useRouter();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -116,81 +132,96 @@ export default function NewConsultationPage() {
   const [followUpDate, setFollowUpDate] = useState("");
   const [followUpNotes, setFollowUpNotes] = useState("");
 
+  const [encounter, setEncounter] = useState<EncounterDetails>(emptyEncounter);
+  const [recording, setRecording] = useState(false);
+  const [previousVisit, setPreviousVisit] = useState<{
+    date: string;
+    diagnosis: string | null;
+    treatment: string | null;
+  } | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [visitLoaded, setVisitLoaded] = useState("");
   const visitKey = `${patientId}:${appointmentId || "unscheduled"}`;
-  const draft = useConsultationDraft(patientId, appointmentId, visitLoaded === visitKey && Boolean(patient), {
-    consultation_date: consultationDate,
-    chief_complaint: chiefComplaint,
-    history_of_present_illness: history,
-    temperature: temperature,
-    pulse: pulse,
-    respiratory_rate: respiratoryRate,
-    blood_pressure_systolic: bloodPressureSystolic,
-    blood_pressure_diastolic: bloodPressureDiastolic,
-    oxygen_saturation: oxygenSaturation,
-    weight: weight,
-    height: height,
-    examination: examination,
-    diagnosis: diagnosis,
-    diagnosis_code: diagnosisCode,
-    treatment: treatment,
-    procedures: procedures,
-    clinical_notes: clinicalNotes,
-    follow_up_date: followUpDate,
-    follow_up_notes: followUpNotes,
-  }, (saved) => {
-    setConsultationDate(saved.consultation_date || today());
-    setChiefComplaint(saved.chief_complaint || "");
-    setHistory(saved.history_of_present_illness || "");
-    setTemperature(saved.temperature || "");
-    setPulse(saved.pulse || "");
-    setRespiratoryRate(saved.respiratory_rate || "");
-    setBloodPressureSystolic(saved.blood_pressure_systolic || "");
-    setBloodPressureDiastolic(saved.blood_pressure_diastolic || "");
-    setOxygenSaturation(saved.oxygen_saturation || "");
-    setWeight(saved.weight || "");
-    setHeight(saved.height || "");
-    setExamination(saved.examination || "");
-    setDiagnosis(saved.diagnosis || "");
-    setDiagnosisCode(saved.diagnosis_code || "");
-    setTreatment(saved.treatment || "");
-    setProcedures(saved.procedures || "");
-    setClinicalNotes(saved.clinical_notes || "");
-    setFollowUpDate(saved.follow_up_date || "");
-    setFollowUpNotes(saved.follow_up_notes || "");
-  });
+  const draft = useConsultationDraft(
+    patientId,
+    appointmentId,
+    visitLoaded === visitKey && Boolean(patient),
+    {
+      consultation_date: consultationDate,
+      chief_complaint: chiefComplaint,
+      history_of_present_illness: history,
+      temperature: temperature,
+      pulse: pulse,
+      respiratory_rate: respiratoryRate,
+      blood_pressure_systolic: bloodPressureSystolic,
+      blood_pressure_diastolic: bloodPressureDiastolic,
+      oxygen_saturation: oxygenSaturation,
+      weight: weight,
+      height: height,
+      examination: examination,
+      diagnosis: diagnosis,
+      diagnosis_code: diagnosisCode,
+      treatment: treatment,
+      procedures: procedures,
+      clinical_notes: clinicalNotes,
+      follow_up_date: followUpDate,
+      follow_up_notes: followUpNotes,
+      encounter_details: JSON.stringify(encounter),
+    },
+    (saved) => {
+      setEncounter(parseEncounter(saved.encounter_details || {}));
+      setConsultationDate(saved.consultation_date || today());
+      setChiefComplaint(saved.chief_complaint || "");
+      setHistory(saved.history_of_present_illness || "");
+      setTemperature(saved.temperature || "");
+      setPulse(saved.pulse || "");
+      setRespiratoryRate(saved.respiratory_rate || "");
+      setBloodPressureSystolic(saved.blood_pressure_systolic || "");
+      setBloodPressureDiastolic(saved.blood_pressure_diastolic || "");
+      setOxygenSaturation(saved.oxygen_saturation || "");
+      setWeight(saved.weight || "");
+      setHeight(saved.height || "");
+      setExamination(saved.examination || "");
+      setDiagnosis(saved.diagnosis || "");
+      setDiagnosisCode(saved.diagnosis_code || "");
+      setTreatment(saved.treatment || "");
+      setProcedures(saved.procedures || "");
+      setClinicalNotes(saved.clinical_notes || "");
+      setFollowUpDate(saved.follow_up_date || "");
+      setFollowUpNotes(saved.follow_up_notes || "");
+    },
+  );
 
   useEffect(() => {
     let active = true;
     async function loadData() {
-    setMessage("");
+      setMessage("");
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-    if (!active) return;
-    if (userError || !user) {
-      router.push("/login");
-      return;
-    }
+      if (!active) return;
+      if (userError || !user) {
+        router.push("/login");
+        return;
+      }
 
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("first_name,last_name,display_name")
-      .eq("id", user.id)
-      .single();
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("first_name,last_name,display_name")
+        .eq("id", user.id)
+        .single();
 
-    if (!active) return;
-    setProfile(profileData);
+      if (!active) return;
+      setProfile(profileData);
 
-    const { data: patientData, error: patientError } = await supabase
-      .from("patients")
-      .select(
-        `
+      const { data: patientData, error: patientError } = await supabase
+        .from("patients")
+        .select(
+          `
         id,
         patient_id,
         first_name,
@@ -206,25 +237,25 @@ export default function NewConsultationPage() {
         medical_aid_provider,
         medical_aid_number,
         medical_aid_plan
-        `
-      )
-      .eq("id", patientId)
-      .single();
+        `,
+        )
+        .eq("id", patientId)
+        .single();
 
-    if (!active) return;
-    if (patientError || !patientData) {
-      setMessage(patientError?.message || "Patient not found.");
-      return;
-    }
+      if (!active) return;
+      if (patientError || !patientData) {
+        setMessage(patientError?.message || "Patient not found.");
+        return;
+      }
 
-    setPatient(patientData);
+      setPatient(patientData);
 
-    if (appointmentId) {
-      const { data: appointmentData, error: appointmentError } =
-        await supabase
-          .from("appointments")
-          .select(
-            `
+      if (appointmentId) {
+        const { data: appointmentData, error: appointmentError } =
+          await supabase
+            .from("appointments")
+            .select(
+              `
             id,
             appointment_date,
             start_time,
@@ -232,30 +263,49 @@ export default function NewConsultationPage() {
             appointment_type,
             reason,
             status
-            `
-          )
-          .eq("id", appointmentId)
-          .eq("patient_id", patientId)
-          .single();
+            `,
+            )
+            .eq("id", appointmentId)
+            .eq("patient_id", patientId)
+            .single();
 
-      if (!active) return;
-      if (appointmentError || !appointmentData) { setMessage("This appointment could not be loaded."); return; }
-      if (!appointmentError && appointmentData) {
-        setAppointment(appointmentData);
-
-        if (appointmentData.appointment_date) {
-          setConsultationDate(appointmentData.appointment_date);
+        if (!active) return;
+        if (appointmentError || !appointmentData) {
+          setMessage("This appointment could not be loaded.");
+          return;
         }
+        if (!appointmentError && appointmentData) {
+          setAppointment(appointmentData);
 
-        if (appointmentData.reason) {
-          setChiefComplaint(appointmentData.reason);
+          if (appointmentData.appointment_date) {
+            setConsultationDate(appointmentData.appointment_date);
+          }
+
+          if (appointmentData.reason) {
+            setChiefComplaint(appointmentData.reason);
+          }
         }
       }
-    }
-    setVisitLoaded(visitKey);
+      const { data: previous } = await supabase
+        .from("consultations")
+        .select("consultation_date,diagnosis,treatment")
+        .eq("patient_id", patientId)
+        .order("consultation_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!active) return;
+      if (previous)
+        setPreviousVisit({
+          date: previous.consultation_date,
+          diagnosis: previous.diagnosis,
+          treatment: previous.treatment,
+        });
+      setVisitLoaded(visitKey);
     }
     void loadData();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [patientId, appointmentId, router, visitKey]);
 
   const patientName = useMemo(() => {
@@ -268,16 +318,23 @@ export default function NewConsultationPage() {
     [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
     "Current Provider";
 
+  function applyNoteFields(fields: NoteFields) {
+    setHistory(fields.history_of_present_illness);
+    setExamination(fields.examination);
+    setTreatment(fields.treatment);
+    setFollowUpNotes(fields.follow_up_notes);
+  }
+
   function validateForm() {
+    if (recording)
+      return "Stop the microphone and review the transcript before saving.";
+    const detailError = validateEncounter(encounter);
+    if (detailError) return detailError;
     if (!consultationDate) {
       return "Consultation date is required.";
     }
 
-    if (
-      !chiefComplaint.trim() &&
-      !diagnosis.trim() &&
-      !clinicalNotes.trim()
-    ) {
+    if (!chiefComplaint.trim() && !diagnosis.trim() && !clinicalNotes.trim()) {
       return "Please enter at least a chief complaint, diagnosis, or clinical notes.";
     }
 
@@ -308,7 +365,7 @@ export default function NewConsultationPage() {
 
   async function saveConsultation(
     event: React.FormEvent<HTMLFormElement>,
-    nextAction: "history" | "prescription" | "sick-note" = "history"
+    nextAction: "history" | "prescription" | "sick-note" = "history",
   ) {
     event.preventDefault();
 
@@ -329,14 +386,14 @@ export default function NewConsultationPage() {
 
       if (nextAction === "prescription") {
         router.push(
-          `/patients/${patientId}/prescriptions/new?consultation_id=${consultationId}`
+          `/patients/${patientId}/prescriptions/new?consultation_id=${consultationId}`,
         );
         return;
       }
 
       if (nextAction === "sick-note") {
         router.push(
-          `/sick-notes?patient_id=${patientId}&consultation_id=${consultationId}`
+          `/sick-notes?patient_id=${patientId}&consultation_id=${consultationId}`,
         );
         return;
       }
@@ -344,9 +401,7 @@ export default function NewConsultationPage() {
       router.push(`/patients/${patientId}/consultations`);
     } catch (error) {
       setMessage(
-        error instanceof Error
-          ? error.message
-          : "Failed to save consultation."
+        error instanceof Error ? error.message : "Failed to save consultation.",
       );
     } finally {
       setSaving(false);
@@ -378,9 +433,7 @@ export default function NewConsultationPage() {
               <h1 className="page-title">New Consultation</h1>
             </div>
           </div>
-          <div className="empty-state">
-            {message || "Loading patient..."}
-          </div>
+          <div className="empty-state">{message || "Loading patient..."}</div>
         </div>
       </main>
     );
@@ -404,7 +457,13 @@ export default function NewConsultationPage() {
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={async () => {
-                  if (draft.dirty) { try { await draft.saveNow(); } catch { return; } }
+                  if (draft.dirty) {
+                    try {
+                      await draft.saveNow();
+                    } catch {
+                      return;
+                    }
+                  }
                   router.push(`/patients/${patientId}/consultations`);
                 }}
               >
@@ -474,8 +533,7 @@ export default function NewConsultationPage() {
 
               {patient.medical_aid_provider && (
                 <div className="mt-4 text-sm text-slate-600">
-                  <strong>Medical Aid:</strong>{" "}
-                  {patient.medical_aid_provider}
+                  <strong>Medical Aid:</strong> {patient.medical_aid_provider}
                   {patient.medical_aid_number
                     ? ` — ${patient.medical_aid_number}`
                     : ""}
@@ -506,305 +564,366 @@ export default function NewConsultationPage() {
 
           <div className="card mb-4" role="status" aria-live="polite">
             <div className="card-body flex flex-wrap items-center justify-between gap-3">
-              <div><strong>{draft.status}</strong><p className="text-sm text-slate-600">Your private draft is separate from the completed patient history.</p>
-                {draft.error && <p className="text-red-700" role="alert">{draft.error}</p>}</div>
-              {draft.error && draft.ready && !draft.conflict && <button type="button" className="btn btn-secondary btn-sm" onClick={() => void draft.saveNow().catch(() => undefined)}>Retry draft save</button>}
-              {!draft.ready && draft.error && <button type="button" className="btn btn-secondary btn-sm" onClick={() => window.location.reload()}>Reload draft</button>}
+              <div>
+                <strong>{draft.status}</strong>
+                <p className="text-sm text-slate-600">
+                  Your private draft is separate from the completed patient
+                  history.
+                </p>
+                {draft.error && (
+                  <p className="text-red-700" role="alert">
+                    {draft.error}
+                  </p>
+                )}
+              </div>
+              {draft.error && draft.ready && !draft.conflict && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => void draft.saveNow().catch(() => undefined)}
+                >
+                  Retry draft save
+                </button>
+              )}
+              {!draft.ready && draft.error && (
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => window.location.reload()}
+                >
+                  Reload draft
+                </button>
+              )}
             </div>
           </div>
           <form
             onSubmit={(event) => saveConsultation(event, "history")}
             className="space-y-5"
           >
-            <fieldset disabled={saving || !draft.ready || draft.conflict} className="space-y-5">
-            <section className="card">
-              <div className="card-header">
-                <h2 className="card-title">Presenting Complaint</h2>
-              </div>
-              <div className="card-body">
-                <label className="field">
-                  <span className="label">Chief Complaint</span>
-                  <textarea
-                    className="input"
-                    value={chiefComplaint}
-                    onChange={(e) => setChiefComplaint(e.target.value)}
-                    rows={3}
-                    placeholder="What brought the patient to the practice?"
-                  />
-                </label>
+            <fieldset
+              disabled={saving || !draft.ready || draft.conflict}
+              className="space-y-5"
+            >
+              <ConsultationWorkbench
+                fields={{
+                  history_of_present_illness: history,
+                  examination,
+                  treatment,
+                  follow_up_notes: followUpNotes,
+                }}
+                onFields={applyNoteFields}
+                allergies={patient.allergies}
+                chronic={patient.chronic_conditions}
+                previous={previousVisit}
+                details={encounter}
+                onDetails={setEncounter}
+                disabled={saving || !draft.ready || draft.conflict}
+                onRecording={setRecording}
+              />
 
-                <label className="field">
-                  <span className="label">History of Present Illness</span>
-                  <textarea
-                    className="input"
-                    value={history}
-                    onChange={(e) => setHistory(e.target.value)}
-                    rows={5}
-                    placeholder="Relevant history, symptoms, duration and progression..."
-                  />
-                </label>
-              </div>
-            </section>
-
-            <section className="card">
-              <div className="card-header">
-                <h2 className="card-title">Vital Signs</h2>
-              </div>
-              <div className="card-body">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <section className="card">
+                <div className="card-header">
+                  <h2 className="card-title">Presenting Complaint</h2>
+                </div>
+                <div className="card-body">
                   <label className="field">
-                    <span className="label">Temperature (°C)</span>
-                    <input
-                      type="number"
+                    <span className="label">Chief Complaint</span>
+                    <textarea
                       className="input"
-                      step="0.1"
-                      value={temperature}
-                      onChange={(e) => setTemperature(e.target.value)}
-                      placeholder="e.g. 36.8"
+                      value={chiefComplaint}
+                      onChange={(e) => setChiefComplaint(e.target.value)}
+                      rows={3}
+                      placeholder="What brought the patient to the practice?"
                     />
                   </label>
 
                   <label className="field">
-                    <span className="label">Pulse (bpm)</span>
-                    <input
-                      type="number"
+                    <span className="label">History of Present Illness</span>
+                    <textarea
                       className="input"
-                      value={pulse}
-                      onChange={(e) => setPulse(e.target.value)}
-                      placeholder="e.g. 72"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <span className="label">Respiratory Rate (/min)</span>
-                    <input
-                      type="number"
-                      className="input"
-                      value={respiratoryRate}
-                      onChange={(e) => setRespiratoryRate(e.target.value)}
-                      placeholder="e.g. 18"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <span className="label">Systolic BP</span>
-                    <input
-                      type="number"
-                      className="input"
-                      value={bloodPressureSystolic}
-                      onChange={(e) =>
-                        setBloodPressureSystolic(e.target.value)
-                      }
-                      placeholder="e.g. 120"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <span className="label">Diastolic BP</span>
-                    <input
-                      type="number"
-                      className="input"
-                      value={bloodPressureDiastolic}
-                      onChange={(e) =>
-                        setBloodPressureDiastolic(e.target.value)
-                      }
-                      placeholder="e.g. 80"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <span className="label">Oxygen Saturation (%)</span>
-                    <input
-                      type="number"
-                      className="input"
-                      step="0.1"
-                      value={oxygenSaturation}
-                      onChange={(e) => setOxygenSaturation(e.target.value)}
-                      placeholder="e.g. 98"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <span className="label">Weight (kg)</span>
-                    <input
-                      type="number"
-                      className="input"
-                      step="0.1"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                      placeholder="e.g. 70"
-                    />
-                  </label>
-
-                  <label className="field">
-                    <span className="label">Height (cm)</span>
-                    <input
-                      type="number"
-                      className="input"
-                      step="0.1"
-                      value={height}
-                      onChange={(e) => setHeight(e.target.value)}
-                      placeholder="e.g. 170"
+                      value={history}
+                      onChange={(e) => setHistory(e.target.value)}
+                      rows={5}
+                      placeholder="Relevant history, symptoms, duration and progression..."
                     />
                   </label>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section className="card">
-              <div className="card-header">
-                <h2 className="card-title">Clinical Assessment</h2>
-              </div>
-              <div className="card-body">
-                <label className="field">
-                  <span className="label">Examination</span>
-                  <textarea
-                    className="input"
-                    value={examination}
-                    onChange={(e) => setExamination(e.target.value)}
-                    rows={5}
-                    placeholder="Physical examination findings..."
+              <section className="card">
+                <div className="card-header">
+                  <h2 className="card-title">Vital Signs</h2>
+                </div>
+                <div className="card-body">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <label className="field">
+                      <span className="label">Temperature (°C)</span>
+                      <input
+                        type="number"
+                        className="input"
+                        step="0.1"
+                        value={temperature}
+                        onChange={(e) => setTemperature(e.target.value)}
+                        placeholder="e.g. 36.8"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Pulse (bpm)</span>
+                      <input
+                        type="number"
+                        className="input"
+                        value={pulse}
+                        onChange={(e) => setPulse(e.target.value)}
+                        placeholder="e.g. 72"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Respiratory Rate (/min)</span>
+                      <input
+                        type="number"
+                        className="input"
+                        value={respiratoryRate}
+                        onChange={(e) => setRespiratoryRate(e.target.value)}
+                        placeholder="e.g. 18"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Systolic BP</span>
+                      <input
+                        type="number"
+                        className="input"
+                        value={bloodPressureSystolic}
+                        onChange={(e) =>
+                          setBloodPressureSystolic(e.target.value)
+                        }
+                        placeholder="e.g. 120"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Diastolic BP</span>
+                      <input
+                        type="number"
+                        className="input"
+                        value={bloodPressureDiastolic}
+                        onChange={(e) =>
+                          setBloodPressureDiastolic(e.target.value)
+                        }
+                        placeholder="e.g. 80"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Oxygen Saturation (%)</span>
+                      <input
+                        type="number"
+                        className="input"
+                        step="0.1"
+                        value={oxygenSaturation}
+                        onChange={(e) => setOxygenSaturation(e.target.value)}
+                        placeholder="e.g. 98"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Weight (kg)</span>
+                      <input
+                        type="number"
+                        className="input"
+                        step="0.1"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="e.g. 70"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span className="label">Height (cm)</span>
+                      <input
+                        type="number"
+                        className="input"
+                        step="0.1"
+                        value={height}
+                        onChange={(e) => setHeight(e.target.value)}
+                        placeholder="e.g. 170"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </section>
+
+              <section className="card">
+                <div className="card-header">
+                  <h2 className="card-title">Clinical Assessment</h2>
+                </div>
+                <div className="card-body">
+                  <label className="field">
+                    <span className="label">Examination</span>
+                    <textarea
+                      className="input"
+                      value={examination}
+                      onChange={(e) => setExamination(e.target.value)}
+                      rows={5}
+                      placeholder="Physical examination findings..."
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Diagnosis</span>
+                    <textarea
+                      className="input"
+                      value={diagnosis}
+                      onChange={(e) => setDiagnosis(e.target.value)}
+                      rows={4}
+                      placeholder="Diagnosis / clinical impression..."
+                    />
+                  </label>
+
+                  <IcdCodePicker
+                    value={diagnosisCode}
+                    onChange={setDiagnosisCode}
+                    onSelect={(row) => {
+                      if (!diagnosis.trim()) setDiagnosis(row.title);
+                    }}
                   />
-                </label>
+                </div>
+              </section>
 
-                <label className="field">
-                  <span className="label">Diagnosis</span>
-                  <textarea
-                    className="input"
-                    value={diagnosis}
-                    onChange={(e) => setDiagnosis(e.target.value)}
-                    rows={4}
-                    placeholder="Diagnosis / clinical impression..."
-                  />
-                </label>
+              <section className="card">
+                <div className="card-header">
+                  <h2 className="card-title">Treatment & Procedures</h2>
+                </div>
+                <div className="card-body">
+                  <label className="field">
+                    <span className="label">Treatment</span>
+                    <textarea
+                      className="input"
+                      value={treatment}
+                      onChange={(e) => setTreatment(e.target.value)}
+                      rows={4}
+                      placeholder="Treatment provided or recommended..."
+                    />
+                  </label>
 
-                <IcdCodePicker value={diagnosisCode} onChange={setDiagnosisCode}
-                  onSelect={row => { if (!diagnosis.trim()) setDiagnosis(row.title); }} />
+                  <label className="field">
+                    <span className="label">Procedures</span>
+                    <textarea
+                      className="input"
+                      value={procedures}
+                      onChange={(e) => setProcedures(e.target.value)}
+                      rows={4}
+                      placeholder="Procedures performed..."
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Clinical Notes</span>
+                    <textarea
+                      className="input"
+                      value={clinicalNotes}
+                      onChange={(e) => setClinicalNotes(e.target.value)}
+                      rows={6}
+                      placeholder="Additional clinical notes..."
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <section className="card">
+                <div className="card-header">
+                  <h2 className="card-title">Follow-up</h2>
+                </div>
+                <div className="card-body">
+                  <label className="field">
+                    <span className="label">Follow-up Date</span>
+                    <input
+                      type="date"
+                      className="input"
+                      value={followUpDate}
+                      onChange={(e) => setFollowUpDate(e.target.value)}
+                    />
+                  </label>
+
+                  <label className="field">
+                    <span className="label">Follow-up Notes</span>
+                    <textarea
+                      className="input"
+                      value={followUpNotes}
+                      onChange={(e) => setFollowUpNotes(e.target.value)}
+                      rows={4}
+                      placeholder="Instructions for follow-up..."
+                    />
+                  </label>
+                </div>
+              </section>
+
+              <div className="page-actions justify-end">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={async () => {
+                    if (draft.dirty) {
+                      try {
+                        await draft.saveNow();
+                      } catch {
+                        return;
+                      }
+                    }
+                    router.push(`/patients/${patientId}/consultations`);
+                  }}
+                  disabled={saving}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={printConsultation}
+                  disabled={saving}
+                >
+                  🖨 Print
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  disabled={saving}
+                  onClick={(event) =>
+                    saveConsultation(
+                      event as unknown as React.FormEvent<HTMLFormElement>,
+                      "prescription",
+                    )
+                  }
+                >
+                  Save & Create Prescription
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  disabled={saving}
+                  onClick={(event) =>
+                    saveConsultation(
+                      event as unknown as React.FormEvent<HTMLFormElement>,
+                      "sick-note",
+                    )
+                  }
+                >
+                  Save & Create Sick Note
+                </button>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={saving}
+                >
+                  {saving ? "Saving Consultation..." : "Save Consultation"}
+                </button>
               </div>
-            </section>
-
-            <section className="card">
-              <div className="card-header">
-                <h2 className="card-title">Treatment & Procedures</h2>
-              </div>
-              <div className="card-body">
-                <label className="field">
-                  <span className="label">Treatment</span>
-                  <textarea
-                    className="input"
-                    value={treatment}
-                    onChange={(e) => setTreatment(e.target.value)}
-                    rows={4}
-                    placeholder="Treatment provided or recommended..."
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="label">Procedures</span>
-                  <textarea
-                    className="input"
-                    value={procedures}
-                    onChange={(e) => setProcedures(e.target.value)}
-                    rows={4}
-                    placeholder="Procedures performed..."
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="label">Clinical Notes</span>
-                  <textarea
-                    className="input"
-                    value={clinicalNotes}
-                    onChange={(e) => setClinicalNotes(e.target.value)}
-                    rows={6}
-                    placeholder="Additional clinical notes..."
-                  />
-                </label>
-              </div>
-            </section>
-
-            <section className="card">
-              <div className="card-header">
-                <h2 className="card-title">Follow-up</h2>
-              </div>
-              <div className="card-body">
-                <label className="field">
-                  <span className="label">Follow-up Date</span>
-                  <input
-                    type="date"
-                    className="input"
-                    value={followUpDate}
-                    onChange={(e) => setFollowUpDate(e.target.value)}
-                  />
-                </label>
-
-                <label className="field">
-                  <span className="label">Follow-up Notes</span>
-                  <textarea
-                    className="input"
-                    value={followUpNotes}
-                    onChange={(e) => setFollowUpNotes(e.target.value)}
-                    rows={4}
-                    placeholder="Instructions for follow-up..."
-                  />
-                </label>
-              </div>
-            </section>
-
-            <div className="page-actions justify-end">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={async () => {
-                  if (draft.dirty) { try { await draft.saveNow(); } catch { return; } }
-                  router.push(`/patients/${patientId}/consultations`);
-                }}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={printConsultation}
-                disabled={saving}
-              >
-                🖨 Print
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-secondary"
-                disabled={saving}
-                onClick={(event) =>
-                  saveConsultation(
-                    event as unknown as React.FormEvent<HTMLFormElement>,
-                    "prescription"
-                  )
-                }
-              >
-                Save & Create Prescription
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-secondary"
-                disabled={saving}
-                onClick={(event) =>
-                  saveConsultation(
-                    event as unknown as React.FormEvent<HTMLFormElement>,
-                    "sick-note"
-                  )
-                }
-              >
-                Save & Create Sick Note
-              </button>
-
-              <button type="submit" className="btn btn-primary" disabled={saving}>
-                {saving ? "Saving Consultation..." : "Save Consultation"}
-              </button>
-            </div>
             </fieldset>
           </form>
         </div>
@@ -834,8 +953,7 @@ export default function NewConsultationPage() {
             <strong>Gender:</strong> {patient.gender || "Not provided"}
           </div>
           <div>
-            <strong>ID Number:</strong>{" "}
-            {patient.id_number || "Not provided"}
+            <strong>ID Number:</strong> {patient.id_number || "Not provided"}
           </div>
           <div>
             <strong>Phone:</strong> {patient.phone || "Not provided"}
@@ -859,8 +977,7 @@ export default function NewConsultationPage() {
         <h2>Clinical Record</h2>
 
         <p>
-          <strong>Chief Complaint:</strong>{" "}
-          {chiefComplaint || "Not recorded"}
+          <strong>Chief Complaint:</strong> {chiefComplaint || "Not recorded"}
         </p>
 
         <p>
@@ -869,8 +986,7 @@ export default function NewConsultationPage() {
         </p>
 
         <p>
-          <strong>Examination:</strong>{" "}
-          {examination || "Not recorded"}
+          <strong>Examination:</strong> {examination || "Not recorded"}
         </p>
 
         <p>
@@ -878,8 +994,7 @@ export default function NewConsultationPage() {
         </p>
 
         <p>
-          <strong>Diagnosis Code:</strong>{" "}
-          {diagnosisCode || "Not recorded"}
+          <strong>Diagnosis Code:</strong> {diagnosisCode || "Not recorded"}
         </p>
 
         <h2>Vital Signs</h2>
@@ -902,8 +1017,7 @@ export default function NewConsultationPage() {
               <td>{pulse || "—"} bpm</td>
               <td>{respiratoryRate || "—"} /min</td>
               <td>
-                {bloodPressureSystolic || "—"}/
-                {bloodPressureDiastolic || "—"}
+                {bloodPressureSystolic || "—"}/{bloodPressureDiastolic || "—"}
               </td>
               <td>{oxygenSaturation || "—"}%</td>
               <td>{weight || "—"} kg</td>
@@ -923,22 +1037,20 @@ export default function NewConsultationPage() {
         </p>
 
         <p>
-          <strong>Clinical Notes:</strong>{" "}
-          {clinicalNotes || "Not recorded"}
+          <strong>Clinical Notes:</strong> {clinicalNotes || "Not recorded"}
         </p>
 
         <h2>Follow-up</h2>
 
         <p>
-          <strong>Follow-up Date:</strong>{" "}
-          {followUpDate || "Not scheduled"}
+          <strong>Follow-up Date:</strong> {followUpDate || "Not scheduled"}
         </p>
 
         <p>
-          <strong>Follow-up Notes:</strong>{" "}
-          {followUpNotes || "Not recorded"}
+          <strong>Follow-up Notes:</strong> {followUpNotes || "Not recorded"}
         </p>
 
+        <EncounterRecord value={encounter} print />
         <div className="signature-area">
           <div>
             ______________________________
