@@ -1,3 +1,5 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 import type { ClaimSnapshot, ClaimIssue } from "@/lib/claims/model";
 export default function ClaimPacketPreview({
   snapshot: s,
@@ -47,11 +49,11 @@ export default function ClaimPacketPreview({
         </section>
       </div>
       <div className="table-wrap mt-5">
-        <table>
+        <table className="table" style={{ minWidth: 680 }}>
           <thead>
             <tr>
-              <th>Service date / code</th>
-              <th>Item</th>
+              <th style={{ width: "22%" }}>Service date / code</th>
+              <th style={{ width: "43%" }}>Item</th>
               <th>ICD-10</th>
               <th>Qty</th>
               <th>Total</th>
@@ -65,7 +67,7 @@ export default function ClaimPacketPreview({
                   <br />
                   {l.service_code || "Tariff / NAPPI missing"}
                 </td>
-                <td>{l.description}</td>
+                <td style={{ overflowWrap: "anywhere" }}>{l.description}</td>
                 <td>{l.diagnosis_code || "Missing"}</td>
                 <td>{l.quantity}</td>
                 <td>R {l.total.toFixed(2)}</td>
