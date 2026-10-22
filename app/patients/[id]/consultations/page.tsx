@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import EncounterRecord from "@/components/EncounterRecord";
+import { type EncounterDetails } from "@/lib/consultation-workbench";
 import { supabase } from "@/lib/supabase";
 
 type Patient = {
@@ -38,6 +40,7 @@ type Consultation = {
   clinical_notes: string | null;
   follow_up_notes: string | null;
   follow_up_date: string | null;
+  encounter_details: EncounterDetails | Record<string, never>;
 };
 
 type Provider = {
@@ -57,15 +60,17 @@ type Appointment = {
 
 export default function ConsultationHistoryPage() {
   const params = useParams();
-  const router = useRouter();
-
   const patientId = params.id as string;
+  return <PatientConsultationHistory key={patientId} patientId={patientId} />;
+}
 
+function PatientConsultationHistory({ patientId }: { patientId: string }) {
+  const router = useRouter();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [consultations, setConsultations] = useState<Consultation[]>([]);
   const [providers, setProviders] = useState<Record<string, Provider>>({});
   const [appointments, setAppointments] = useState<Record<string, Appointment>>(
-    {}
+    {},
   );
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -74,55 +79,55 @@ export default function ConsultationHistoryPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    loadData();
-  }, [patientId]);
+    let active = true;
+    async function loadData() {
+      setLoading(true);
+      setError("");
 
-  async function loadData() {
-    setLoading(true);
-    setError("");
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        if (!active) return;
+        if (!user) {
+          router.push("/login");
+          return;
+        }
 
-      if (!user) {
-        router.push("/login");
-        return;
-      }
+        const { data: profile, error: profileError } = await supabase
+          .from("profiles")
+          .select("practice_id")
+          .eq("id", user.id)
+          .single();
 
-      const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("practice_id")
-        .eq("id", user.id)
-        .single();
+        if (profileError || !profile?.practice_id) {
+          throw new Error("Unable to determine practice.");
+        }
 
-      if (profileError || !profile?.practice_id) {
-        throw new Error("Unable to determine practice.");
-      }
+        const practiceId = profile.practice_id;
 
-      const practiceId = profile.practice_id;
-
-      const { data: patientData, error: patientError } = await supabase
-        .from("patients")
-        .select(
-          "id, patient_id, title, first_name, middle_name, last_name, date_of_birth, phone"
-        )
-        .eq("id", patientId)
-        .eq("practice_id", practiceId)
-        .single();
-
-      if (patientError) {
-        throw new Error(patientError.message);
-      }
-
-      setPatient(patientData);
-
-      const { data: consultationData, error: consultationError } =
-        await supabase
-          .from("consultations")
+        const { data: patientData, error: patientError } = await supabase
+          .from("patients")
           .select(
-            `
+            "id, patient_id, title, first_name, middle_name, last_name, date_of_birth, phone",
+          )
+          .eq("id", patientId)
+          .eq("practice_id", practiceId)
+          .single();
+
+        if (!active) return;
+        if (patientError) {
+          throw new Error(patientError.message);
+        }
+
+        setPatient(patientData);
+
+        const { data: consultationData, error: consultationError } =
+          await supabase
+            .from("consultations")
+            .select(
+              `
               id,
               consultation_date,
               appointment_id,
@@ -144,81 +149,91 @@ export default function ConsultationHistoryPage() {
               procedures,
               clinical_notes,
               follow_up_notes,
-              follow_up_date
-            `
-          )
-          .eq("patient_id", patientId)
-          .eq("practice_id", practiceId)
-          .order("consultation_date", { ascending: false });
+              follow_up_date,
+              encounter_details
+            `,
+            )
+            .eq("patient_id", patientId)
+            .eq("practice_id", practiceId)
+            .order("consultation_date", { ascending: false });
 
-      if (consultationError) {
-        throw new Error(consultationError.message);
+        if (!active) return;
+        if (consultationError) {
+          throw new Error(consultationError.message);
+        }
+
+        const loadedConsultations = consultationData || [];
+        setConsultations(loadedConsultations);
+
+        const providerIds = Array.from(
+          new Set(
+            loadedConsultations
+              .map((item) => item.provider_id)
+              .filter(Boolean) as string[],
+          ),
+        );
+
+        if (providerIds.length > 0) {
+          const { data: providerData } = await supabase
+            .from("profiles")
+            .select("id, first_name, last_name, display_name")
+            .in("id", providerIds);
+
+          const providerMap: Record<string, Provider> = {};
+
+          (providerData || []).forEach((provider) => {
+            providerMap[provider.id] = provider;
+          });
+
+          if (!active) return;
+          setProviders(providerMap);
+        } else {
+          setProviders({});
+        }
+
+        const appointmentIds = Array.from(
+          new Set(
+            loadedConsultations
+              .map((item) => item.appointment_id)
+              .filter(Boolean) as string[],
+          ),
+        );
+
+        if (appointmentIds.length > 0) {
+          const { data: appointmentData } = await supabase
+            .from("appointments")
+            .select(
+              "id, appointment_date, start_time, appointment_type, reason",
+            )
+            .in("id", appointmentIds)
+            .eq("practice_id", practiceId);
+
+          const appointmentMap: Record<string, Appointment> = {};
+
+          (appointmentData || []).forEach((appointment) => {
+            appointmentMap[appointment.id] = appointment;
+          });
+
+          if (!active) return;
+          setAppointments(appointmentMap);
+        } else {
+          setAppointments({});
+        }
+      } catch (err) {
+        if (!active) return;
+        console.error(err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load consultations.",
+        );
+      } finally {
+        if (active) setLoading(false);
       }
-
-      const loadedConsultations = consultationData || [];
-      setConsultations(loadedConsultations);
-
-      const providerIds = Array.from(
-        new Set(
-          loadedConsultations
-            .map((item) => item.provider_id)
-            .filter(Boolean) as string[]
-        )
-      );
-
-      if (providerIds.length > 0) {
-        const { data: providerData } = await supabase
-          .from("profiles")
-          .select("id, first_name, last_name, display_name")
-          .in("id", providerIds);
-
-        const providerMap: Record<string, Provider> = {};
-
-        (providerData || []).forEach((provider) => {
-          providerMap[provider.id] = provider;
-        });
-
-        setProviders(providerMap);
-      } else {
-        setProviders({});
-      }
-
-      const appointmentIds = Array.from(
-        new Set(
-          loadedConsultations
-            .map((item) => item.appointment_id)
-            .filter(Boolean) as string[]
-        )
-      );
-
-      if (appointmentIds.length > 0) {
-        const { data: appointmentData } = await supabase
-          .from("appointments")
-          .select(
-            "id, appointment_date, start_time, appointment_type, reason"
-          )
-          .in("id", appointmentIds)
-          .eq("practice_id", practiceId);
-
-        const appointmentMap: Record<string, Appointment> = {};
-
-        (appointmentData || []).forEach((appointment) => {
-          appointmentMap[appointment.id] = appointment;
-        });
-
-        setAppointments(appointmentMap);
-      } else {
-        setAppointments({});
-      }
-    } catch (err) {
-      console.error(err);
-      setError(
-        err instanceof Error ? err.message : "Failed to load consultations."
-      );
-    } finally {
-      setLoading(false);
     }
-  }
+    void loadData();
+    return () => {
+      active = false;
+    };
+  }, [patientId, router]);
 
   function patientName() {
     if (!patient) return "";
@@ -276,6 +291,7 @@ export default function ConsultationHistoryPage() {
       consultation.treatment,
       consultation.procedures,
       consultation.clinical_notes,
+      JSON.stringify(consultation.encounter_details || {}),
       consultation.follow_up_notes,
       providerName(consultation.provider_id),
     ]
@@ -388,9 +404,7 @@ export default function ConsultationHistoryPage() {
 
           <div className="page-actions">
             <button
-              onClick={() =>
-                router.push(`/patients/${patientId}/appointments`)
-              }
+              onClick={() => router.push(`/patients/${patientId}/appointments`)}
               className="btn btn-secondary"
             >
               Appointments
@@ -542,15 +556,9 @@ export default function ConsultationHistoryPage() {
                         value={consultation.chief_complaint}
                       />
 
-                      <Info
-                        label="Diagnosis"
-                        value={consultation.diagnosis}
-                      />
+                      <Info label="Diagnosis" value={consultation.diagnosis} />
 
-                      <Info
-                        label="Treatment"
-                        value={consultation.treatment}
-                      />
+                      <Info label="Treatment" value={consultation.treatment} />
 
                       <Info
                         label="Follow-up"
@@ -604,6 +612,9 @@ export default function ConsultationHistoryPage() {
                           />
                         </div>
 
+                        <EncounterRecord
+                          value={consultation.encounter_details}
+                        />
                         <h3 className="mb-3 mt-5 text-[15px] font-bold">
                           Vital Signs
                         </h3>
@@ -678,7 +689,7 @@ export default function ConsultationHistoryPage() {
                           <button
                             onClick={() =>
                               router.push(
-                                `/patients/${patientId}/prescriptions/new?consultation_id=${consultation.id}`
+                                `/patients/${patientId}/prescriptions/new?consultation_id=${consultation.id}`,
                               )
                             }
                             className="btn btn-secondary btn-sm"
@@ -689,7 +700,7 @@ export default function ConsultationHistoryPage() {
                           <button
                             onClick={() =>
                               router.push(
-                                `/sick-notes?patient_id=${patientId}&consultation_id=${consultation.id}`
+                                `/sick-notes?patient_id=${patientId}&consultation_id=${consultation.id}`,
                               )
                             }
                             className="btn btn-secondary btn-sm"
@@ -726,20 +737,12 @@ function Info({
       }`}
     >
       <span className="stat-label block">{label}</span>
-      <div className="mt-1 whitespace-pre-wrap text-[13px]">
-        {value || "—"}
-      </div>
+      <div className="mt-1 whitespace-pre-wrap text-[13px]">{value || "—"}</div>
     </div>
   );
 }
 
-function Vital({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | null;
-}) {
+function Vital({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex flex-col gap-1 rounded-xl border border-line bg-slate-50 p-3">
       <span className="stat-label">{label}</span>
