@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import ClaimSubmissionPanel from "@/components/ClaimSubmissionPanel";
+import { claimRequest, downloadClaim } from "@/lib/claims/client";
 import { supabase } from "../../../lib/supabase";
 
 type Claim = {
@@ -76,7 +78,10 @@ type Profile = {
 export default function ClaimDetailPage() {
   const params = useParams();
   const claimId = String(params.id);
-
+  return <ClaimDetail key={claimId} claimId={claimId} />;
+}
+function ClaimDetail({ claimId }: { claimId: string }) {
+  const [managed, setManaged] = useState(false);
   const [claim, setClaim] = useState<Claim | null>(null);
   const [patient, setPatient] = useState<Patient | null>(null);
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -89,7 +94,7 @@ export default function ClaimDetailPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const [status, setStatus] = useState("pending");
+  const [status, setStatus] = useState("draft");
   const [approvedAmount, setApprovedAmount] = useState("");
   const [rejectedAmount, setRejectedAmount] = useState("");
   const [submissionDate, setSubmissionDate] = useState("");
@@ -97,28 +102,21 @@ export default function ClaimDetailPage() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [notes, setNotes] = useState("");
 
-  useEffect(() => {
-    loadClaim();
-  }, [claimId]);
-
-  const loadClaim = async () => {
+  const loadClaim = useCallback(async () => {
+    const { data: userData } = await supabase.auth.getUser();
     setLoading(true);
     setError("");
-
-    const { data: userData } =
-      await supabase.auth.getUser();
 
     if (!userData.user) {
       window.location.href = "/login";
       return;
     }
 
-    const { data: claimData, error: claimError } =
-      await supabase
-        .from("medical_aid_claims")
-        .select("*")
-        .eq("id", claimId)
-        .maybeSingle();
+    const { data: claimData, error: claimError } = await supabase
+      .from("medical_aid_claims")
+      .select("*")
+      .eq("id", claimId)
+      .maybeSingle();
 
     if (claimError) {
       setError(claimError.message);
@@ -136,37 +134,21 @@ export default function ClaimDetailPage() {
 
     setClaim(loadedClaim);
 
-    setStatus(
-      loadedClaim.status || "pending"
-    );
+    setStatus(loadedClaim.status || "draft");
 
-    setApprovedAmount(
-      String(loadedClaim.approved_amount || 0)
-    );
+    setApprovedAmount(String(loadedClaim.approved_amount || 0));
 
-    setRejectedAmount(
-      String(loadedClaim.rejected_amount || 0)
-    );
+    setRejectedAmount(String(loadedClaim.rejected_amount || 0));
 
-    setSubmissionDate(
-      loadedClaim.submission_date || ""
-    );
+    setSubmissionDate(loadedClaim.submission_date || "");
 
-    setResponseDate(
-      loadedClaim.response_date || ""
-    );
+    setResponseDate(loadedClaim.response_date || "");
 
-    setRejectionReason(
-      loadedClaim.rejection_reason || ""
-    );
+    setRejectionReason(loadedClaim.rejection_reason || "");
 
     setNotes(loadedClaim.notes || "");
 
-    const [
-      patientResult,
-      invoiceResult,
-      settingsResult,
-    ] = await Promise.all([
+    const [patientResult, invoiceResult, settingsResult] = await Promise.all([
       supabase
         .from("patients")
         .select("*")
@@ -177,7 +159,7 @@ export default function ClaimDetailPage() {
         ? supabase
             .from("invoices")
             .select(
-              "id, invoice_number, invoice_date, total, amount_paid, balance, status"
+              "id, invoice_number, invoice_date, total, amount_paid, balance, status",
             )
             .eq("id", loadedClaim.invoice_id)
             .maybeSingle()
@@ -186,9 +168,7 @@ export default function ClaimDetailPage() {
             error: null,
           }),
 
-      supabase
-        .from("practice_settings")
-        .select("setting_key, setting_value"),
+      supabase.from("practice_settings").select("setting_key, setting_value"),
     ]);
 
     if (patientResult.data) {
@@ -202,27 +182,21 @@ export default function ClaimDetailPage() {
     if (!settingsResult.error) {
       const mapped: Record<string, string> = {};
 
-      (settingsResult.data || []).forEach(
-        (setting: Setting) => {
-          if (setting.setting_value !== null) {
-            mapped[setting.setting_key] =
-              setting.setting_value;
-          }
+      (settingsResult.data || []).forEach((setting: Setting) => {
+        if (setting.setting_value !== null) {
+          mapped[setting.setting_key] = setting.setting_value;
         }
-      );
+      });
 
       setSettings(mapped);
     }
 
     if (loadedClaim.created_by) {
-      const { data: providerData } =
-        await supabase
-          .from("profiles")
-          .select(
-            "id, first_name, last_name, display_name"
-          )
-          .eq("id", loadedClaim.created_by)
-          .maybeSingle();
+      const { data: providerData } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, display_name")
+        .eq("id", loadedClaim.created_by)
+        .maybeSingle();
 
       if (providerData) {
         setProvider(providerData as Profile);
@@ -230,15 +204,17 @@ export default function ClaimDetailPage() {
     }
 
     setLoading(false);
-  };
+  }, [claimId]);
+  useEffect(() => {
+    // State updates follow the awaited Supabase request in this reusable loader.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadClaim();
+  }, [loadClaim]);
 
-  const currency = (
-    value: number | null | undefined
-  ) => `R ${(Number(value) || 0).toFixed(2)}`;
+  const currency = (value: number | null | undefined) =>
+    `R ${(Number(value) || 0).toFixed(2)}`;
 
-  const formatDate = (
-    value: string | null | undefined
-  ) => {
+  const formatDate = (value: string | null | undefined) => {
     if (!value) return "-";
 
     const date = new Date(value);
@@ -254,12 +230,8 @@ export default function ClaimDetailPage() {
     });
   };
 
-  const statusBadgeClass = (
-    value: string | null | undefined
-  ) => {
-    const text = (value || "pending")
-      .toLowerCase()
-      .replace(/_/g, " ");
+  const statusBadgeClass = (value: string | null | undefined) => {
+    const text = (value || "draft").toLowerCase().replace(/_/g, " ");
 
     if (
       text === "paid" ||
@@ -271,7 +243,7 @@ export default function ClaimDetailPage() {
     }
 
     if (
-      text === "pending" ||
+      text === "draft" ||
       text === "submitted" ||
       text === "partially paid" ||
       text === "partially approved" ||
@@ -281,10 +253,7 @@ export default function ClaimDetailPage() {
       return "badge badge-blue";
     }
 
-    if (
-      text === "low stock" ||
-      text === "no show"
-    ) {
+    if (text === "low stock" || text === "no show") {
       return "badge badge-amber";
     }
 
@@ -313,24 +282,16 @@ export default function ClaimDetailPage() {
 
   const providerName =
     provider?.display_name ||
-    [provider?.first_name, provider?.last_name]
-      .filter(Boolean)
-      .join(" ") ||
+    [provider?.first_name, provider?.last_name].filter(Boolean).join(" ") ||
     "J&J Practitioner";
 
-  const claimedAmount =
-    Number(claim?.claimed_amount) || 0;
+  const claimedAmount = Number(claim?.claimed_amount) || 0;
 
-  const approved =
-    Number(approvedAmount) || 0;
+  const approved = Number(approvedAmount) || 0;
 
-  const rejected =
-    Number(rejectedAmount) || 0;
+  const rejected = Number(rejectedAmount) || 0;
 
-  const unallocated = Math.max(
-    claimedAmount - approved - rejected,
-    0
-  );
+  const unallocated = Math.max(claimedAmount - approved - rejected, 0);
 
   const saveClaim = async () => {
     if (!claim) return;
@@ -339,61 +300,46 @@ export default function ClaimDetailPage() {
     setSuccess("");
 
     if (approved < 0 || rejected < 0) {
+      setError("Approved and rejected amounts cannot be negative.");
+      return;
+    }
+
+    if (approved + rejected > claimedAmount + 0.01) {
       setError(
-        "Approved and rejected amounts cannot be negative."
+        "Approved plus rejected amounts cannot exceed the claimed amount.",
       );
       return;
     }
 
-    if (
-      approved + rejected >
-      claimedAmount + 0.01
-    ) {
-      setError(
-        "Approved plus rejected amounts cannot exceed the claimed amount."
-      );
-      return;
-    }
-
-    if (
-      responseDate &&
-      submissionDate &&
-      responseDate < submissionDate
-    ) {
-      setError(
-        "Response date cannot be before submission date."
-      );
+    if (responseDate && submissionDate && responseDate < submissionDate) {
+      setError("Response date cannot be before submission date.");
       return;
     }
 
     setSaving(true);
 
-    const { error: updateError } =
-      await supabase
-        .from("medical_aid_claims")
-        .update({
-          status,
-          approved_amount: approved,
-          rejected_amount: rejected,
-          submission_date:
-            submissionDate || null,
-          response_date:
-            responseDate || null,
-          rejection_reason:
-            rejectionReason.trim() || null,
-          notes: notes.trim() || null,
-        })
-        .eq("id", claim.id);
-
-    if (updateError) {
-      setError(updateError.message);
+    try {
+      await claimRequest("/api/claims/response", {
+        claimId: claim.id,
+        status,
+        approvedAmount: approved,
+        rejectedAmount: rejected,
+        submissionDate,
+        responseDate,
+        rejectionReason,
+        notes,
+      });
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "The scheme response could not be saved.",
+      );
       setSaving(false);
       return;
     }
 
-    setSuccess(
-      "Claim updated successfully."
-    );
+    setSuccess("Claim updated successfully.");
 
     await loadClaim();
 
@@ -401,6 +347,10 @@ export default function ClaimDetailPage() {
   };
 
   const printClaim = () => {
+    if (managed) {
+      void downloadClaim(claimId).catch((error) => setError(error.message));
+      return;
+    }
     setPrinting(true);
 
     setTimeout(() => {
@@ -417,9 +367,7 @@ export default function ClaimDetailPage() {
       <main className="page-shell">
         <div className="page-inner">
           <div className="card">
-            <div className="card-body empty-state">
-              Loading claim...
-            </div>
+            <div className="card-body empty-state">Loading claim...</div>
           </div>
         </div>
       </main>
@@ -430,14 +378,9 @@ export default function ClaimDetailPage() {
     return (
       <main className="page-shell">
         <div className="page-inner">
-          <div className="alert-error">
-            {error || "Claim not found."}
-          </div>
+          <div className="alert-error">{error || "Claim not found."}</div>
 
-          <Link
-            href="/claims"
-            className="btn btn-secondary btn-sm"
-          >
+          <Link href="/claims" className="btn btn-secondary btn-sm">
             Back to Claims
           </Link>
         </div>
@@ -450,64 +393,40 @@ export default function ClaimDetailPage() {
     settings.practiceName ||
     "J & J PRACTICE MEDICAL CENTRE";
 
-  const practiceCode =
-    settings.practice_code ||
-    settings.practiceCode ||
-    "773";
+  const practiceCode = settings.practice_code || settings.practiceCode || "773";
 
-  const practicePhone =
-    settings.phone || "0718272091";
+  const practicePhone = settings.phone || "0718272091";
 
-  const practiceEmail =
-    settings.email ||
-    "thabomotati713@gmail.com";
+  const practiceEmail = settings.email || "thabomotati713@gmail.com";
 
-  const practiceAddress =
-    settings.address || "Zone 14";
+  const practiceAddress = settings.address || "Zone 14";
 
-  const practiceCity =
-    settings.city || "Sebokeng";
+  const practiceCity = settings.city || "Sebokeng";
 
-  const practiceProvince =
-    settings.province || "Gauteng";
+  const practiceProvince = settings.province || "Gauteng";
 
-  const practicePostal =
-    settings.postal_code ||
-    settings.postalCode ||
-    "1983";
+  const practicePostal = settings.postal_code || settings.postalCode || "1983";
 
-  const practiceCountry =
-    settings.country || "South Africa";
+  const practiceCountry = settings.country || "South Africa";
 
-  const logoUrl =
-    settings.logo_url ||
-    settings.logoUrl ||
-    "";
+  const logoUrl = settings.logo_url || settings.logoUrl || "";
 
   return (
     <>
       <main className="page-shell screen-only">
         <header className="app-header">
           <div className="app-header-inner">
-            <a
-              href="/dashboard"
-              className="app-brand"
-            >
+            <a href="/dashboard" className="app-brand">
               <img
                 src="/logo.jpg"
                 alt="J&J Practice Cloud"
                 className="app-brand-logo"
               />
-              <span className="app-brand-name">
-                J&J Practice Cloud
-              </span>
+              <span className="app-brand-name">J&J Practice Cloud</span>
             </a>
 
             <div className="page-actions">
-              <Link
-                href="/claims"
-                className="btn btn-secondary btn-sm"
-              >
+              <Link href="/claims" className="btn btn-secondary btn-sm">
                 ← Claims
               </Link>
 
@@ -541,65 +460,43 @@ export default function ClaimDetailPage() {
         <div className="page-inner">
           <div className="page-header">
             <div>
-              <h1 className="page-title">
-                Medical Aid Claim
-              </h1>
+              <h1 className="page-title">Medical Aid Claim</h1>
               <p className="page-subtitle">
-                Claim {claim.claim_number || "-"} —{" "}
-                {patientName}
+                Claim {claim.claim_number || "-"} — {patientName}
               </p>
             </div>
 
             <span className={statusBadgeClass(claim.status)}>
-              {claim.status || "pending"}
+              {claim.status || "draft"}
             </span>
           </div>
 
-          {error && (
-            <div className="alert-error">
-              {error}
-            </div>
-          )}
+          {error && <div className="alert-error">{error}</div>}
 
-          {success && (
-            <div className="alert-success">
-              {success}
-            </div>
-          )}
+          {success && <div className="alert-success">{success}</div>}
 
+          <ClaimSubmissionPanel
+            claimId={claimId}
+            onManaged={setManaged}
+            onComplete={loadClaim}
+          />
           <section className="stat-grid">
-            <Stat
-              label="Claimed"
-              value={currency(claim.claimed_amount)}
-            />
-            <Stat
-              label="Approved"
-              value={currency(claim.approved_amount)}
-            />
-            <Stat
-              label="Rejected"
-              value={currency(claim.rejected_amount)}
-            />
-            <Stat
-              label="Unallocated"
-              value={currency(unallocated)}
-            />
+            <Stat label="Claimed" value={currency(claim.claimed_amount)} />
+            <Stat label="Approved" value={currency(claim.approved_amount)} />
+            <Stat label="Rejected" value={currency(claim.rejected_amount)} />
+            <Stat label="Unallocated" value={currency(unallocated)} />
           </section>
 
           <section className="card">
             <div className="card-body">
               <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
-                  <p className="stat-label">
-                    Claim Number
-                  </p>
-                  <h2 className="stat-value">
-                    {claim.claim_number || "-"}
-                  </h2>
+                  <p className="stat-label">Claim Number</p>
+                  <h2 className="stat-value">{claim.claim_number || "-"}</h2>
                 </div>
 
                 <span className={statusBadgeClass(claim.status)}>
-                  {claim.status || "pending"}
+                  {claim.status || "draft"}
                 </span>
               </div>
             </div>
@@ -608,43 +505,23 @@ export default function ClaimDetailPage() {
           {patient && (
             <section className="card">
               <div className="card-header">
-                <h2 className="card-title">
-                  Patient Information
-                </h2>
+                <h2 className="card-title">Patient Information</h2>
               </div>
 
               <div className="card-body">
                 <div className="grid gap-4 md:grid-cols-3">
-                  <Info
-                    label="Patient Name"
-                    value={patientName}
-                  />
-                  <Info
-                    label="Patient ID"
-                    value={patient.patient_id}
-                  />
+                  <Info label="Patient Name" value={patientName} />
+                  <Info label="Patient ID" value={patient.patient_id} />
                   <Info
                     label="Date of Birth"
-                    value={formatDate(
-                      patient.date_of_birth
-                    )}
+                    value={formatDate(patient.date_of_birth)}
                   />
                   <Info
                     label="ID / Passport"
-                    value={
-                      patient.id_number ||
-                      patient.passport_number ||
-                      "-"
-                    }
+                    value={patient.id_number || patient.passport_number || "-"}
                   />
-                  <Info
-                    label="Phone"
-                    value={patient.phone || "-"}
-                  />
-                  <Info
-                    label="Email"
-                    value={patient.email || "-"}
-                  />
+                  <Info label="Phone" value={patient.phone || "-"} />
+                  <Info label="Email" value={patient.email || "-"} />
                 </div>
               </div>
             </section>
@@ -653,9 +530,7 @@ export default function ClaimDetailPage() {
           {patient && (
             <section className="card">
               <div className="card-header">
-                <h2 className="card-title">
-                  Medical Aid Information
-                </h2>
+                <h2 className="card-title">Medical Aid Information</h2>
               </div>
 
               <div className="card-body">
@@ -678,12 +553,7 @@ export default function ClaimDetailPage() {
                     }
                   />
 
-                  <Info
-                    label="Plan"
-                    value={
-                      patient.medical_aid_plan || "-"
-                    }
-                  />
+                  <Info label="Plan" value={patient.medical_aid_plan || "-"} />
 
                   <Info
                     label="Dependent Code"
@@ -709,37 +579,23 @@ export default function ClaimDetailPage() {
 
           <section className="card">
             <div className="card-header">
-              <h2 className="card-title">
-                Claim Information
-              </h2>
+              <h2 className="card-title">Claim Information</h2>
             </div>
 
             <div className="card-body">
               <div className="grid gap-4 md:grid-cols-4">
-                <Info
-                  label="Claim Number"
-                  value={
-                    claim.claim_number || "-"
-                  }
-                />
+                <Info label="Claim Number" value={claim.claim_number || "-"} />
 
-                <Info
-                  label="Claim Date"
-                  value={formatDate(claim.claim_date)}
-                />
+                <Info label="Claim Date" value={formatDate(claim.claim_date)} />
 
                 <Info
                   label="Submission Date"
-                  value={formatDate(
-                    claim.submission_date
-                  )}
+                  value={formatDate(claim.submission_date)}
                 />
 
                 <Info
                   label="Response Date"
-                  value={formatDate(
-                    claim.response_date
-                  )}
+                  value={formatDate(claim.response_date)}
                 />
               </div>
             </div>
@@ -748,43 +604,29 @@ export default function ClaimDetailPage() {
           {invoice && (
             <section className="card">
               <div className="card-header">
-                <h2 className="card-title">
-                  Linked Invoice
-                </h2>
+                <h2 className="card-title">Linked Invoice</h2>
               </div>
 
               <div className="card-body">
                 <div className="grid gap-4 md:grid-cols-5">
                   <Info
                     label="Invoice Number"
-                    value={
-                      invoice.invoice_number || "-"
-                    }
+                    value={invoice.invoice_number || "-"}
                   />
 
                   <Info
                     label="Invoice Date"
-                    value={formatDate(
-                      invoice.invoice_date
-                    )}
+                    value={formatDate(invoice.invoice_date)}
                   />
 
-                  <Info
-                    label="Invoice Total"
-                    value={currency(invoice.total)}
-                  />
+                  <Info label="Invoice Total" value={currency(invoice.total)} />
 
                   <Info
                     label="Amount Paid"
-                    value={currency(
-                      invoice.amount_paid
-                    )}
+                    value={currency(invoice.amount_paid)}
                   />
 
-                  <Info
-                    label="Balance"
-                    value={currency(invoice.balance)}
-                  />
+                  <Info label="Balance" value={currency(invoice.balance)} />
                 </div>
               </div>
             </section>
@@ -792,9 +634,7 @@ export default function ClaimDetailPage() {
 
           <section className="card">
             <div className="card-header">
-              <h2 className="card-title">
-                Update Claim
-              </h2>
+              <h2 className="card-title">Record scheme response</h2>
             </div>
 
             <div className="card-body">
@@ -807,32 +647,17 @@ export default function ClaimDetailPage() {
                   <select
                     id="claim-status"
                     value={status}
-                    onChange={(event) =>
-                      setStatus(event.target.value)
-                    }
+                    onChange={(event) => setStatus(event.target.value)}
                     className="input"
                   >
-                    <option value="pending">
-                      Pending
-                    </option>
-                    <option value="submitted">
-                      Submitted
-                    </option>
-                    <option value="approved">
-                      Approved
-                    </option>
-                    <option value="partially_approved">
-                      Partially Approved
-                    </option>
-                    <option value="rejected">
-                      Rejected
-                    </option>
-                    <option value="paid">
-                      Paid
-                    </option>
-                    <option value="cancelled">
-                      Cancelled
-                    </option>
+                    <option value="draft">Draft</option>
+                    <option value="ready">Ready</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="accepted">Approved</option>
+                    <option value="partially_paid">Partially Paid</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="paid">Paid</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
 
@@ -858,11 +683,7 @@ export default function ClaimDetailPage() {
                     id="claim-submission-date"
                     type="date"
                     value={submissionDate}
-                    onChange={(event) =>
-                      setSubmissionDate(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setSubmissionDate(event.target.value)}
                     className="input"
                   />
                 </div>
@@ -875,11 +696,7 @@ export default function ClaimDetailPage() {
                     id="claim-response-date"
                     type="date"
                     value={responseDate}
-                    onChange={(event) =>
-                      setResponseDate(
-                        event.target.value
-                      )
-                    }
+                    onChange={(event) => setResponseDate(event.target.value)}
                     className="input"
                   />
                 </div>
@@ -896,11 +713,11 @@ export default function ClaimDetailPage() {
                   </label>
 
                   <textarea
+                    placeholder="Record the scheme response reference and what it confirmed."
+                    maxLength={4000}
                     id="claim-notes"
                     value={notes}
-                    onChange={(event) =>
-                      setNotes(event.target.value)
-                    }
+                    onChange={(event) => setNotes(event.target.value)}
                     rows={4}
                     className="input"
                   />
@@ -913,9 +730,7 @@ export default function ClaimDetailPage() {
                 disabled={saving}
                 className="btn btn-primary"
               >
-                {saving
-                  ? "Saving..."
-                  : "Save Changes"}
+                {saving ? "Saving..." : "Save Changes"}
               </button>
             </div>
           </section>
@@ -923,9 +738,7 @@ export default function ClaimDetailPage() {
           {claim.rejection_reason && (
             <section className="card">
               <div className="card-header">
-                <h2 className="card-title">
-                  Rejection Reason
-                </h2>
+                <h2 className="card-title">Rejection Reason</h2>
               </div>
 
               <div className="card-body">
@@ -939,9 +752,7 @@ export default function ClaimDetailPage() {
           {claim.notes && (
             <section className="card">
               <div className="card-header">
-                <h2 className="card-title">
-                  Notes
-                </h2>
+                <h2 className="card-title">Notes</h2>
               </div>
 
               <div className="card-body">
@@ -966,21 +777,16 @@ export default function ClaimDetailPage() {
                     className="practice-logo"
                   />
                 ) : (
-                  <div className="logo-placeholder">
-                    J&J
-                  </div>
+                  <div className="logo-placeholder">J&J</div>
                 )}
               </div>
 
               <div className="practice-details">
                 <h1>{practiceName}</h1>
-                <p>
-                  Practice Code: {practiceCode}
-                </p>
+                <p>Practice Code: {practiceCode}</p>
                 <p>{practiceAddress}</p>
                 <p>
-                  {practiceCity}, {practiceProvince}{" "}
-                  {practicePostal}
+                  {practiceCity}, {practiceProvince} {practicePostal}
                 </p>
                 <p>{practiceCountry}</p>
                 <p>Tel: {practicePhone}</p>
@@ -990,29 +796,23 @@ export default function ClaimDetailPage() {
 
             <div className="blue-line" />
 
-            <h2 className="document-title">
-              MEDICAL AID CLAIM FORM
-            </h2>
+            <h2 className="document-title">MEDICAL AID CLAIM FORM</h2>
 
             <div className="document-meta">
               <div>
-                <strong>Claim Number:</strong>{" "}
-                {claim.claim_number || "-"}
+                <strong>Claim Number:</strong> {claim.claim_number || "-"}
               </div>
 
               <div>
-                <strong>Claim Date:</strong>{" "}
-                {formatDate(claim.claim_date)}
+                <strong>Claim Date:</strong> {formatDate(claim.claim_date)}
               </div>
 
               <div>
-                <strong>Status:</strong>{" "}
-                {claim.status || "pending"}
+                <strong>Status:</strong> {claim.status || "draft"}
               </div>
 
               <div>
-                <strong>Provider:</strong>{" "}
-                {providerName}
+                <strong>Provider:</strong> {providerName}
               </div>
             </div>
 
@@ -1020,54 +820,28 @@ export default function ClaimDetailPage() {
               <h3>Patient Information</h3>
 
               <div className="print-grid">
-                <PrintInfo
-                  label="Patient Name"
-                  value={patientName}
-                />
+                <PrintInfo label="Patient Name" value={patientName} />
 
                 <PrintInfo
                   label="Patient ID"
-                  value={
-                    patient?.patient_id || "-"
-                  }
+                  value={patient?.patient_id || "-"}
                 />
 
                 <PrintInfo
                   label="Date of Birth"
-                  value={formatDate(
-                    patient?.date_of_birth
-                  )}
+                  value={formatDate(patient?.date_of_birth)}
                 />
 
                 <PrintInfo
                   label="ID / Passport"
-                  value={
-                    patient?.id_number ||
-                    patient?.passport_number ||
-                    "-"
-                  }
+                  value={patient?.id_number || patient?.passport_number || "-"}
                 />
 
-                <PrintInfo
-                  label="Gender"
-                  value={
-                    patient?.gender || "-"
-                  }
-                />
+                <PrintInfo label="Gender" value={patient?.gender || "-"} />
 
-                <PrintInfo
-                  label="Phone"
-                  value={
-                    patient?.phone || "-"
-                  }
-                />
+                <PrintInfo label="Phone" value={patient?.phone || "-"} />
 
-                <PrintInfo
-                  label="Email"
-                  value={
-                    patient?.email || "-"
-                  }
-                />
+                <PrintInfo label="Email" value={patient?.email || "-"} />
               </div>
             </div>
 
@@ -1095,10 +869,7 @@ export default function ClaimDetailPage() {
 
                 <PrintInfo
                   label="Plan"
-                  value={
-                    patient?.medical_aid_plan ||
-                    "-"
-                  }
+                  value={patient?.medical_aid_plan || "-"}
                 />
 
                 <PrintInfo
@@ -1127,30 +898,22 @@ export default function ClaimDetailPage() {
               <div className="print-grid">
                 <PrintInfo
                   label="Claim Number"
-                  value={
-                    claim.claim_number || "-"
-                  }
+                  value={claim.claim_number || "-"}
                 />
 
                 <PrintInfo
                   label="Claim Date"
-                  value={formatDate(
-                    claim.claim_date
-                  )}
+                  value={formatDate(claim.claim_date)}
                 />
 
                 <PrintInfo
                   label="Submission Date"
-                  value={formatDate(
-                    claim.submission_date
-                  )}
+                  value={formatDate(claim.submission_date)}
                 />
 
                 <PrintInfo
                   label="Response Date"
-                  value={formatDate(
-                    claim.response_date
-                  )}
+                  value={formatDate(claim.response_date)}
                 />
               </div>
             </div>
@@ -1162,38 +925,27 @@ export default function ClaimDetailPage() {
                 <div className="print-grid">
                   <PrintInfo
                     label="Invoice Number"
-                    value={
-                      invoice.invoice_number ||
-                      "-"
-                    }
+                    value={invoice.invoice_number || "-"}
                   />
 
                   <PrintInfo
                     label="Invoice Date"
-                    value={formatDate(
-                      invoice.invoice_date
-                    )}
+                    value={formatDate(invoice.invoice_date)}
                   />
 
                   <PrintInfo
                     label="Invoice Total"
-                    value={currency(
-                      invoice.total
-                    )}
+                    value={currency(invoice.total)}
                   />
 
                   <PrintInfo
                     label="Amount Paid"
-                    value={currency(
-                      invoice.amount_paid
-                    )}
+                    value={currency(invoice.amount_paid)}
                   />
 
                   <PrintInfo
                     label="Invoice Balance"
-                    value={currency(
-                      invoice.balance
-                    )}
+                    value={currency(invoice.balance)}
                   />
                 </div>
               </div>
@@ -1202,63 +954,43 @@ export default function ClaimDetailPage() {
             <div className="amounts-box">
               <div>
                 <span>Claimed Amount</span>
-                <strong>
-                  {currency(
-                    claim.claimed_amount
-                  )}
-                </strong>
+                <strong>{currency(claim.claimed_amount)}</strong>
               </div>
 
               <div>
                 <span>Approved Amount</span>
-                <strong>
-                  {currency(
-                    claim.approved_amount
-                  )}
-                </strong>
+                <strong>{currency(claim.approved_amount)}</strong>
               </div>
 
               <div>
                 <span>Rejected Amount</span>
-                <strong>
-                  {currency(
-                    claim.rejected_amount
-                  )}
-                </strong>
+                <strong>{currency(claim.rejected_amount)}</strong>
               </div>
 
               <div className="unallocated">
                 <span>Unallocated Amount</span>
-                <strong>
-                  {currency(unallocated)}
-                </strong>
+                <strong>{currency(unallocated)}</strong>
               </div>
             </div>
 
             {claim.rejection_reason && (
               <div className="print-section">
                 <h3>Rejection Reason</h3>
-                <p className="notes">
-                  {claim.rejection_reason}
-                </p>
+                <p className="notes">{claim.rejection_reason}</p>
               </div>
             )}
 
             {claim.notes && (
               <div className="print-section">
                 <h3>Notes</h3>
-                <p className="notes">
-                  {claim.notes}
-                </p>
+                <p className="notes">{claim.notes}</p>
               </div>
             )}
 
             <div className="signature-area">
               <div>
                 <div className="signature-line" />
-                <p>
-                  Practitioner: {providerName}
-                </p>
+                <p>Practitioner: {providerName}</p>
                 <p>Signature</p>
               </div>
 
@@ -1271,18 +1003,14 @@ export default function ClaimDetailPage() {
 
             <div className="print-footer">
               <p>
-                {practiceName} • Practice Code{" "}
-                {practiceCode}
+                {practiceName} • Practice Code {practiceCode}
               </p>
 
               <p>
                 {practicePhone} • {practiceEmail}
               </p>
 
-              <p>
-                This document was generated by
-                J&J PRACTICE CLOUD.
-              </p>
+              <p>This document was generated by J&J PRACTICE CLOUD.</p>
             </div>
           </div>
         </div>
@@ -1474,40 +1202,20 @@ export default function ClaimDetailPage() {
   );
 }
 
-function Info({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function Info({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="stat-label">
-        {label}
-      </p>
-      <p className="mt-1 text-sm font-medium text-slate-800">
-        {value}
-      </p>
+      <p className="stat-label">{label}</p>
+      <p className="mt-1 text-sm font-medium text-slate-800">{value}</p>
     </div>
   );
 }
 
-function Stat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="stat-card">
-      <p className="stat-label">
-        {label}
-      </p>
-      <p className="stat-value">
-        {value}
-      </p>
+      <p className="stat-label">{label}</p>
+      <p className="stat-value">{value}</p>
     </div>
   );
 }
@@ -1525,37 +1233,23 @@ function Field({
 }) {
   return (
     <div className="field">
-      <label className="label">
-        {label}
-      </label>
+      <label className="label">{label}</label>
 
       <input
         type={type}
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
+        onChange={(event) => onChange(event.target.value)}
         className="input"
       />
     </div>
   );
 }
 
-function PrintInfo({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function PrintInfo({ label, value }: { label: string; value: string }) {
   return (
     <div className="print-info">
-      <div className="print-info-label">
-        {label}
-      </div>
-      <div className="print-info-value">
-        {value}
-      </div>
+      <div className="print-info-label">{label}</div>
+      <div className="print-info-value">{value}</div>
     </div>
   );
 }

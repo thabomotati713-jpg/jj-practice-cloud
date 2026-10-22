@@ -40,9 +40,17 @@ export default function ClaimsPage() {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const { rows: claims, total, summary, loading, error, refresh } = usePracticeList<Claim>("pc_claims_page", search, page);
+  const {
+    rows: claims,
+    total,
+    summary,
+    loading,
+    error,
+    refresh,
+  } = usePracticeList<Claim>("pc_claims_page", search, page);
   useEffect(() => {
-    if (!loading && !error) void logAudit("view", "claim", null, "Claims list viewed");
+    if (!loading && !error)
+      void logAudit("view", "claim", null, "Claims list viewed");
   }, [loading, error]);
 
   function formatCurrency(value: number | null) {
@@ -73,17 +81,18 @@ export default function ClaimsPage() {
     if (
       value === "paid" ||
       value === "completed" ||
-      value === "approved" ||
+      value === "accepted" ||
       value === "active"
     ) {
       return "badge badge-green";
     }
 
     if (
-      value === "pending" ||
+      value === "draft" ||
+      value === "ready" ||
       value === "submitted" ||
       value === "partially paid" ||
-      value === "partially_approved" ||
+      value === "partially_paid" ||
       value === "partially approved" ||
       value === "scheduled" ||
       value === "confirmed"
@@ -118,11 +127,29 @@ export default function ClaimsPage() {
       <header className="app-header">
         <div className="app-header-inner">
           <a href="/dashboard" className="app-brand">
-            <img src="/logo.jpg" alt="J&J Practice Cloud" className="app-brand-logo" />
+            <img
+              src="/logo.jpg"
+              alt="J&J Practice Cloud"
+              className="app-brand-logo"
+            />
             <span className="app-brand-name">J&J Practice Cloud</span>
           </a>
 
           <div className="page-actions">
+            <button
+              type="button"
+              onClick={() => router.push("/claims-demo")}
+              className="btn btn-secondary btn-sm"
+            >
+              Interactive sample
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push("/claims/settings")}
+              className="btn btn-secondary btn-sm"
+            >
+              Claim automation settings
+            </button>
             <button
               onClick={() => router.push("/dashboard")}
               className="btn btn-secondary btn-sm"
@@ -144,7 +171,9 @@ export default function ClaimsPage() {
         <div className="page-header">
           <div>
             <h1 className="page-title">Medical Aid Claims</h1>
-            <p className="page-subtitle">Manage and track medical aid claims.</p>
+            <p className="page-subtitle">
+              Manage and track medical aid claims.
+            </p>
           </div>
         </div>
 
@@ -183,14 +212,30 @@ export default function ClaimsPage() {
               value={search}
               maxLength={200}
               aria-label="Search all claims"
-              onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
               className="input"
             />
           </div>
         </div>
 
-        <p className="text-sm text-slate-600 mb-3">Financial totals cover all claims in your practice.</p>
-        {error && <div className="alert-error" role="alert">{error} <button type="button" className="btn btn-secondary btn-sm" onClick={refresh}>Retry</button></div>}
+        <p className="text-sm text-slate-600 mb-3">
+          Financial totals cover all claims in your practice.
+        </p>
+        {error && (
+          <div className="alert-error" role="alert">
+            {error}{" "}
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={refresh}
+            >
+              Retry
+            </button>
+          </div>
+        )}
         {loading ? (
           <div className="empty-state">Loading claims...</div>
         ) : filteredClaims.length === 0 ? (
@@ -228,9 +273,7 @@ export default function ClaimsPage() {
                   return (
                     <tr key={claim.id}>
                       <td>
-                        <strong>
-                          {claim.claim_number || "Not assigned"}
-                        </strong>
+                        <strong>{claim.claim_number || "Not assigned"}</strong>
                       </td>
 
                       <td>
@@ -279,7 +322,12 @@ export default function ClaimsPage() {
             </table>
           </div>
         )}
-        <ListPagination page={page} total={total} loading={loading} onChange={setPage} />
+        <ListPagination
+          page={page}
+          total={total}
+          loading={loading}
+          onChange={setPage}
+        />
       </div>
     </main>
   );

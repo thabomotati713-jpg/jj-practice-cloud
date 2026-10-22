@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useParams,useRouter } from "next/navigation";
+import {claimRequest} from "@/lib/claims/client";
+import {localDay} from "@/lib/claims/model";
 import { supabase } from "../../../../../lib/supabase";
 
 type Patient = {
@@ -26,6 +28,7 @@ type InvoiceItem = {
 export default function NewInvoicePage() {
   const params = useParams();
   const patientId = params.id as string;
+  const router=useRouter();
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,7 +36,7 @@ export default function NewInvoicePage() {
   const [error, setError] = useState("");
 
   const [invoiceDate, setInvoiceDate] = useState(
-    new Date().toISOString().split("T")[0]
+    localDay()
   );
   const [dueDate, setDueDate] = useState("");
   const [amountPaid, setAmountPaid] = useState("0");
@@ -53,11 +56,7 @@ export default function NewInvoicePage() {
     },
   ]);
 
-  useEffect(() => {
-    loadPatient();
-  }, [patientId]);
-
-  const loadPatient = async () => {
+  const loadPatient = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser();
 
     if (!userData.user) {
@@ -80,7 +79,12 @@ export default function NewInvoicePage() {
     }
 
     setLoading(false);
-  };
+  },[patientId,router]);
+  useEffect(()=>{
+    // State updates follow the awaited Supabase request in this reusable loader.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadPatient();
+  },[loadPatient]);
 
   const updateItem = (
     id: string,
@@ -159,10 +163,6 @@ export default function NewInvoicePage() {
   const paid = Number(amountPaid) || 0;
   const balance = Math.max(total - paid, 0);
 
-  const generateInvoiceNumber = () => {
-    return `INV-${Date.now().toString().slice(-8)}`;
-  };
-
   const handleSave = async (
     event: React.FormEvent
   ) => {
@@ -190,7 +190,7 @@ export default function NewInvoicePage() {
       await supabase.auth.getUser();
 
     if (!userData.user) {
-      window.location.href = "/login";
+      router.push("/login");
       return;
     }
 
@@ -209,7 +209,7 @@ export default function NewInvoicePage() {
       return;
     }
 
-    const invoiceNumber = generateInvoiceNumber();
+    const invoiceNumber = `INV-${crypto.randomUUID().slice(0,8).toUpperCase()}`;
 
     const { data: invoice, error: invoiceError } =
       await supabase
@@ -282,7 +282,11 @@ export default function NewInvoicePage() {
       return;
     }
 
-    window.location.href = `/patients/${patientId}/billing`;
+    try {
+      const result=await claimRequest<{claimId?:string}>("/api/claims/automation",{action:"auto_prepare_invoice",invoiceId:invoice.id});
+      if(result.claimId) { router.push(`/claims/${result.claimId}`); return; }
+    } catch { /* The saved invoice remains usable; the daily worker can prepare eligible drafts. */ }
+    router.push(`/patients/${patientId}/billing`);
   };
 
   const currency = (value: number) =>
@@ -695,7 +699,7 @@ export default function NewInvoicePage() {
             <button
               type="button"
               onClick={() => {
-                window.location.href = `/patients/${patientId}/billing`;
+                router.push(`/patients/${patientId}/billing`);
               }}
               className="btn btn-secondary"
             >
