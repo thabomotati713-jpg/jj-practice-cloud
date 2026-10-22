@@ -7,6 +7,10 @@
     {
       "path": "/api/marketing/run",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/claims/run",
+      "schedule": "30 6 * * *"
     }
   ]
 }
