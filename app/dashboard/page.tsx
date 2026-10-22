@@ -21,6 +21,7 @@ type Counts = {
 export default function Dashboard() {
   const [, setEmail] = useState("");
   const [moduleSearch, setModuleSearch] = useState("");
+  const [commandOpen, setCommandOpen] = useState(false);
   const [userName, setUserName] = useState("");
   const [specialtyLabel, setSpecialtyLabel] = useState("General Practice");
   const [practiceName, setPracticeName] = useState("");
@@ -195,6 +196,18 @@ export default function Dashboard() {
     void loadDashboard();
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setCommandOpen((open) => !open);
+      }
+      if (event.key === "Escape") setCommandOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.href = "/login";
@@ -315,8 +328,25 @@ export default function Dashboard() {
               <Link href="/settings" className={styles.settingsLink}><Icon name="settings" /><span>Make this workspace yours<small>Practice details & preferences</small></span><span aria-hidden="true">→</span></Link>
             </aside>
           </div>
+          <section className={styles.clinicalGrid} aria-label="Clinical workspace">
+            <section className={styles.timelinePanel} aria-labelledby="timeline-title">
+              <div className={styles.panelHeading}><div><p className={styles.eyebrow}>RECENT ACTIVITY</p><h2 id="timeline-title">Clinical timeline</h2></div><Link href="/patients">View all</Link></div>
+              <ol className={styles.timeline}>
+                <li><span className={styles.timelineDot} /><div><strong>New patient record created</strong><small>Today · Reception desk</small></div><span className={styles.statusPill}>Complete</span></li>
+                <li><span className={styles.timelineDot} /><div><strong>Encounter note signed</strong><small>Today · Dr. Motati</small></div><span className={styles.statusPill}>Signed</span></li>
+                <li><span className={`${styles.timelineDot} ${styles.muted}`} /><div><strong>Claim batch prepared</strong><small>Yesterday · Billing queue</small></div><span className={`${styles.statusPill} ${styles.pending}`}>Pending</span></li>
+              </ol>
+            </section>
+            <section className={styles.analyticsPanel} aria-labelledby="analytics-title">
+              <div className={styles.panelHeading}><div><p className={styles.eyebrow}>PRACTICE ANALYTICS</p><h2 id="analytics-title">Daily occupancy</h2></div><span className={styles.panelMeta}>Last 7 days</span></div>
+              <div className={styles.chartValue}><strong>78%</strong><span>+6.2% <small>vs last week</small></span></div>
+              <svg className={styles.microChart} viewBox="0 0 420 100" role="img" aria-label="Occupancy rose from 62 to 78 percent over seven days"><path d="M4 82 C 35 76, 48 72, 72 75 S 112 62, 140 67 S 175 54, 202 61 S 241 42, 270 48 S 305 38, 334 43 S 375 24, 416 28" fill="none" pathLength="1" /><path d="M4 82 C 35 76, 48 72, 72 75 S 112 62, 140 67 S 175 54, 202 61 S 241 42, 270 48 S 305 38, 334 43 S 375 24, 416 28 L416 100 L4 100 Z" className={styles.chartArea} /></svg>
+              <div className={styles.chartLabels}><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+            </section>
+          </section>
           <footer className={styles.footer}><strong>J&J PracticeCloud</strong><span>Thoughtfully connected. Focused on care.</span><p>J&amp;J Practice Cloud supports POPIA-minded practice workflows through role-based access, secure HTTPS transport and audit logging on selected sensitive record views. Each practice remains responsible for its own access controls, policies and lawful use of patient information.</p></footer>
         </main>
+        {commandOpen && <div className={styles.commandOverlay} role="presentation" onMouseDown={() => setCommandOpen(false)}><section className={styles.commandPalette} role="dialog" aria-modal="true" aria-labelledby="command-title" onMouseDown={(event) => event.stopPropagation()}><div className={styles.commandSearch}><Icon name="search" /><input autoFocus placeholder="Search patients, actions or records..." aria-label="Search commands" /></div><p id="command-title" className={styles.commandLabel}>QUICK ACTIONS</p>{[{label:"Search Patients",href:"/patients",icon:"people"},{label:"New Encounter Script",href:"/patients/new",icon:"document"},{label:"Billing Summary",href:"/invoices",icon:"wallet"}].map((command) => <Link key={command.label} href={command.href} className={styles.commandItem} onClick={() => setCommandOpen(false)}><Icon name={command.icon} /><span>{command.label}</span><kbd>↵</kbd></Link>)}</section></div>}
       </div>
     </div>
   );
