@@ -315,6 +315,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="page-actions">
+            <a href="/appearance" className="btn btn-secondary btn-sm">Appearance studio</a>
             <a href="/audit" className="btn btn-secondary btn-sm">
               Audit Trail
             </a>

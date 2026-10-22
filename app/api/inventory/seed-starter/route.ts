@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createHash } from "node:crypto";
 import { fetchMySpecialty, SPECIALTIES, getSpecialty } from "@/lib/specialties";
+import { MEDICATION_CATALOG, catalogKey } from "@/lib/medication-catalog";
 import { SPECIALTY_CATALOGS } from "@/lib/specialty-catalog";
 
 export const dynamic = "force-dynamic";
@@ -91,43 +92,50 @@ export async function POST(request: Request) {
       return NextResponse.json({error:"Your practice is inactive or unavailable."}, {status:403});
     }
     const rawBody = await request.text();
-    let body: {specialty?: string} = {};
+    let body: {specialty?: string;medications?: string[]} = {};
     try { body = rawBody ? JSON.parse(rawBody) : {}; }
     catch { return NextResponse.json({error:"Invalid catalogue selection."}, {status:400}); }
-    if (!body || (body.specialty !== undefined && !SPECIALTIES.some(s => s.id === body.specialty))) {
+    if (!body || typeof body !== "object" || Array.isArray(body) || (body.specialty !== undefined && !SPECIALTIES.some(s => s.id === body.specialty))) {
       return NextResponse.json({error:"Select a supported speciality."}, {status:400});
+    }
+    if (body.medications !== undefined && (!Array.isArray(body.medications) || body.medications.length < 1 || body.medications.length > 200 || body.medications.some(name => typeof name !== "string" || !MEDICATION_CATALOG.some(item => item.name === name)))) {
+      return NextResponse.json({error:"Choose between 1 and 200 supported medication templates."},{status:400});
     }
     const specialty = body.specialty ? getSpecialty(body.specialty) : await fetchMySpecialty(
       authClient as never,
       authClient
     );
 
-    const catalog = SPECIALTY_CATALOGS[specialty.id] || [];
+    const catalog = body.medications ? MEDICATION_CATALOG.filter(item => body.medications!.includes(item.name)) : SPECIALTY_CATALOGS[specialty.id] || [];
 
-    const { data: existing, error: existingError } = await adminClient
-      .from("inventory_products")
-      .select("name")
-      .eq("practice_id", practiceId);
-
-    if (existingError) {
-      console.error("Starter inventory lookup failed", existingError);
-      return NextResponse.json({error:"Could not read inventory. Please try again."}, {status:500});
+    // Read every page: a practice can have more than PostgREST's row cap.
+    const existingNames = new Set<string>();
+    for (let offset = 0; ; offset += 1000) {
+      const { data: existing, error: existingError } = await adminClient
+        .from("inventory_products").select("name").eq("practice_id", practiceId)
+        .order("id").range(offset, offset + 999);
+      if (existingError) {
+        console.error("Starter inventory lookup failed", existingError);
+        return NextResponse.json({error:"Could not read inventory. Please try again."},{status:500});
+      }
+      for (const row of existing || []) existingNames.add(catalogKey(row.name));
+      if (!existing || existing.length < 1000) break;
     }
-    const existingNames = new Set(
-      ((existing || []) as { name: string }[]).map((row) =>
-        row.name.trim().toLowerCase()
-      )
-    );
 
     const toInsert = catalog
-      .filter((item) => !existingNames.has(item.name.toLowerCase()))
+      .filter((item) => {
+        const key = catalogKey(item.name);
+        if (existingNames.has(key)) return false;
+        existingNames.add(key);
+        return true;
+      })
       .map((item) => ({
         practice_id: practiceId,
-        product_code: `STARTER-${createHash("sha256").update(item.name.trim().toLowerCase()).digest("hex").slice(0,24)}`,
+        product_code: `STARTER-${createHash("sha256").update(catalogKey(item.name)).digest("hex").slice(0,24)}`,
         name: item.name,
         generic_name: item.generic_name || null,
         category: item.category,
-        strength: null,
+        strength: item.strength || null,
         dosage_form: item.dosage_form || null,
         manufacturer: null,
         unit: item.unit || null,
@@ -162,7 +170,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       added: inserted?.length || 0,
-      message: `Added ${inserted?.length || 0} starter items for ${specialty.label} practices. Set the prices and stock counts to match your suppliers.`,
+      message: `Added ${inserted?.length || 0} ${body.medications ? "medication templates" : "starter items for " + specialty.label}. Existing products were preserved. Review product details, units, prices and prescription requirements before receiving stock.`,
     });
   } catch (error) {
     console.error("seed-starter error:", error);

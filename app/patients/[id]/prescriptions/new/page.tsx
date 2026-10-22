@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, useRouter } from "next/navigation";
+import MedicationTemplatePicker from "@/components/MedicationTemplatePicker";
 import { supabase } from "@/lib/supabase";
 
 type Patient = {
@@ -613,6 +614,8 @@ export default function NewPrescriptionPage() {
                         </button>
                       )}
                     </div>
+
+                    <MedicationTemplatePicker onSelect={template => setItems(current => current.map((existing, itemIndex) => itemIndex === index ? { ...emptyItem, medicine_name: `${template.generic_name} — ${template.dosage_form}`, strength: template.strength } : existing))} />
 
                     <label className="field">
                       <span className="label">Inventory Medicine</span>

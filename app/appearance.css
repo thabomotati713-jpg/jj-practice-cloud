@@ -20,3 +20,8 @@
 .admin-filters {display:flex;flex-wrap:wrap;gap:12px;padding:16px 20px;align-items:end;}
 .admin-filters .field {margin:0;flex:1;min-width:170px;}
 @media(max-width:700px){.appearance-options {grid-template-columns:repeat(2,minmax(0,1fr));}.login-brand-logo{width:130px;}}
+@media screen {
+ html[data-appearance] .card,html[data-appearance] .stat-card {box-shadow:var(--pc-shadow,0 8px 32px #1233350b)}
+ html[data-appearance=linen] .page-shell {background-image:repeating-linear-gradient(0deg,transparent,transparent 3px,#826a3a03 4px),var(--ambient)}
+ html[data-appearance] .btn:focus-visible,html[data-appearance] a:focus-visible {outline:3px solid var(--pc-action);outline-offset:3px}
+}
