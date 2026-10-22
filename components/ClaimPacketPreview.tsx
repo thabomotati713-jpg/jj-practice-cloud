@@ -1,5 +1,3 @@
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
-npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
 import type { ClaimSnapshot, ClaimIssue } from "@/lib/claims/model";
 export default function ClaimPacketPreview({
   snapshot: s,
