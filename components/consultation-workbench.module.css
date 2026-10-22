@@ -20,7 +20,7 @@
   margin: 18px 0;
   flex-wrap: wrap;
 }
-.quickRow > .field {
+.quickRow > :global(.field) {
   flex: 1;
   min-width: 200px;
   margin: 0;
@@ -83,7 +83,7 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
-.fields .field {
+.fields :global(.field) {
   margin: 0;
 }
 .wide {
@@ -144,7 +144,7 @@
   .quickRow {
     align-items: stretch;
   }
-  .quickRow > .btn {
+  .quickRow > :global(.btn) {
     width: 100%;
   }
   .testEntry {
@@ -186,4 +186,10 @@
 }
 .workbench [hidden] {
   display: none;
+}
+
+.tabs button:focus-visible,
+.testChoice:focus-visible {
+  outline: 3px solid var(--pc-action);
+  outline-offset: 3px;
 }

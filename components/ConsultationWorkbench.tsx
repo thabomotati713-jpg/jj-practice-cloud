@@ -271,7 +271,10 @@ export default function ConsultationWorkbench({
             aria-controls={`consult-panel-${tab.id}`}
             tabIndex={activeTab === tab.id ? 0 : -1}
             disabled={(recording || starting) && activeTab !== tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => {
+              setActiveTab(tab.id);
+              setNotice("");
+            }}
             onKeyDown={(event) => {
               if (recording || starting) return;
               const ids = ["templates", "labs", "transcript"];
@@ -289,6 +292,7 @@ export default function ConsultationWorkbench({
               if (next) {
                 event.preventDefault();
                 setActiveTab(next);
+                setNotice("");
                 document.getElementById(`consult-tool-${next}`)?.focus();
               }
             }}
