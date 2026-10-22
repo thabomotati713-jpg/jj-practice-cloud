@@ -247,6 +247,8 @@ export default function Dashboard() {
           </div>)}
           <div className={styles.navGroup}><p>WORKSPACE</p>
             <Link href="/ai/no-show"><Icon name="spark" />Appointment follow-up</Link>
+            <Link href="/clinical-library"><Icon name="prescription" />Clinical library</Link>
+            <Link href="/appearance"><Icon name="settings" />Appearance studio</Link>
             <Link href="/settings"><Icon name="settings" />Settings</Link>
           </div>
         </nav>

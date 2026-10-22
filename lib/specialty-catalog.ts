@@ -1,3 +1,4 @@
+import { MEDICATION_CATALOG } from "./medication-catalog";
 import type { SpecialtyId } from "./specialties";
 
 /*
@@ -13,6 +14,7 @@ export type CatalogItem = {
   generic_name?: string;
   unit?: string;
   dosage_form?: string;
+  strength?: string;
   prescription_required?: boolean;
   minimum_stock: number;
 };
@@ -152,7 +154,7 @@ const OTHER_SPECIALIST: CatalogItem[] = [
 ];
 
 export const SPECIALTY_CATALOGS: Record<SpecialtyId, CatalogItem[]> = {
-  general: GENERAL,
+  general: [...GENERAL, ...MEDICATION_CATALOG],
   dental: DENTAL,
   optical: OPTICAL,
   physio: PHYSIO,

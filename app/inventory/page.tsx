@@ -140,6 +140,7 @@ export default function InventoryPage() {
           </a>
 
           <div className="page-actions">
+            <a href="/clinical-library" className="btn btn-secondary">Browse medication catalogue</a>
             <label className="field" style={{margin:0}}>
               <span className="label">Starter catalogue speciality</span>
               <select className="input" value={specialty.id} disabled={seeding || !specialtyReady}

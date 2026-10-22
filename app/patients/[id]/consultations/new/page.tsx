@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import IcdCodePicker from "@/components/IcdCodePicker";
 import { useConsultationDraft } from "@/lib/useConsultationDraft";
 
 type Patient = {
@@ -677,16 +678,8 @@ export default function NewConsultationPage() {
                   />
                 </label>
 
-                <label className="field">
-                  <span className="label">Diagnosis Code</span>
-                  <input
-                    type="text"
-                    className="input"
-                    value={diagnosisCode}
-                    onChange={(e) => setDiagnosisCode(e.target.value)}
-                    placeholder="Optional ICD-10 code"
-                  />
-                </label>
+                <IcdCodePicker value={diagnosisCode} onChange={setDiagnosisCode}
+                  onSelect={row => { if (!diagnosis.trim()) setDiagnosis(row.title); }} />
               </div>
             </section>
 
